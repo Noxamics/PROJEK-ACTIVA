@@ -14,6 +14,16 @@ import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
 import '../../grafik/screens/grafik_screen.dart';
 import '../../profil/screens/profil_screen.dart';
 
+/// Warna berdasarkan skor dependensi digital
+/// Rendah  < 33.47  → hijau  (teal)
+/// Sedang  33.47–61.34 → kuning (amber)
+/// Tinggi  > 61.34  → merah  (red)
+Color _scoreColor(double score) {
+  if (score < 33.47) return AppColors.teal;
+  if (score <= 61.34) return AppColors.amber;
+  return AppColors.red;
+}
+
 class HasilPrediksiScreen extends ConsumerWidget {
   /// Jika null, ambil dari questionnaireResultProvider
   final MlResultModel? result;
@@ -181,11 +191,12 @@ class HasilPrediksiScreen extends ConsumerWidget {
   // ── Score Components ───────────────────────────────────────────────────────
 
   Widget _buildLargeScoreCircle(MlResultModel data) {
+    final color = _scoreColor(data.digitalDependenceScore);
     return Center(
       child: ScoreCircle(
         score: data.dependenceInt.toString(),
         label: 'Skor Dependensi Digital',
-        color: AppColors.red,
+        color: color,
         percent: (data.digitalDependenceScore / 100).clamp(0.0, 1.0),
         size: 160,
         fontSize: 48,
@@ -198,9 +209,7 @@ class HasilPrediksiScreen extends ConsumerWidget {
     final isHigh = cat == 'tinggi' || cat == 'high';
     final isMedium = cat == 'sedang' || cat == 'moderate';
 
-    final color = isHigh
-        ? AppColors.red
-        : (isMedium ? AppColors.amber : AppColors.teal);
+    final color = _scoreColor(data.digitalDependenceScore);
 
     final label = isHigh
         ? 'Tinggi — Risiko Ketergantungan'
@@ -240,7 +249,7 @@ class HasilPrediksiScreen extends ConsumerWidget {
 
   Widget _buildConfidenceDetail(MlResultModel data) {
     final confidence = data.confidence.confidenceFinalPct;
-    const color = AppColors.teal;
+    final color = _scoreColor(data.digitalDependenceScore);
 
     return Container(
       width: double.infinity,
@@ -266,7 +275,7 @@ class HasilPrediksiScreen extends ConsumerWidget {
               ),
               Text(
                 '${confidence.toStringAsFixed(1)}%',
-                style: const TextStyle(
+                style: TextStyle(
                   color: color,
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
@@ -281,7 +290,7 @@ class HasilPrediksiScreen extends ConsumerWidget {
               value: confidence / 100,
               minHeight: 10,
               backgroundColor: color.withValues(alpha: 0.1),
-              valueColor: const AlwaysStoppedAnimation(color),
+              valueColor: AlwaysStoppedAnimation(color),
             ),
           ),
           if (data.confidence.label.isNotEmpty) ...[

@@ -186,12 +186,14 @@ def preprocess_and_predict(raw_input: dict):
 
     # 9. Simpan X_scaled untuk confidence, lalu predict
     X_scaled = df[feature_names].values
-    score    = round(float(model.predict(df)[0]), 2)
 
+    raw_score = float(model.predict(df)[0])
+    score     = round(float(np.clip(raw_score, 0.0, 100.0)), 2)
     return score, X_scaled
 
 
 def get_category(score: float) -> str:
+    score = float(np.clip(score, 0.0, 100.0))  # safety net
     if score < 33.47:
         return 'rendah'
     elif score < 61.34:
