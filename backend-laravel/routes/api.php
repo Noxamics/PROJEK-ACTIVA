@@ -5,10 +5,9 @@ use App\Http\Controllers\Api\PrediksiController;
 use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\PasswordResetController;
-use App\Http\Controllers\PredictController;
+use App\Http\Controllers\PredictController; 
 use App\Http\Controllers\SurveyController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\LaporanController;
 
 /*
 |══════════════════════════════════════════════════════════════
@@ -99,8 +98,6 @@ Route::middleware('jwt.auth')->group(function () {
         Route::get('comparison', [AnalyticsController::class, 'comparison']);
         Route::get('history', [AnalyticsController::class, 'history']);
     });
-
-    Route::get('/laporan', [LaporanController::class, 'getLaporan']);
 
 });
 
