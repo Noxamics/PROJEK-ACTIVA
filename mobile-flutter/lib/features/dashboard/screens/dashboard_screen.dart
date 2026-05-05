@@ -31,14 +31,14 @@ class DashboardScreen extends ConsumerWidget {
               child: Container(
                 decoration: const BoxDecoration(
                   color: AppColors.bgLight,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
                 ),
                 child: RefreshIndicator(
                   color: AppColors.teal,
                   onRefresh: () => ref.read(dashboardProvider.notifier).refresh(),
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -47,8 +47,10 @@ class DashboardScreen extends ConsumerWidget {
                           _buildLoadingShimmer()
                         else ...[
                           _buildScoreCards(ref),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 24),
                           _buildInsightCard(analytics),
+                          const SizedBox(height: 24),
+                          _buildQuickInfo(),
                         ],
                       ],
                     ),
@@ -115,7 +117,7 @@ class DashboardScreen extends ConsumerWidget {
         : 'Selamat malam,';
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -124,31 +126,40 @@ class DashboardScreen extends ConsumerWidget {
             children: [
               Text(
                 greeting,
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 13,
+                style: TextStyle(
+                  color: AppColors.textSecondary.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               Text(
                 name,
                 style: const TextStyle(
                   color: AppColors.textPrimary,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
                 ),
               ),
             ],
           ),
-          CircleAvatar(
-            radius: 22,
-            backgroundColor: AppColors.teal,
-            child: Text(
-              initials,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: 13,
+          Container(
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.teal.withValues(alpha: 0.3), width: 2),
+            ),
+            child: CircleAvatar(
+              radius: 24,
+              backgroundColor: AppColors.teal,
+              child: Text(
+                initials,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                ),
               ),
             ),
           ),
@@ -170,7 +181,7 @@ class DashboardScreen extends ConsumerWidget {
         Row(
           children: [
             ScoreCard(
-              label: 'Skor\nDependensi', 
+              label: 'Skor Dependensi', 
               value: value, 
               color: hasData ? AppColors.red : AppColors.textMuted,
             ),
@@ -179,23 +190,31 @@ class DashboardScreen extends ConsumerWidget {
         if (!hasData)
           Positioned.fill(
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(24),
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
                 child: Container(
-                  color: AppColors.bgDark.withValues(alpha: 0.2),
+                  color: AppColors.bgDark.withValues(alpha: 0.4),
+                  alignment: Alignment.center,
+                  child: const Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.lock_rounded, color: Colors.white, size: 28),
+                      SizedBox(height: 10),
+                      Text(
+                        'Silakan isi kuesioner\nuntuk melihat skor',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ),
-        if (!hasData)
-          const Text(
-            'Silakan isi kuesioner\nuntuk melihat skor',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
             ),
           ),
       ],
@@ -209,42 +228,60 @@ class DashboardScreen extends ConsumerWidget {
         analytics?.insightText ??
         'Isi kuesioner untuk melihat insight pertamamu.';
     final changeLabel = analytics?.dependenceChangeLabelFormatted ?? '';
-    // Untuk dependensi: turun = positif (membaik)
     final isPositive = (analytics?.dependenceChangePercentage ?? 0) < 0;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: AppColors.bgWhite,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Insight minggu ini',
-            style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.blue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.auto_awesome_rounded, color: AppColors.blue, size: 18),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Insight Minggu Ini',
+                style: TextStyle(
+                  color: AppColors.textMuted, 
+                  fontSize: 13, 
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 20),
           Text(
             insightText,
             style: const TextStyle(
               color: AppColors.textDark,
-              fontSize: 15,
-              height: 1.5,
-              fontWeight: FontWeight.w500,
+              fontSize: 16,
+              height: 1.6,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.2,
             ),
           ),
           if (changeLabel.isNotEmpty) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
             _buildChangeBadge(changeLabel, isPositive),
           ],
         ],
@@ -255,27 +292,27 @@ class DashboardScreen extends ConsumerWidget {
   Widget _buildChangeBadge(String label, bool isPositive) {
     final color = isPositive ? AppColors.teal : AppColors.red;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.15)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          Icon(
+            isPositive ? Icons.trending_down_rounded : Icons.trending_up_rounded,
+            color: color,
+            size: 18,
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 10),
           Text(
             'Dependensi $label minggu ini',
             style: TextStyle(
               color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -283,7 +320,35 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-
+  Widget _buildQuickInfo() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.teal.withValues(alpha: 0.1), AppColors.teal.withValues(alpha: 0.02)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.teal.withValues(alpha: 0.1)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.tips_and_updates_rounded, color: AppColors.teal, size: 24),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              'Tips: Coba kurangi penggunaan gadget 1 jam sebelum tidur untuk kualitas istirahat lebih baik.',
+              style: TextStyle(
+                color: AppColors.textDark.withValues(alpha: 0.8),
+                fontSize: 13,
+                height: 1.5,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   // ── Loading Shimmer ────────────────────────────────────────────────────────
 
@@ -292,25 +357,25 @@ class DashboardScreen extends ConsumerWidget {
       children: [
         Row(
           children: List.generate(
-            3,
+            2,
             (_) => Expanded(
               child: Container(
-                height: 72,
-                margin: const EdgeInsets.only(right: 10),
+                height: 140,
+                margin: const EdgeInsets.only(right: 12),
                 decoration: BoxDecoration(
-                  color: AppColors.bgCard,
-                  borderRadius: BorderRadius.circular(14),
+                  color: AppColors.bgWhite,
+                  borderRadius: BorderRadius.circular(24),
                 ),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         Container(
-          height: 120,
+          height: 180,
           decoration: BoxDecoration(
-            color: AppColors.bgCard,
-            borderRadius: BorderRadius.circular(16),
+            color: AppColors.bgWhite,
+            borderRadius: BorderRadius.circular(24),
           ),
         ),
       ],

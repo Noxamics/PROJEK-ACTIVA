@@ -228,7 +228,7 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
     final state = ref.watch(questionnaireProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.bgWhite,
+      backgroundColor: AppColors.bgLight,
       body: SafeArea(
         child: Column(
           children: [
@@ -266,19 +266,19 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Container(
-                      width: 40,
-                      height: 40,
+                      width: 44,
+                      height: 44,
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: Colors.white.withValues(alpha: 0.15),
                         ),
                       ),
                       child: const Icon(
                         Icons.arrow_back_rounded,
                         color: Colors.white,
-                        size: 20,
+                        size: 22,
                       ),
                     ),
                   ),
@@ -290,16 +290,17 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
                         'Kuesioner Analisis',
                         style: TextStyle(
                           color: AppColors.textPrimary,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
                         ),
                       ),
                       SizedBox(height: 4),
                       Text(
-                        'Pilih opsi di bawah',
+                        'Pilih opsi di bawah untuk lanjut',
                         style: TextStyle(
                           color: AppColors.textSecondary,
-                          fontSize: 13,
+                          fontSize: 14,
                         ),
                       ),
                     ],
@@ -312,17 +313,17 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
                 width: double.infinity,
                 decoration: const BoxDecoration(
                   color: AppColors.bgLight,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
                 ),
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 32, 20, 20),
+                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _selectionCard(
                         title: 'Mulai Kuesioner Baru',
                         desc: 'Lakukan analisis kondisi terbaru kamu hari ini.',
-                        icon: Icons.assignment_outlined,
+                        icon: Icons.assignment_rounded,
                         color: AppColors.teal,
                         onTap: _startNew,
                       ),
@@ -331,10 +332,35 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
                         title: 'Lihat Hasil Terakhir',
                         desc:
                             'Cek rangkuman dan rekomendasi kuesioner sebelumnya.',
-                        icon: Icons.history_outlined,
+                        icon: Icons.history_rounded,
                         color: AppColors.blue,
                         onTap: _viewLatest,
                         isLoading: _isFetchingLatest,
+                      ),
+                      const SizedBox(height: 40),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: AppColors.teal.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: AppColors.teal.withValues(alpha: 0.1)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.info_outline_rounded, color: AppColors.teal, size: 24),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                'Analisis ini membantu kami memberikan rekomendasi gaya hidup digital yang lebih baik.',
+                                style: TextStyle(
+                                  color: AppColors.textDark.withValues(alpha: 0.7),
+                                  fontSize: 13,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -367,11 +393,10 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
         decoration: BoxDecoration(
           color: AppColors.bgWhite,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppColors.lightBorder),
           boxShadow: [
             BoxShadow(
-              color: color.withValues(alpha: 0.05),
-              blurRadius: 20,
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 15,
               offset: const Offset(0, 4),
             ),
           ],
@@ -384,7 +409,7 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
                 color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: Icon(icon, color: color, size: 28),
+              child: Icon(icon, color: color, size: 32),
             ),
             const SizedBox(width: 20),
             Expanded(
@@ -395,11 +420,12 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
                     title,
                     style: const TextStyle(
                       color: AppColors.textDark,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.4,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
                     desc,
                     style: const TextStyle(
@@ -413,15 +439,15 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
             ),
             if (isLoading)
               const SizedBox(
-                width: 20,
-                height: 20,
+                width: 24,
+                height: 24,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2,
+                  strokeWidth: 2.5,
                   color: AppColors.textMuted,
                 ),
               )
             else
-              Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
+              Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey.shade300, size: 16),
           ],
         ),
       ),
@@ -439,12 +465,21 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
     const subtitles = [
       'Seberapa sering kamu pakai gadget?',
       'Bagaimana keseharianmu?',
-      'Bagaimana kondisi mentalmu belakangan ini?',
+      'Bagaimana kondisi mentalmu?',
     ];
 
     return Container(
-      color: AppColors.bgWhite,
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      decoration: BoxDecoration(
+        color: AppColors.bgWhite,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -453,21 +488,21 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
               GestureDetector(
                 onTap: _prevPage,
                 child: Container(
-                  width: 36,
-                  height: 36,
+                  width: 42,
+                  height: 42,
                   decoration: BoxDecoration(
                     color: AppColors.bgLight,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: AppColors.lightBorder),
                   ),
                   child: const Icon(
-                    Icons.arrow_back_rounded,
+                    Icons.chevron_left_rounded,
                     color: AppColors.textDark,
-                    size: 18,
+                    size: 28,
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -476,49 +511,70 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
                       titles[state.currentPage],
                       style: const TextStyle(
                         color: AppColors.textDark,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
                       ),
                     ),
                     Text(
                       subtitles[state.currentPage],
                       style: const TextStyle(
                         color: AppColors.textMuted,
-                        fontSize: 12,
+                        fontSize: 13,
                       ),
                     ),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: AppColors.teal.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  '${state.currentPage + 1} / ${QuestionnaireState.totalPages}',
+                  '${state.currentPage + 1}/${QuestionnaireState.totalPages}',
                   style: const TextStyle(
                     color: AppColors.teal,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: (state.currentPage + 1) / QuestionnaireState.totalPages,
-              backgroundColor: AppColors.lightBorder,
-              valueColor: const AlwaysStoppedAnimation(AppColors.teal),
-              minHeight: 5,
-            ),
+          const SizedBox(height: 20),
+          Stack(
+            children: [
+              Container(
+                height: 6,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: AppColors.lightBorder,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.easeOutCubic,
+                height: 6,
+                width: MediaQuery.of(context).size.width * 
+                       ((state.currentPage + 1) / QuestionnaireState.totalPages) - 40,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.tealLight, AppColors.teal],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.teal.withValues(alpha: 0.2),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -529,20 +585,20 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
 
   Widget _buildBottomBar(QuestionnaireState state) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
       decoration: BoxDecoration(
-        color: AppColors.bgWhite,
+        color: AppColors.bgLight,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 20,
+            offset: const Offset(0, -10),
           ),
         ],
       ),
       child: SizedBox(
         width: double.infinity,
-        height: 54,
+        height: 56,
         child: ElevatedButton(
           onPressed: state.isLoading ? null : _nextPage,
           style: ElevatedButton.styleFrom(
@@ -550,9 +606,10 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
             foregroundColor: Colors.white,
             disabledBackgroundColor: AppColors.teal.withValues(alpha: 0.6),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
             ),
-            elevation: 0,
+            elevation: 4,
+            shadowColor: AppColors.teal.withValues(alpha: 0.3),
           ),
           child: state.isLoading
               ? const Row(
@@ -571,7 +628,7 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
                       'Memproses...',
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                         color: Colors.white,
                       ),
                     ),
@@ -581,18 +638,18 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      state.isLastPage ? 'Lihat Hasil Analisis' : 'Lanjut',
+                      state.isLastPage ? 'Lihat Hasil Analisis' : 'Halaman Berikutnya',
                       style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 10),
                     Icon(
                       state.isLastPage
-                          ? Icons.analytics_outlined
+                          ? Icons.analytics_rounded
                           : Icons.arrow_forward_rounded,
-                      size: 18,
+                      size: 20,
                     ),
                   ],
                 ),
@@ -1004,74 +1061,174 @@ class _PageKondisiMental extends ConsumerWidget {
       child: Column(
         children: [
           _buildDisclaimer(),
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
 
-          // Q9 — Anxiety (0–27, invertColor: tinggi = merah)
+          // Q9 — Anxiety (pilihan ganda, nilai ML: 1/7/14/21/27)
           _QuestionBlock(
             number: 9,
             question:
                 'Seberapa sering kamu merasa cemas atau gelisah hari ini?',
-            hint: '0 = tidak pernah cemas, 27 = sangat sering cemas',
-            child: QuestionScalePicker(
-              value: form.anxietyScore,
-              min: 0,
-              max: 27,
-              lowLabel: 'Tidak Pernah',
-              highLabel: 'Sangat Sering',
-              invertColor: true,
-              onChanged: (v) => notifier.setAnxietyScore(v.toDouble()),
+            hint: 'Contoh: rasa takut, gugup, atau tidak bisa rileks',
+            child: Column(
+              children: [
+                QuestionOptionCard(
+                  label: 'Sangat Jarang',
+                  subtitle: 'Hampir tidak pernah merasa cemas',
+                  isSelected: form.anxietyScore == 1.0,
+                  onTap: () => notifier.setAnxietyScore(1.0),
+                ),
+                QuestionOptionCard(
+                  label: 'Jarang',
+                  subtitle: 'Sesekali muncul rasa cemas',
+                  isSelected: form.anxietyScore == 7.0,
+                  onTap: () => notifier.setAnxietyScore(7.0),
+                ),
+                QuestionOptionCard(
+                  label: 'Sedang',
+                  subtitle: 'Kadang-kadang merasa cemas',
+                  isSelected: form.anxietyScore == 14.0,
+                  onTap: () => notifier.setAnxietyScore(14.0),
+                ),
+                QuestionOptionCard(
+                  label: 'Sering',
+                  subtitle: 'Cukup sering merasa cemas atau gelisah',
+                  isSelected: form.anxietyScore == 21.0,
+                  onTap: () => notifier.setAnxietyScore(21.0),
+                ),
+                QuestionOptionCard(
+                  label: 'Sangat Sering',
+                  subtitle: 'Hampir setiap saat merasa cemas',
+                  isSelected: form.anxietyScore == 27.0,
+                  onTap: () => notifier.setAnxietyScore(27.0),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 32),
 
-          // Q10 — Depresi (0–27, invertColor: tinggi = merah)
+          // Q10 — Depresi (pilihan ganda, nilai ML: 1/7/14/21/27)
           _QuestionBlock(
             number: 10,
             question:
                 'Seberapa sering kamu merasa sedih atau tidak bersemangat hari ini?',
-            hint: '0 = tidak pernah, 27 = hampir setiap saat',
-            child: QuestionScalePicker(
-              value: form.depressionScore,
-              min: 0,
-              max: 27,
-              lowLabel: 'Tidak Pernah',
-              highLabel: 'Hampir Setiap Saat',
-              invertColor: true,
-              onChanged: (v) => notifier.setDepressionScore(v.toDouble()),
+            hint: 'Pilih yang paling menggambarkan kondisimu',
+            child: Column(
+              children: [
+                QuestionOptionCard(
+                  label: 'Sangat Jarang',
+                  subtitle: 'Hampir tidak pernah merasa sedih',
+                  isSelected: form.depressionScore == 1.0,
+                  onTap: () => notifier.setDepressionScore(1.0),
+                ),
+                QuestionOptionCard(
+                  label: 'Jarang',
+                  subtitle: 'Sesekali merasa kurang bersemangat',
+                  isSelected: form.depressionScore == 7.0,
+                  onTap: () => notifier.setDepressionScore(7.0),
+                ),
+                QuestionOptionCard(
+                  label: 'Sedang',
+                  subtitle: 'Kadang-kadang merasa sedih atau lesu',
+                  isSelected: form.depressionScore == 14.0,
+                  onTap: () => notifier.setDepressionScore(14.0),
+                ),
+                QuestionOptionCard(
+                  label: 'Sering',
+                  subtitle: 'Cukup sering merasa sedih atau tidak berenergi',
+                  isSelected: form.depressionScore == 21.0,
+                  onTap: () => notifier.setDepressionScore(21.0),
+                ),
+                QuestionOptionCard(
+                  label: 'Sangat Sering',
+                  subtitle: 'Hampir setiap saat merasa sedih atau putus asa',
+                  isSelected: form.depressionScore == 27.0,
+                  onTap: () => notifier.setDepressionScore(27.0),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 28),
 
-          // Q11 — Stres (1–10, invertColor: tinggi = merah)
+          // Q11 — Stres (pilihan ganda, nilai ML: 1/3/5/8/10)
           _QuestionBlock(
             number: 11,
             question: 'Seberapa tinggi tingkat stres kamu hari ini?',
-            hint: '1 = sangat santai, 10 = sangat stres',
-            child: QuestionScalePicker(
-              value: form.stressLevel,
-              min: 1,
-              max: 10,
-              lowLabel: 'Sangat Santai',
-              highLabel: 'Sangat Stres',
-              invertColor: true,
-              onChanged: (v) => notifier.setStressLevel(v.toDouble()),
+            hint: 'Pilih yang paling menggambarkan tingkat stresmu',
+            child: Column(
+              children: [
+                QuestionOptionCard(
+                  label: 'Sangat Rendah',
+                  subtitle: 'Merasa sangat tenang dan santai',
+                  isSelected: form.stressLevel == 1.0,
+                  onTap: () => notifier.setStressLevel(1.0),
+                ),
+                QuestionOptionCard(
+                  label: 'Rendah',
+                  subtitle: 'Sedikit tekanan tapi masih terkendali',
+                  isSelected: form.stressLevel == 3.0,
+                  onTap: () => notifier.setStressLevel(3.0),
+                ),
+                QuestionOptionCard(
+                  label: 'Sedang',
+                  subtitle: 'Tekanan terasa cukup nyata hari ini',
+                  isSelected: form.stressLevel == 5.0,
+                  onTap: () => notifier.setStressLevel(5.0),
+                ),
+                QuestionOptionCard(
+                  label: 'Tinggi',
+                  subtitle: 'Banyak tekanan dan mulai merasa terbebani',
+                  isSelected: form.stressLevel == 8.0,
+                  onTap: () => notifier.setStressLevel(8.0),
+                ),
+                QuestionOptionCard(
+                  label: 'Sangat Tinggi',
+                  subtitle: 'Sangat stres dan sulit untuk rileks',
+                  isSelected: form.stressLevel == 10.0,
+                  onTap: () => notifier.setStressLevel(10.0),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 28),
 
-          // Q12 — Happiness (0–10, normal: tinggi = hijau)
+          // Q12 — Happiness (pilihan ganda, nilai ML: 0/2.5/5/7.5/10)
           _QuestionBlock(
             number: 12,
             question: 'Seberapa bahagia kamu hari ini?',
-            hint: '0 = sangat tidak bahagia, 10 = sangat bahagia',
-            child: QuestionScalePicker(
-              value: form.happinessScore,
-              min: 0,
-              max: 10,
-              lowLabel: 'Tidak Bahagia',
-              highLabel: 'Sangat Bahagia',
-              invertColor: false,
-              onChanged: (v) => notifier.setHappinessScore(v.toDouble()),
+            hint: 'Pilih yang paling menggambarkan suasana hatimu',
+            child: Column(
+              children: [
+                QuestionOptionCard(
+                  label: 'Sangat Tidak Bahagia',
+                  subtitle: 'Merasa sangat sedih atau kecewa',
+                  isSelected: form.happinessScore == 0.0,
+                  onTap: () => notifier.setHappinessScore(0.0),
+                ),
+                QuestionOptionCard(
+                  label: 'Tidak Bahagia',
+                  subtitle: 'Suasana hati kurang baik hari ini',
+                  isSelected: form.happinessScore == 2.5,
+                  onTap: () => notifier.setHappinessScore(2.5),
+                ),
+                QuestionOptionCard(
+                  label: 'Biasa Saja',
+                  subtitle: 'Tidak merasa sedih maupun sangat senang',
+                  isSelected: form.happinessScore == 5.0,
+                  onTap: () => notifier.setHappinessScore(5.0),
+                ),
+                QuestionOptionCard(
+                  label: 'Bahagia',
+                  subtitle: 'Merasa senang dan cukup puas',
+                  isSelected: form.happinessScore == 7.5,
+                  onTap: () => notifier.setHappinessScore(7.5),
+                ),
+                QuestionOptionCard(
+                  label: 'Sangat Bahagia',
+                  subtitle: 'Merasa sangat gembira dan penuh semangat',
+                  isSelected: form.happinessScore == 10.0,
+                  onTap: () => notifier.setHappinessScore(10.0),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 20),
@@ -1082,30 +1239,51 @@ class _PageKondisiMental extends ConsumerWidget {
 
   Widget _buildDisclaimer() {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.amber.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.amber.withValues(alpha: 0.25)),
+        gradient: LinearGradient(
+          colors: [
+            AppColors.amber.withValues(alpha: 0.12),
+            AppColors.amber.withValues(alpha: 0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.amber.withValues(alpha: 0.2)),
       ),
       child: const Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
-            Icons.favorite_outline_rounded,
+            Icons.favorite_rounded,
             color: AppColors.amber,
-            size: 18,
+            size: 22,
           ),
-          SizedBox(width: 10),
+          SizedBox(width: 14),
           Expanded(
-            child: Text(
-              'Jawab dengan jujur. Semua jawaban bersifat rahasia '
-              'dan hanya digunakan untuk analisis gaya hidupmu.',
-              style: TextStyle(
-                color: AppColors.amber,
-                fontSize: 13,
-                height: 1.5,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Ruang Aman Kamu',
+                  style: TextStyle(
+                    color: Color(0xFF92400E), // Amber 800
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Jawab dengan jujur. Semua jawaban bersifat rahasia dan hanya digunakan untuk analisis gaya hidupmu.',
+                  style: TextStyle(
+                    color: Color(0xFFB45309), // Amber 700
+                    fontSize: 12,
+                    height: 1.6,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -1136,44 +1314,59 @@ class _QuestionBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: AppColors.teal.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            'PERTANYAAN $number',
-            style: const TextStyle(
-              color: AppColors.teal,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.0,
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppColors.teal, AppColors.tealLight],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.teal.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Text(
+                'PERTANYAAN $number',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.2,
+                ),
+              ),
             ),
-          ),
+          ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 18),
         Text(
           question,
           style: const TextStyle(
             color: AppColors.textDark,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            height: 1.4,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            height: 1.3,
+            letterSpacing: -0.5,
           ),
         ),
         if (hint != null) ...[
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
             hint!,
             style: const TextStyle(
               color: AppColors.textMuted,
-              fontSize: 13,
-              height: 1.4,
+              fontSize: 14,
+              height: 1.5,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         child,
       ],
     );

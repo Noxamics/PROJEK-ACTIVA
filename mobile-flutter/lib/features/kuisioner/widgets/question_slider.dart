@@ -29,13 +29,28 @@ class QuestionSlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildValueDisplay(),
-        const SizedBox(height: 12),
-        _buildSlider(context),
-        _buildLabels(),
-      ],
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.bgWhite,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          _buildValueDisplay(),
+          const SizedBox(height: 24),
+          _buildSlider(context),
+          const SizedBox(height: 12),
+          _buildLabels(),
+        ],
+      ),
     );
   }
 
@@ -46,35 +61,27 @@ class QuestionSlider extends StatelessWidget {
         ? value.toInt().toString()
         : value.toStringAsFixed(1);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: BoxDecoration(
-        color: activeColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: activeColor.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            displayVal,
-            style: TextStyle(
-              color: activeColor,
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-            ),
+    return Column(
+      children: [
+        Text(
+          displayVal,
+          style: TextStyle(
+            color: activeColor,
+            fontSize: 44,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -1,
           ),
-          const SizedBox(width: 6),
-          Text(
-            unit,
-            style: TextStyle(
-              color: activeColor.withValues(alpha: 0.7),
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+        ),
+        Text(
+          unit.toUpperCase(),
+          style: TextStyle(
+            color: activeColor.withValues(alpha: 0.5),
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.5,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -84,12 +91,14 @@ class QuestionSlider extends StatelessWidget {
     return SliderTheme(
       data: SliderTheme.of(context).copyWith(
         activeTrackColor: activeColor,
-        inactiveTrackColor: activeColor.withValues(alpha: 0.15),
-        thumbColor: activeColor,
-        overlayColor: activeColor.withValues(alpha: 0.12),
-        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 13),
-        trackHeight: 6,
+        inactiveTrackColor: activeColor.withValues(alpha: 0.1),
+        thumbColor: Colors.white,
+        overlayColor: activeColor.withValues(alpha: 0.1),
+        thumbShape: _CustomThumbShape(color: activeColor),
+        trackHeight: 8,
         trackShape: const RoundedRectSliderTrackShape(),
+        activeTickMarkColor: Colors.transparent,
+        inactiveTickMarkColor: Colors.transparent,
       ),
       child: Slider(
         value: value,
@@ -106,20 +115,69 @@ class QuestionSlider extends StatelessWidget {
   Widget _buildLabels() {
     if (minLabel == null && maxLabel == null) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             minLabel ?? '',
-            style: TextStyle(color: Colors.grey.shade400, fontSize: 12),
+            style: TextStyle(
+              color: AppColors.textMuted.withValues(alpha: 0.6),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           Text(
             maxLabel ?? '',
-            style: TextStyle(color: Colors.grey.shade400, fontSize: 12),
+            style: TextStyle(
+              color: AppColors.textMuted.withValues(alpha: 0.6),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
     );
+  }
+}
+
+class _CustomThumbShape extends SliderComponentShape {
+  final Color color;
+  const _CustomThumbShape({required this.color});
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) => const Size(28, 28);
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    final Canvas canvas = context.canvas;
+
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    // Shadow
+    canvas.drawCircle(center, 14, Paint()
+      ..color = Colors.black.withValues(alpha: 0.1)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4));
+
+    // Outer circle (white)
+    canvas.drawCircle(center, 14, paint);
+
+    // Inner circle (colored)
+    canvas.drawCircle(center, 8, Paint()..color = color);
   }
 }
