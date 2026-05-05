@@ -53,7 +53,7 @@ class _LaporanPerkembanganScreenState
                     decoration: const BoxDecoration(
                       color: AppColors.bgLight,
                       borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(24),
+                        top: Radius.circular(32),
                       ),
                     ),
                     child: _buildBody(laporanState),
@@ -88,21 +88,25 @@ class _LaporanPerkembanganScreenState
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, color: AppColors.red, size: 48),
-              const SizedBox(height: 12),
+              const Icon(Icons.error_outline_rounded, color: AppColors.red, size: 56),
+              const SizedBox(height: 16),
               Text(
                 state.error!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () =>
-                    ref.read(laporanProvider.notifier).fetchLaporan(),
-                child: const Text(
-                  'Coba lagi',
-                  style: TextStyle(color: AppColors.teal),
+                style: const TextStyle(
+                  color: AppColors.textDark,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                 ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => ref.read(laporanProvider.notifier).fetchLaporan(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.teal,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('Coba lagi', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
@@ -112,39 +116,40 @@ class _LaporanPerkembanganScreenState
 
     final data = state.data;
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ① Status Banner
           _buildStatusBanner(data),
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
 
           // ② Insight Utama
           _sectionLabel('INSIGHT UTAMA'),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _buildInsightCards(data),
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
 
           // ③ Bar Chart Perbandingan
           _sectionLabel('PERBANDINGAN SKOR'),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _buildComparisonChart(data),
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
 
           // ④ Penyebab
           _sectionLabel('PENYEBAB UTAMA'),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _buildTagsCard(
             data?.causes ?? [],
             icon: Icons.warning_amber_rounded,
             color: AppColors.red,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 32),
 
           // ⑤ Rekomendasi
           _sectionLabel('REKOMENDASI AI'),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _buildRekomendasiCard(data?.recommendations ?? []),
         ],
       ),
@@ -167,34 +172,44 @@ class _LaporanPerkembanganScreenState
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Laporan Perkembangan',
+            'Laporan Analisis',
             style: TextStyle(
               color: AppColors.textPrimary,
               fontSize: 24,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
             ),
           ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              const Text(
-                '14 data terakhir = ',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-              ),
-              Text(
-                statusText,
-                style: TextStyle(
-                  color: statusColor,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Trend 14 data terakhir: ',
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w500),
                 ),
-              ),
-            ],
+                Text(
+                  statusText,
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -219,36 +234,47 @@ class _LaporanPerkembanganScreenState
         ? Icons.trending_down_rounded
         : Icons.trending_flat_rounded;
     final label = isMembaik
-        ? 'Kondisi Membaik'
+        ? 'Trend Membaik'
         : isMemburuk
-        ? 'Kondisi Memburuk'
-        : 'Kondisi Stabil';
+        ? 'Trend Memburuk'
+        : 'Trend Stabil';
     final absPct = data.scorePct.abs().toStringAsFixed(1);
     final subtitle = isMembaik
         ? 'Skor turun $absPct% dari periode sebelumnya'
         : isMemburuk
         ? 'Skor naik $absPct% dari periode sebelumnya'
-        : 'Perubahan skor < 2% dari periode sebelumnya';
+        : 'Perubahan skor < 2% (relatif stabil)';
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
+        gradient: LinearGradient(
+          colors: [color.withValues(alpha: 0.12), color.withValues(alpha: 0.05)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: color.withValues(alpha: 0.2), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
+              color: color.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: color, size: 28),
+            child: Icon(icon, color: color, size: 32),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,16 +283,18 @@ class _LaporanPerkembanganScreenState
                   label,
                   style: TextStyle(
                     color: color,
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   subtitle,
                   style: TextStyle(
                     color: color.withValues(alpha: 0.8),
-                    fontSize: 13,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -286,31 +314,31 @@ class _LaporanPerkembanganScreenState
         _insightItem(
           icon: Icons.speed_rounded,
           color: AppColors.teal,
-          title: 'Digital Dependence Score',
+          title: 'Skor Dependensi',
           desc: insights?.digitalDependence ?? 'Memuat data...',
         ),
         _insightItem(
           icon: Icons.timer_rounded,
           color: AppColors.blue,
-          title: 'Screen Time',
+          title: 'Waktu Layar',
           desc: insights?.screenTime ?? 'Memuat data...',
         ),
         _insightItem(
           icon: Icons.share_rounded,
           color: AppColors.purple,
-          title: 'Social Media Usage',
+          title: 'Media Sosial',
           desc: insights?.socialMedia ?? 'Memuat data...',
         ),
         _insightItem(
           icon: Icons.bedtime_rounded,
           color: Colors.indigo,
-          title: 'Sleep',
+          title: 'Kualitas Tidur',
           desc: insights?.sleep ?? 'Memuat data...',
         ),
         _insightItem(
           icon: Icons.psychology_rounded,
           color: AppColors.amber,
-          title: 'Stress Level',
+          title: 'Tingkat Stres',
           desc: insights?.stress ?? 'Memuat data...',
         ),
       ],
@@ -324,30 +352,30 @@ class _LaporanPerkembanganScreenState
     required String desc,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.bgWhite,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(icon, color: color, size: 22),
+            child: Icon(icon, color: color, size: 24),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -355,18 +383,20 @@ class _LaporanPerkembanganScreenState
                 Text(
                   title,
                   style: const TextStyle(
-                    color: AppColors.textSecondary,
+                    color: AppColors.textMuted,
                     fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   desc,
                   style: const TextStyle(
                     color: AppColors.textDark,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    height: 1.4,
                   ),
                 ),
               ],
@@ -384,15 +414,15 @@ class _LaporanPerkembanganScreenState
     final lastScore = data?.lastWeekAvg ?? 0;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: AppColors.bgWhite,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -402,17 +432,25 @@ class _LaporanPerkembanganScreenState
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              _chartBar('7 Data Lalu', lastScore, Colors.grey.shade400),
-              const SizedBox(width: 40),
+              _chartBar('7 Data Lalu', lastScore, Colors.grey.shade300),
               _chartBar('7 Data Ini', thisScore, AppColors.teal),
             ],
           ),
-          const SizedBox(height: 16),
-          const Divider(height: 1),
-          const SizedBox(height: 12),
-          const Text(
-            'Rata-rata Digital Dependence Score',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppColors.bgLight,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Text(
+              'Rata-rata Digital Dependence Score',
+              style: TextStyle(
+                color: AppColors.textMuted, 
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
@@ -426,46 +464,52 @@ class _LaporanPerkembanganScreenState
         Text(
           value.toStringAsFixed(1),
           style: TextStyle(
-            color: color,
-            fontWeight: FontWeight.w800,
-            fontSize: 20,
+            color: color == Colors.grey.shade300 ? AppColors.textMuted : color,
+            fontWeight: FontWeight.w900,
+            fontSize: 22,
+            letterSpacing: -0.5,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         Container(
-          width: 56,
-          height: 120,
+          width: 64,
+          height: 140,
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: Align(
             alignment: Alignment.bottomCenter,
-            child: FractionallySizedBox(
-              heightFactor: (value / 100).clamp(0.05, 1.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: color.withValues(alpha: 0.4),
-                      blurRadius: 6,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 1000),
+              curve: Curves.easeOutCubic,
+              width: 64,
+              height: 140 * (value / 100).clamp(0.05, 1.0),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [color, color.withValues(alpha: 0.8)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                 ),
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         Text(
           label,
           style: const TextStyle(
             color: AppColors.textDark,
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ],
@@ -481,45 +525,52 @@ class _LaporanPerkembanganScreenState
   }) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: AppColors.bgWhite,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: items.isEmpty
           ? const Text(
-              'Belum ada data.',
-              style: TextStyle(color: AppColors.textSecondary),
+              'Belum ada data pemicu terdeteksi.',
+              style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
             )
           : Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: 10,
+              runSpacing: 10,
               children: items
                   .map(
                     (tag) => Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
+                        horizontal: 16,
+                        vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: color.withValues(alpha: 0.3)),
+                        color: color.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: color.withValues(alpha: 0.15)),
                       ),
-                      child: Text(
-                        tag,
-                        style: TextStyle(
-                          color: color,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.tag_rounded, color: color, size: 14),
+                          const SizedBox(width: 6),
+                          Text(
+                            tag,
+                            style: TextStyle(
+                              color: color,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   )
@@ -533,15 +584,15 @@ class _LaporanPerkembanganScreenState
   Widget _buildRekomendasiCard(List<String> items) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: AppColors.bgWhite,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -550,54 +601,56 @@ class _LaporanPerkembanganScreenState
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.auto_awesome_rounded,
-                color: AppColors.teal,
-                size: 20,
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.teal.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.auto_awesome_rounded, color: AppColors.teal, size: 18),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               const Text(
-                'Saran untuk kamu',
+                'Saran Perbaikan AI',
                 style: TextStyle(
                   color: AppColors.teal,
                   fontSize: 14,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 24),
           if (items.isEmpty)
             const Text(
-              'Belum ada rekomendasi.',
-              style: TextStyle(color: AppColors.textSecondary),
+              'Belum ada rekomendasi khusus saat ini.',
+              style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
             )
           else
             ...items.map(
               (item) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.only(bottom: 16),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: Container(
-                        width: 6,
-                        height: 6,
-                        decoration: const BoxDecoration(
-                          color: AppColors.teal,
-                          shape: BoxShape.circle,
-                        ),
+                    Container(
+                      margin: const EdgeInsets.only(top: 6),
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: AppColors.teal,
+                        shape: BoxShape.circle,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Text(
                         item,
                         style: const TextStyle(
                           color: AppColors.textDark,
                           fontSize: 14,
-                          height: 1.5,
+                          height: 1.6,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -613,97 +666,115 @@ class _LaporanPerkembanganScreenState
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 
-  Widget _sectionLabel(String text) => Text(
-    text,
-    style: const TextStyle(
-      color: AppColors.textSecondary,
-      fontSize: 12,
-      fontWeight: FontWeight.w700,
-      letterSpacing: 1.2,
+  Widget _sectionLabel(String text) => Padding(
+    padding: const EdgeInsets.only(left: 4),
+    child: Text(
+      text,
+      style: const TextStyle(
+        color: AppColors.textSecondary,
+        fontSize: 12,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 1.5,
+      ),
     ),
   );
 
-  // ── Lock Overlay (tidak diubah, sudah OK) ──────────────────────────────────
+  // ── Lock Overlay ───────────────────────────────────────────────────────────
 
   Widget _buildLockOverlay(int currentCount) {
     final remaining = 14 - currentCount;
     return Positioned.fill(
       child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         child: BackdropFilter(
-          filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
           child: Container(
-            color: Colors.white.withValues(alpha: 0.3),
+            color: Colors.white.withValues(alpha: 0.4),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: AppColors.bgWhite,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 30,
+                        offset: const Offset(0, 15),
                       ),
                     ],
                   ),
                   child: const Icon(
                     Icons.lock_person_rounded,
                     color: AppColors.teal,
-                    size: 40,
+                    size: 48,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
                 const Text(
-                  'Fitur Terkunci',
+                  'Analisis Terkunci',
                   style: TextStyle(
                     color: AppColors.textDark,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: Text(
-                    'Isi kuesioner $remaining x lagi untuk membuka fitur ini',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: AppColors.textDark.withValues(alpha: 0.7),
-                      fontSize: 14,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 30),
-                Container(
-                  width: 200,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: AppColors.teal.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: (currentCount / 14).clamp(0.0, 1.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.teal,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
                   ),
                 ),
                 const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 48),
+                  child: Text(
+                    'Kami butuh $remaining data harian lagi untuk memberikan analisis perkembangan yang akurat.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.textDark.withValues(alpha: 0.7),
+                      fontSize: 15,
+                      height: 1.6,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 40),
+                Container(
+                  width: 240,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: AppColors.teal.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Stack(
+                    children: [
+                      FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: (currentCount / 14).clamp(0.0, 1.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [AppColors.tealLight, AppColors.teal],
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.teal.withValues(alpha: 0.3),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
                 Text(
-                  '$currentCount / 14 Kuesioner',
+                  '$currentCount / 14 Data Terkumpul',
                   style: const TextStyle(
                     color: AppColors.teal,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ],

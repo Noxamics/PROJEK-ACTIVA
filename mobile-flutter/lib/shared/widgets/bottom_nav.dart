@@ -22,27 +22,42 @@ class BottomNav extends StatelessWidget {
 
     final bgColor = isDark ? AppColors.bgCard : AppColors.bgWhite;
     final borderColor = isDark ? AppColors.cardBorder : AppColors.lightBorder;
+    
+    // Warna sesuai image reference (Slate palette)
+    final activeColor = isDark ? Colors.white : AppColors.textDark;
     final inactiveColor = isDark
         ? AppColors.textSecondary
-        : Colors.grey.shade400;
+        : AppColors.textSecondary;
 
     return Container(
       decoration: BoxDecoration(
         color: bgColor,
-        border: Border(top: BorderSide(color: borderColor)),
+        border: Border(
+          top: BorderSide(color: borderColor.withValues(alpha: 0.5)),
+        ),
+        boxShadow: [
+          if (!isDark)
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, -4),
+            ),
+        ],
       ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.fromLTRB(4, 10, 4, 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(
               _navItems.length,
               (i) => _buildNavItem(
                 index: i,
-                icon: _navItems[i].$1,
-                label: _navItems[i].$2,
+                activeIcon: _navItems[i].activeIcon,
+                inactiveIcon: _navItems[i].inactiveIcon,
+                label: _navItems[i].label,
+                activeColor: activeColor,
                 inactiveColor: inactiveColor,
               ),
             ),
@@ -54,8 +69,10 @@ class BottomNav extends StatelessWidget {
 
   Widget _buildNavItem({
     required int index,
-    required IconData icon,
+    required IconData activeIcon,
+    required IconData inactiveIcon,
     required String label,
+    required Color activeColor,
     required Color inactiveColor,
   }) {
     final isActive = index == currentIndex;
@@ -63,23 +80,24 @@ class BottomNav extends StatelessWidget {
     return GestureDetector(
       onTap: () => onTap(index),
       behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: SizedBox(
+        width: 68,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              icon,
-              color: isActive ? AppColors.teal : inactiveColor,
+              isActive ? activeIcon : inactiveIcon,
+              color: isActive ? activeColor : inactiveColor,
               size: 24,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Text(
               label,
               style: TextStyle(
-                color: isActive ? AppColors.teal : inactiveColor,
+                color: isActive ? activeColor : inactiveColor,
                 fontSize: 11,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                letterSpacing: -0.2,
               ),
             ),
           ],
@@ -89,10 +107,18 @@ class BottomNav extends StatelessWidget {
   }
 }
 
+class _NavItem {
+  final IconData activeIcon;
+  final IconData inactiveIcon;
+  final String label;
+
+  const _NavItem(this.activeIcon, this.inactiveIcon, this.label);
+}
+
 const _navItems = [
-  (Icons.home_rounded, 'Beranda'),
-  (Icons.assignment_outlined, 'Kuesioner'),
-  (Icons.analytics_outlined, 'Laporan'),
-  (Icons.show_chart_rounded, 'Grafik'),
-  (Icons.person_rounded, 'Profil'),
+  _NavItem(Icons.home_rounded, Icons.home_outlined, 'Beranda'),
+  _NavItem(Icons.assignment_rounded, Icons.assignment_outlined, 'Kuesioner'),
+  _NavItem(Icons.description_rounded, Icons.description_outlined, 'Laporan'),
+  _NavItem(Icons.show_chart_rounded, Icons.show_chart_rounded, 'Grafik'),
+  _NavItem(Icons.person_rounded, Icons.person_outline_rounded, 'Profil'),
 ];
