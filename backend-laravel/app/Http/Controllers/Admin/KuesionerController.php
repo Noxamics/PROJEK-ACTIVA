@@ -95,6 +95,28 @@ class KuesionerController extends Controller
         };
     }
 
+    private function calculateAge($user): string
+    {
+        if (isset($user['age']) && !empty($user['age']) && $user['age'] !== '-') {
+            return (string) $user['age'];
+        }
+
+        if (isset($user['date_of_birth'])) {
+            try {
+                $dob = $user['date_of_birth'];
+                // Handle MongoDB UTCDateTime
+                if ($dob instanceof \MongoDB\BSON\UTCDateTime) {
+                    return (string) Carbon::parse($dob->toDateTime())->age;
+                }
+                return (string) Carbon::parse($dob)->age;
+            } catch (\Exception $e) {
+                return '-';
+            }
+        }
+
+        return '-';
+    }
+
     public function index()
     {
         $mlCol   = DB::connection('mongodb')->collection('ml_results');
@@ -117,6 +139,10 @@ class KuesionerController extends Controller
             if (!$ml || !$q) continue;
 
             $mlData   = json_decode($ml['ml_result'] ?? '{}', true);
+            $aiData   = is_string($ml['ai_analysis'] ?? null) 
+                        ? json_decode($ml['ai_analysis'], true) 
+                        : ($ml['ai_analysis'] ?? []);
+
             $skor     = (int) round($mlData['digital_dependence_score'] ?? 0);
             $kategori = $this->formatKategori($mlData['category'] ?? 'rendah');
 
@@ -125,7 +151,7 @@ class KuesionerController extends Controller
                 'skor_ketergantungan'   => $skor,
                 'kategori'              => $kategori,
                 'gender'                => $user['gender'] ?? '-',
-                'umur'                  => $user['age'] ?? '-',
+                'umur'                  => $this->calculateAge($user),
                 'region'                => $user['region'] ?? '-',
                 'tingkat_pendidikan'    => $user['education_level'] ?? '-',
                 'peran_harian'          => $this->formatRole($user['daily_role'] ?? null),
@@ -142,8 +168,10 @@ class KuesionerController extends Controller
                 'skor_depresi'          => $q['depression_score'] ?? 0,
                 'tingkat_stres'         => $this->formatStres($q['stress_level'] ?? null),
                 'skor_kebahagiaan'      => $q['happiness_score'] ?? 0,
+                'status'                => 'Selesai',
                 'jenis_perangkat'       => $q['device_type'] ?? '-',
-                'rekomendasi'           => $this->getRekomendasi($kategori),
+                'penyebab'              => $aiData['penyebab'] ?? [],
+                'rekomendasi'           => (!empty($aiData['rekomendasi'])) ? $aiData['rekomendasi'] : $this->getRekomendasi($kategori),
             ];
 
             $no++;
