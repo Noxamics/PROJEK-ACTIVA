@@ -20,95 +20,182 @@
     border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
   }
 
   .table-container {
-    overflow-x: auto;
+    overflow: auto; /* Enable both x and y scrolling */
+    width: 100%;
+    max-height: 70vh; /* Set a professional fixed height for the table area */
+    position: relative;
+    /* Smooth scrolling for touch devices */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Custom Scrollbar styling for a professional look */
+  .table-container::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+  .table-container::-webkit-scrollbar-track {
+    background: #f8fafc;
+  }
+  .table-container::-webkit-scrollbar-thumb {
+    background: var(--border2);
+    border-radius: 10px;
+    border: 2px solid #f8fafc;
+  }
+  .table-container::-webkit-scrollbar-thumb:hover {
+    background: var(--text3);
   }
 
   table {
     width: 100%;
-    border-collapse: collapse;
-    min-width: 1400px;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 1800px;
   }
 
   thead th {
-    padding: 12px 14px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: 14px 16px;
     text-align: left;
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--navy);
-    background: #EEF4FB;
-    border-bottom: 2px solid var(--border2);
+    background: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%);
+    border-bottom: 2px solid var(--border);
     white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(15,31,53,.04);
   }
 
   tbody tr {
-    border-bottom: 1px solid var(--border);
-    transition: background 0.1s;
+    transition: all 0.2s ease;
+  }
+  tbody tr:nth-child(even) {
+    background: #FAFCFE;
+  }
+  tbody tr:hover {
+    background: linear-gradient(90deg, rgba(13,148,136,.04) 0%, rgba(30,58,95,.04) 100%);
+    transform: scale(1.001);
   }
 
-  tbody tr:hover { background: #F5F9FF; }
-  tbody tr:last-child { border-bottom: none; }
-
-  td {
-    padding: 11px 14px;
-    font-size: 12.5px;
+  tbody tr td {
+    padding: 13px 16px;
+    font-size: 13px;
+    color: var(--text2);
+    border-bottom: 1px solid #EEF2F7;
     white-space: nowrap;
+    transition: all 0.15s ease;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr:hover td {
+    color: var(--navy);
+  }
+
+  tbody tr:hover td:first-child {
+    border-left: 3px solid var(--teal);
+    padding-left: 13px;
   }
 
   .badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 99px;
     font-size: 11px;
     font-weight: 600;
+    letter-spacing: 0.02em;
   }
-  .badge-selesai   { background: rgba(13,148,136,.12); color: #0d9488; }
-  .badge-sangat-tinggi { background: rgba(220,38,38,.1); color: #dc2626; }
-  .badge-tinggi    { background: rgba(234,88,12,.1);  color: #ea580c; }
-  .badge-sedang    { background: rgba(217,119,6,.1);  color: #d97706; }
-  .badge-rendah    { background: rgba(22,163,74,.1);  color: #16a34a; }
+  .badge-selesai   { background: rgba(13,148,136,.1); color: #0d9488; border: 1px solid rgba(13,148,136,.2); }
+  .badge-sangat-tinggi { background: rgba(220,38,38,.1); color: #dc2626; border: 1px solid rgba(220,38,38,.2); }
+  .badge-tinggi    { background: rgba(234,88,12,.1);  color: #ea580c; border: 1px solid rgba(234,88,12,.2); }
+  .badge-sedang    { background: rgba(217,119,6,.1);  color: #d97706; border: 1px solid rgba(217,119,6,.2); }
+  .badge-rendah    { background: rgba(22,163,74,.1);  color: #16a34a; border: 1px solid rgba(22,163,74,.2); }
 
   /* ── Toolbar ── */
   .toolbar {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: center;
-    padding: 16px 16px 0;
-    margin-bottom: 14px;
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+    padding: 20px; background: #FAFCFF; border-bottom: 1px solid var(--border);
   }
-
+  .toolbar-group { display: flex; align-items: center; gap: 8px; }
+  .toolbar label { font-size: 12px; font-weight: 600; color: var(--text2); white-space: nowrap; }
   .toolbar input[type="text"] {
-    padding: 7px 12px;
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    font-size: 12.5px;
-    outline: none;
-    width: 200px;
-    color: var(--navy);
+    padding: 9px 14px; border: 1px solid var(--border2); border-radius: 10px;
+    font-size: 13px; font-weight: 500; outline: none; color: var(--navy);
+    background: #fff; transition: all 0.25s ease; width: 220px; font-family: var(--sans);
   }
-  .toolbar input[type="text"]:focus { border-color: var(--teal); }
+  .toolbar input[type="text"]:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(13,148,136,.12); }
+  .toolbar input[type="text"]:hover { border-color: var(--navy); background: #FAFCFF; }
 
-  .toolbar select {
-    padding: 7px 10px;
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    font-size: 12.5px;
-    outline: none;
-    color: var(--navy);
-    background: #fff;
-    cursor: pointer;
+  /* Custom Dropdown — Premium */
+  .custom-dd { position: relative; min-width: 120px; }
+  .custom-dd__btn {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 10px 14px; background: #fff; border: 1.5px solid #E2E8F0;
+    border-radius: 11px; font-size: 13px; font-weight: 500; color: var(--navy);
+    cursor: pointer; transition: all 0.3s cubic-bezier(.4,0,.2,1);
+    font-family: var(--sans); user-select: none; white-space: nowrap;
+    box-shadow: 0 1px 2px rgba(15,31,53,.04);
   }
-  .toolbar select:focus { border-color: var(--teal); }
-
-  .toolbar label {
-    font-size: 12px;
-    color: var(--text2);
-    white-space: nowrap;
+  .custom-dd__btn:hover {
+    border-color: #94A3B8; background: #FAFCFF;
+    box-shadow: 0 2px 8px rgba(15,31,53,.06);
+  }
+  .custom-dd.open .custom-dd__btn {
+    border-color: var(--teal); background: #fff;
+    box-shadow: 0 0 0 4px rgba(13,148,136,.08), 0 2px 8px rgba(15,31,53,.06);
+  }
+  .custom-dd__arrow {
+    width: 15px; height: 15px; flex-shrink: 0; color: #94A3B8;
+    transition: all 0.3s cubic-bezier(.4,0,.2,1);
+  }
+  .custom-dd.open .custom-dd__arrow { transform: rotate(180deg); color: var(--teal); }
+  .custom-dd__menu {
+    position: absolute; top: calc(100% + 8px); left: 0; min-width: 100%; z-index: 100;
+    background: rgba(255,255,255,.98); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(226,232,240,.8); border-radius: 14px;
+    box-shadow: 0 16px 48px rgba(15,31,53,.10), 0 4px 12px rgba(15,31,53,.04);
+    padding: 5px; opacity: 0; transform: translateY(-6px) scale(.98);
+    pointer-events: none; transition: all 0.25s cubic-bezier(.4,0,.2,1);
+    max-height: 280px; overflow-y: auto;
+  }
+  .custom-dd__menu::-webkit-scrollbar { width: 5px; }
+  .custom-dd__menu::-webkit-scrollbar-track { background: transparent; }
+  .custom-dd__menu::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+  .custom-dd.open .custom-dd__menu {
+    opacity: 1; transform: translateY(0) scale(1); pointer-events: auto;
+  }
+  .custom-dd__item {
+    padding: 10px 13px; border-radius: 9px; font-size: 13px; font-weight: 500;
+    color: #475569; cursor: pointer; transition: all 0.18s ease;
+    display: flex; align-items: center; gap: 10px; margin: 1px 0;
+    position: relative;
+  }
+  .custom-dd__item:hover {
+    background: linear-gradient(135deg, #F0FDFA 0%, #F0F9FF 100%);
+    color: var(--navy); padding-left: 16px;
+  }
+  .custom-dd__item.active {
+    background: linear-gradient(135deg, rgba(13,148,136,.06) 0%, rgba(13,148,136,.03) 100%);
+    color: var(--teal); font-weight: 600;
+  }
+  .custom-dd__item.active::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--teal); box-shadow: 0 0 0 3px rgba(13,148,136,.15);
+    flex-shrink: 0;
   }
 
   /* ── Bottom bar ── */
@@ -116,92 +203,182 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 16px;
+    padding: 16px 20px;
+    background: #F8FAFC;
     border-top: 1px solid var(--border);
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 16px;
   }
-  .count-info { font-size: 12px; color: var(--text3); }
+  .count-info { 
+    font-size: 13px; 
+    color: var(--text3);
+    font-weight: 500;
+  }
 
   .btn-export {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 18px;
+    gap: 8px;
+    padding: 10px 20px;
     background: var(--teal);
     color: #fff;
     border: none;
-    border-radius: 8px;
-    font-size: 12.5px;
+    border-radius: 10px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
   }
-  .btn-export:hover { background: #0b7a72; }
+  .btn-export:hover { 
+    background: var(--teal-dk); 
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(13, 148, 136, 0.3);
+  }
+  .btn-export:active { transform: translateY(0); }
 
   /* ── Modal ── */
   .modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,.45);
-    z-index: 999;
+    background: rgba(15, 31, 53, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
     align-items: center;
     justify-content: center;
+    padding: 20px;
+    transition: all 0.3s;
   }
   .modal-overlay.open { display: flex; }
 
   .modal-box {
     background: #fff;
-    border-radius: 14px;
-    padding: 28px;
-    width: 420px;
-    max-width: 95vw;
-    max-height: 85vh;
+    border-radius: 20px;
+    padding: 32px;
+    width: 480px;
+    max-width: 100%;
+    max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0,0,0,.15);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    position: relative;
+    animation: modalSlideUp 0.3s ease-out;
   }
+
+  @keyframes modalSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   .modal-box h3 {
-    font-size: 15px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--navy);
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
+  
   .modal-rec-item {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
-    padding: 9px 0;
-    border-bottom: 1px solid #eef;
-    font-size: 13px;
-    color: var(--text2);
-    line-height: 1.5;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #F8FAFC;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+    border: 1px solid #E2EAF2;
   }
-  .modal-rec-item:last-child { border-bottom: none; }
+
   .rec-dot {
-    width: 7px; height: 7px;
+    width: 8px; height: 8px;
     border-radius: 50%;
     background: var(--teal);
     flex-shrink: 0;
-    margin-top: 5px;
+    margin-top: 7px;
+    box-shadow: 0 0 0 3px var(--teal-lt);
   }
+
   .modal-close-btn {
-    margin-top: 18px;
+    margin-top: 24px;
     width: 100%;
-    padding: 9px;
+    padding: 12px;
     border: 1px solid var(--border2);
-    border-radius: 8px;
-    background: transparent;
-    font-size: 13px;
+    border-radius: 12px;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
     color: var(--text2);
+    transition: all 0.2s;
   }
-  .modal-close-btn:hover { background: #f5f9ff; }
+  .modal-close-btn:hover { 
+    background: #F1F5F9;
+    color: var(--navy);
+    border-color: var(--navy);
+  }
 
   .no-data {
     text-align: center;
-    padding: 48px 20px;
+    padding: 60px 20px;
     color: var(--text3);
+  }
+
+  .btn-view {
+    background: var(--ice);
+    color: var(--teal);
+    border: 1px solid var(--teal-lt);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-view:hover {
+    background: var(--teal);
+    color: #fff;
+    border-color: var(--teal);
+  }
+
+  /* ── Pagination ── */
+  .pagination-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .pagination-btn {
+    padding: 6px 14px;
+    background: #fff;
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.2s;
+    outline: none;
+  }
+  .pagination-btn:hover:not(:disabled) {
+    background: var(--ice);
+    border-color: var(--teal);
+    color: var(--teal);
+  }
+  .pagination-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .page-info {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    min-width: 120px;
+    text-align: center;
   }
 </style>
 @endpush
@@ -222,56 +399,105 @@
 
   {{-- TOOLBAR --}}
   <div class="toolbar">
-    {{-- Search --}}
-    <input type="text" id="searchInput" placeholder="🔍 Cari ID user, kategori..." oninput="applyFilters()">
+    {{-- Search Group --}}
+    <div class="toolbar-group">
+      <label>Cari:</label>
+      <input type="text" id="searchInput" placeholder="Kategori, region..." oninput="applyFilters()">
+    </div>
 
-    {{-- Filter gender --}}
-    <select id="fGender" onchange="applyFilters()">
-      <option value="">Semua Gender</option>
-      <option>Laki-laki</option>
-      <option>Perempuan</option>
-    </select>
+    {{-- Filter Groups --}}
+    <div class="toolbar-group">
+      <label>Gender:</label>
+      <div class="custom-dd" id="ddGender">
+        <div class="custom-dd__btn" onclick="toggleDD('ddGender')">
+          <span>Semua</span>
+          <svg class="custom-dd__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="custom-dd__menu">
+          <div class="custom-dd__item active" data-val="" onclick="selectDD('ddGender','fGender',this)">Semua</div>
+          <div class="custom-dd__item" data-val="Male" onclick="selectDD('ddGender','fGender',this)">Laki-laki</div>
+          <div class="custom-dd__item" data-val="Female" onclick="selectDD('ddGender','fGender',this)">Perempuan</div>
+        </div>
+        <input type="hidden" id="fGender" value="">
+      </div>
+    </div>
 
-    {{-- Filter region --}}
-    <select id="fRegion" onchange="applyFilters()">
-      <option value="">Semua Region</option>
-      @foreach($regions as $r)
-        <option>{{ $r }}</option>
-      @endforeach
-    </select>
+    <div class="toolbar-group">
+      <label>Wilayah:</label>
+      <div class="custom-dd" id="ddRegion">
+        <div class="custom-dd__btn" onclick="toggleDD('ddRegion')">
+          <span>Semua</span>
+          <svg class="custom-dd__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="custom-dd__menu">
+          <div class="custom-dd__item active" data-val="" onclick="selectDD('ddRegion','fRegion',this)">Semua</div>
+          @foreach($regions as $r)
+            <div class="custom-dd__item" data-val="{{ $r }}" onclick="selectDD('ddRegion','fRegion',this)">{{ $r }}</div>
+          @endforeach
+        </div>
+        <input type="hidden" id="fRegion" value="">
+      </div>
+    </div>
 
-    {{-- Filter kategori --}}
-    <select id="fKategori" onchange="applyFilters()">
-      <option value="">Semua Kategori</option>
-      <option>Sangat Tinggi</option>
-      <option>Tinggi</option>
-      <option>Sedang</option>
-      <option>Rendah</option>
-    </select>
+    <div class="toolbar-group">
+      <label>Kategori:</label>
+      <div class="custom-dd" id="ddKategori">
+        <div class="custom-dd__btn" onclick="toggleDD('ddKategori')">
+          <span>Semua</span>
+          <svg class="custom-dd__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="custom-dd__menu">
+          <div class="custom-dd__item active" data-val="" onclick="selectDD('ddKategori','fKategori',this)">Semua</div>
+          <div class="custom-dd__item" data-val="Sangat Tinggi" onclick="selectDD('ddKategori','fKategori',this)">Sangat Tinggi</div>
+          <div class="custom-dd__item" data-val="Tinggi" onclick="selectDD('ddKategori','fKategori',this)">Tinggi</div>
+          <div class="custom-dd__item" data-val="Sedang" onclick="selectDD('ddKategori','fKategori',this)">Sedang</div>
+          <div class="custom-dd__item" data-val="Rendah" onclick="selectDD('ddKategori','fKategori',this)">Rendah</div>
+        </div>
+        <input type="hidden" id="fKategori" value="">
+      </div>
+    </div>
 
-    {{-- Filter daily role --}}
-    <select id="fRole" onchange="applyFilters()">
-      <option value="">Semua Role</option>
-      @foreach($roles as $r)
-        <option>{{ $r }}</option>
-      @endforeach
-    </select>
+    <div class="toolbar-group">
+      <label>Peran:</label>
+      <div class="custom-dd" id="ddRole">
+        <div class="custom-dd__btn" onclick="toggleDD('ddRole')">
+          <span>Semua</span>
+          <svg class="custom-dd__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="custom-dd__menu">
+          <div class="custom-dd__item active" data-val="" onclick="selectDD('ddRole','fRole',this)">Semua</div>
+          @foreach($roles as $r)
+            <div class="custom-dd__item" data-val="{{ $r }}" onclick="selectDD('ddRole','fRole',this)">{{ $r }}</div>
+          @endforeach
+        </div>
+        <input type="hidden" id="fRole" value="">
+      </div>
+    </div>
 
-    {{-- Sort --}}
-    <label>Urutkan:</label>
-    <select id="sortBy" onchange="applyFilters()">
-      <option value="">— Pilih —</option>
-      <option value="skor_desc">Skor tertinggi → rendah</option>
-      <option value="skor_asc">Skor terendah → tinggi</option>
-      <option value="umur_desc">Umur tertinggi → rendah</option>
-      <option value="umur_asc">Umur terendah → tinggi</option>
-      <option value="device_desc">Jam perangkat tertinggi → rendah</option>
-      <option value="device_asc">Jam perangkat terendah → tinggi</option>
-      <option value="sleep_desc">Jam tidur terbanyak → sedikit</option>
-      <option value="sleep_asc">Jam tidur terendah → tinggi</option>
-      <option value="anxiety_desc">Kecemasan tertinggi → rendah</option>
-      <option value="anxiety_asc">Kecemasan terendah → tinggi</option>
-    </select>
+    {{-- Sort Group --}}
+    <div class="toolbar-group">
+      <label>Urutkan:</label>
+      <div class="custom-dd" id="ddSort" style="min-width:200px;">
+        <div class="custom-dd__btn" onclick="toggleDD('ddSort')">
+          <span>— Pilih —</span>
+          <svg class="custom-dd__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="custom-dd__menu">
+          <div class="custom-dd__item active" data-val="" onclick="selectDD('ddSort','sortBy',this)">— Pilih —</div>
+          <div class="custom-dd__item" data-val="skor_desc" onclick="selectDD('ddSort','sortBy',this)">Skor tertinggi → rendah</div>
+          <div class="custom-dd__item" data-val="skor_asc" onclick="selectDD('ddSort','sortBy',this)">Skor terendah → tinggi</div>
+          <div class="custom-dd__item" data-val="umur_desc" onclick="selectDD('ddSort','sortBy',this)">Umur tertinggi → rendah</div>
+          <div class="custom-dd__item" data-val="umur_asc" onclick="selectDD('ddSort','sortBy',this)">Umur terendah → tinggi</div>
+          <div class="custom-dd__item" data-val="device_desc" onclick="selectDD('ddSort','sortBy',this)">Jam perangkat ↓</div>
+          <div class="custom-dd__item" data-val="device_asc" onclick="selectDD('ddSort','sortBy',this)">Jam perangkat ↑</div>
+          <div class="custom-dd__item" data-val="sleep_desc" onclick="selectDD('ddSort','sortBy',this)">Jam tidur ↓</div>
+          <div class="custom-dd__item" data-val="sleep_asc" onclick="selectDD('ddSort','sortBy',this)">Jam tidur ↑</div>
+          <div class="custom-dd__item" data-val="anxiety_desc" onclick="selectDD('ddSort','sortBy',this)">Kecemasan ↓</div>
+          <div class="custom-dd__item" data-val="anxiety_asc" onclick="selectDD('ddSort','sortBy',this)">Kecemasan ↑</div>
+        </div>
+        <input type="hidden" id="sortBy" value="">
+      </div>
+    </div>
   </div>
 
   <div class="table-container">
@@ -279,30 +505,29 @@
       <thead>
         <tr>
           <th>No</th>
-          <th>ID</th>
-          <th>Skor Ketergantungan</th>
+          <th>Skor</th>
           <th>Kategori</th>
           <th>Gender</th>
           <th>Umur</th>
-          <th>Region</th>
-          <th>Tingkat Pendidikan</th>
+          <th>Wilayah</th>
+          <th>Pendidikan</th>
           <th>Peran Harian</th>
-          <th>Tingkat Pendapatan</th>
-          <th>Jam Pakai Perangkat/Hari</th>
+          <th>Pendapatan</th>
+          <th>Jam Perangkat</th>
           <th>Buka HP/Hari</th>
-          <th>Notifikasi/Hari</th>
-          <th>Menit Medsos</th>
-          <th>Menit Belajar</th>
-          <th>Hari Aktif Fisik</th>
+          <th>Notif/Hari</th>
+          <th>Mnt Medsos</th>
+          <th>Mnt Belajar</th>
+          <th>Aktif Fisik</th>
           <th>Jam Tidur</th>
           <th>Kualitas Tidur</th>
-          <th>Skor Kecemasan</th>
-          <th>Skor Depresi</th>
-          <th>Tingkat Stres</th>
-          <th>Skor Kebahagiaan</th>
+          <th>Kecemasan</th>
+          <th>Depresi</th>
+          <th>Stres</th>
+          <th>Kebahagiaan</th>
           <th>Jenis Perangkat</th>
           <th>Status</th>
-          <th>Rekomendasi</th>
+          <th>Aksi</th>
         </tr>
       </thead>
       <tbody id="tableBody">
@@ -327,9 +552,8 @@
             data-sleep="{{ $item['jam_tidur'] }}"
             data-anxiety="{{ $item['skor_kecemasan'] }}"
           >
-            <td>{{ $index + 1 }}</td>
-            <td style="font-weight:600;color:var(--navy);">{{ $item['user_id'] }}</td>
-            <td style="font-weight:700;color:var(--navy);">{{ $item['skor_ketergantungan'] }}</td>
+            <td style="text-align:center; color: var(--text3); font-weight: 600;">{{ $index + 1 }}</td>
+            <td style="font-weight:700;color:var(--teal);">{{ $item['skor_ketergantungan'] }}</td>
             <td><span class="badge {{ $katClass }}">{{ $item['kategori'] }}</span></td>
             <td>{{ $item['gender'] }}</td>
             <td>{{ $item['umur'] }} thn</td>
@@ -352,21 +576,22 @@
             <td>{{ $item['jenis_perangkat'] }}</td>
             <td><span class="badge badge-selesai">Selesai</span></td>
             <td>
-             <button class="btn btn-ghost btn-sm" style="padding:5px 12px;font-size:11px;"
-    onclick="showRekomendasi(this)"
-    data-recs="{{ e(json_encode($item['rekomendasi'])) }}"
-    data-uid="{{ $item['user_id'] }}">
-    Lihat
-</button>
+              <button class="btn-view"
+                onclick="showRekomendasi(this)"
+                data-recs='@json($item["rekomendasi"])'
+                data-penyebab='@json($item["penyebab"])'
+                data-uid="{{ $item['user_id'] }}">
+                Lihat
+              </button>
             </td>
           </tr>
         @empty
           <tr>
-            <td colspan="25">
+            <td colspan="24">
               <div class="no-data">
-                <div style="font-size:36px;margin-bottom:10px;">📋</div>
-                <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Belum ada data kuesioner</div>
-                <div style="font-size:12px;">Kuesioner akan muncul di sini setelah user mulai mengisi</div>
+                <div style="font-size:48px;margin-bottom:16px; opacity: 0.5;">📋</div>
+                <div style="font-size:16px;font-weight:700;color: var(--navy);margin-bottom:8px;">Belum ada data kuesioner</div>
+                <div style="font-size:14px;color: var(--text3);">Kuesioner akan muncul di sini setelah user mulai mengisi</div>
               </div>
             </td>
           </tr>
@@ -377,17 +602,25 @@
 
   {{-- BOTTOM BAR --}}
   <div class="bottom-bar">
-    <span class="count-info" id="countInfo">Menampilkan {{ count($kuesioner) }} data</span>
-    <button class="btn-export" onclick="exportXlsx()">
-      ⬇ Export data ke .xlsx
-    </button>
+    <div class="pagination-wrap">
+      <button class="pagination-btn" id="prevBtn" onclick="prevPage()">Sebelumnya</button>
+      <span class="page-info" id="pageInfo">Halaman 1 dari 1</span>
+      <button class="pagination-btn" id="nextBtn" onclick="nextPage()">Selanjutnya</button>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:20px;">
+      <span class="count-info" id="countInfo">Menampilkan 0 data</span>
+      <button class="btn-export" onclick="exportXlsx()">
+        ⬇ Export data ke .xlsx
+      </button>
+    </div>
   </div>
 </div>
 
 {{-- MODAL REKOMENDASI --}}
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal-box">
-    <h3 id="modalTitle">Rekomendasi</h3>
+    <h3 id="modalTitle">Analisis & Rekomendasi</h3>
     <div id="modalContent"></div>
     <button class="modal-close-btn" onclick="document.getElementById('modalOverlay').classList.remove('open')">Tutup</button>
   </div>
@@ -396,6 +629,16 @@
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
+  /* ── State ── */
+  let currentPage = 1;
+  const rowsPerPage = 50;
+  let filteredRows = [];
+
+  // Initial render
+  window.onload = () => {
+    applyFilters();
+  };
+
   /* ── Filter & Sort ── */
   function applyFilters() {
     const search   = document.getElementById('searchInput').value.toLowerCase();
@@ -406,52 +649,199 @@
     const sort     = document.getElementById('sortBy').value;
 
     const tbody = document.getElementById('tableBody');
-    let rows = Array.from(tbody.querySelectorAll('tr[data-search]'));
+    let allRows = Array.from(tbody.querySelectorAll('tr[data-search]'));
 
     // Filter
-    rows.forEach(row => {
+    filteredRows = allRows.filter(row => {
       const matchSearch   = !search   || row.dataset.search.includes(search);
       const matchGender   = !gender   || row.dataset.gender   === gender;
       const matchRegion   = !region   || row.dataset.region   === region;
       const matchKategori = !kategori || row.dataset.kategori === kategori;
       const matchRole     = !role     || row.dataset.role     === role;
-      row.style.display = (matchSearch && matchGender && matchRegion && matchKategori && matchRole) ? '' : 'none';
+      return matchSearch && matchGender && matchRegion && matchKategori && matchRole;
     });
 
     // Sort
     if (sort) {
-      const visibleRows = rows.filter(r => r.style.display !== 'none');
       const [field, dir] = sort.split('_');
       const key = { skor: 'skor', umur: 'umur', device: 'device', sleep: 'sleep', anxiety: 'anxiety' }[field];
-      visibleRows.sort((a, b) => {
+      filteredRows.sort((a, b) => {
         const va = parseFloat(a.dataset[key]);
         const vb = parseFloat(b.dataset[key]);
         return dir === 'desc' ? vb - va : va - vb;
       });
-      visibleRows.forEach(r => tbody.appendChild(r));
     }
 
-    // Re-number
-    let no = 1;
-    rows.forEach(row => {
-      if (row.style.display !== 'none') {
-        row.querySelector('td:first-child').textContent = no++;
-      }
+    // Reset to page 1 on filter
+    currentPage = 1;
+    renderTable();
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('tableBody');
+    const totalFiltered = filteredRows.length;
+    const totalPages = Math.ceil(totalFiltered / rowsPerPage) || 1;
+
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    // Hide all rows first
+    const allRows = Array.from(tbody.querySelectorAll('tr[data-search]'));
+    allRows.forEach(r => r.style.display = 'none');
+
+    // Show only rows for the current page
+    const pageRows = filteredRows.slice(start, end);
+    pageRows.forEach((row, i) => {
+      row.style.display = '';
+      row.querySelector('td:first-child').textContent = start + i + 1;
+      tbody.appendChild(row); // Keep DOM order aligned with sorted array
     });
 
-    // Count info
-    const visible = rows.filter(r => r.style.display !== 'none').length;
-    document.getElementById('countInfo').textContent = `Menampilkan ${visible} dari ${rows.length} data`;
+    // Update Pagination UI
+    document.getElementById('pageInfo').textContent = `Halaman ${currentPage} dari ${totalPages}`;
+    document.getElementById('prevBtn').disabled = currentPage === 1;
+    document.getElementById('nextBtn').disabled = currentPage === totalPages;
+    
+    // Update count info
+    document.getElementById('countInfo').textContent = `Menampilkan ${pageRows.length} dari ${totalFiltered} data`;
+    
+    // Optional: Scroll table to top when page changes
+    document.querySelector('.table-container').scrollTop = 0;
+  }
+
+  function nextPage() {
+    currentPage++;
+    renderTable();
+  }
+
+  function prevPage() {
+    currentPage--;
+    renderTable();
+  }
+
+  /* ── Peta terjemahan penyebab ke Bahasa Indonesia ── */
+  const penyebabTranslations = {
+    // Kebahagiaan
+    'happiness_low':            'Tingkat kebahagiaan rendah',
+    'happiness_very_low':       'Tingkat kebahagiaan sangat rendah',
+    'low_happiness':            'Tingkat kebahagiaan rendah',
+    // Kecemasan
+    'anxiety_high':             'Tingkat kecemasan tinggi',
+    'anxiety_very_high':        'Tingkat kecemasan sangat tinggi',
+    'high_anxiety':             'Tingkat kecemasan tinggi',
+    // Depresi
+    'depression_high':          'Tingkat depresi tinggi',
+    'depression_very_high':     'Tingkat depresi sangat tinggi',
+    'high_depression':          'Tingkat depresi tinggi',
+    // Stres
+    'stress_high':              'Tingkat stres tinggi',
+    'stress_very_high':         'Tingkat stres sangat tinggi',
+    'high_stress':              'Tingkat stres tinggi',
+    // Tidur
+    'sleep_low':                'Jam tidur kurang',
+    'sleep_quality_low':        'Kualitas tidur buruk',
+    'poor_sleep':               'Kualitas tidur buruk',
+    'low_sleep_quality':        'Kualitas tidur rendah',
+    'sleep_deprivation':        'Kurang tidur',
+    // Penggunaan perangkat
+    'device_hours_high':        'Penggunaan perangkat berlebihan',
+    'high_device_usage':        'Penggunaan perangkat terlalu tinggi',
+    'excessive_screen_time':    'Waktu layar berlebihan',
+    'screen_time_high':         'Waktu layar terlalu tinggi',
+    // Media sosial
+    'social_media_high':        'Penggunaan media sosial berlebihan',
+    'high_social_media':        'Penggunaan media sosial terlalu tinggi',
+    'social_media_excessive':   'Media sosial berlebihan',
+    // Aktivitas fisik
+    'physical_activity_low':    'Aktivitas fisik kurang',
+    'low_physical_activity':    'Kurang aktivitas fisik',
+    'sedentary_lifestyle':      'Gaya hidup kurang gerak',
+    // Notifikasi
+    'notifications_high':       'Jumlah notifikasi terlalu banyak',
+    'high_notifications':       'Notifikasi berlebihan',
+    // Belajar
+    'study_time_low':           'Waktu belajar kurang',
+    'low_study_time':           'Waktu belajar rendah',
+    // Buka HP
+    'phone_unlocks_high':       'Terlalu sering membuka HP',
+    'high_phone_unlocks':       'Frekuensi membuka HP tinggi',
+    // Ketergantungan
+    'digital_dependence_high':  'Ketergantungan digital tinggi',
+    'high_digital_dependence':  'Ketergantungan digital tinggi',
+  };
+
+  /**
+   * Ambil teks yang bisa ditampilkan dari sebuah item (bisa string, bisa object).
+   */
+  function extractText(item) {
+    if (typeof item === 'string') return item;
+    if (item && typeof item === 'object') {
+      // Prioritaskan "isi" (konten Indonesia) daripada "tag" (key mentah seperti happiness_low)
+      return item.isi || item.text || item.message || item.label || item.description
+          || item.title || item.name || item.value || item.cause || item.reason
+          || item.recommendation || item.action || item.suggestion
+          || JSON.stringify(item);
+    }
+    return String(item);
+  }
+
+  /**
+   * Terjemahkan key penyebab ke Bahasa Indonesia.
+   * Kalau sudah dalam Bahasa Indonesia (tidak ditemukan di map), kembalikan apa adanya
+   * dengan underscore diganti spasi dan huruf awal kapital.
+   */
+  function translatePenyebab(raw) {
+    const text = extractText(raw);
+    const key  = text.trim().toLowerCase().replace(/\s+/g, '_');
+    if (penyebabTranslations[key]) return penyebabTranslations[key];
+    // Fallback: capitalize dan ganti underscore
+    return text.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }
 
   function showRekomendasi(btn) {
     const recs = JSON.parse(btn.dataset.recs);
+    const penyebab = JSON.parse(btn.dataset.penyebab || '[]');
     const userId = btn.dataset.uid;
-    document.getElementById('modalTitle').textContent = `Rekomendasi — ${userId}`;
+    
+    document.getElementById('modalTitle').textContent = `Analisis & Rekomendasi`;
     const content = document.getElementById('modalContent');
-    content.innerHTML = recs.map(r =>
-        `<div class="modal-rec-item"><div class="rec-dot"></div><div>${r}</div></div>`
-    ).join('');
+    
+    let html = '';
+    
+    // ── Penyebab Utama ──
+    html += `<div style="margin-bottom:24px;">
+                <h4 style="font-size:11px; color:var(--text3); text-transform:uppercase; margin-bottom:12px; letter-spacing:0.08em; font-weight:700;">Penyebab Utama</h4>`;
+    if (penyebab && penyebab.length > 0) {
+        html += penyebab.map(p => {
+          const label = translatePenyebab(p);
+          return `
+          <div class="modal-rec-item" style="background:#FFF5F5; border-color:#FED7D7;">
+            <div class="rec-dot" style="background:#E53E3E; box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);"></div>
+            <div style="color:#C53030; font-weight:500;">${label}</div>
+          </div>`;
+        }).join('');
+    } else {
+        html += `<div style="font-size:13px; color:var(--text3); padding:10px; background:#F8FAFC; border-radius:8px; text-align:center;">Data penyebab tidak tersedia</div>`;
+    }
+    html += `</div>`;
+    
+    // ── Rekomendasi Tindakan ──
+    html += `<div>
+                <h4 style="font-size:11px; color:var(--text3); text-transform:uppercase; margin-bottom:12px; letter-spacing:0.08em; font-weight:700;">Rekomendasi Tindakan</h4>`;
+    if (recs && recs.length > 0) {
+        html += recs.map(r => {
+          const text = extractText(r);
+          return `<div class="modal-rec-item"><div class="rec-dot"></div><div>${text}</div></div>`;
+        }).join('');
+    } else {
+        html += `<div style="font-size:13px; color:var(--text3); padding:10px; background:#F8FAFC; border-radius:8px; text-align:center;">Data rekomendasi tidak tersedia</div>`;
+    }
+    html += `</div>`;
+    
+    content.innerHTML = html;
     document.getElementById('modalOverlay').classList.add('open');
 }
 
@@ -463,21 +853,22 @@
 
   /* ── Export XLSX ── */
   function exportXlsx() {
-    const rows  = Array.from(document.querySelectorAll('#tableBody tr[data-search]'))
-                       .filter(r => r.style.display !== 'none');
     const headers = [
-      'No','ID User','Skor Ketergantungan','Kategori','Gender','Umur','Region',
-      'Tingkat Pendidikan','Peran Harian','Tingkat Pendapatan',
+      'No','Skor Ketergantungan','Kategori','Gender','Umur','Wilayah',
+      'Pendidikan','Peran Harian','Pendapatan',
       'Jam Perangkat/Hari','Buka HP/Hari','Notifikasi/Hari',
-      'Menit Medsos','Menit Belajar','Hari Aktif Fisik',
+      'Menit Medsos','Menit Belajar','Aktif Fisik',
       'Jam Tidur','Kualitas Tidur','Skor Kecemasan',
       'Skor Depresi','Tingkat Stres','Skor Kebahagiaan','Jenis Perangkat','Status'
     ];
     const data = [headers];
-    rows.forEach(row => {
+    
+    // Export ALL filtered rows, not just the visible page
+    filteredRows.forEach((row, i) => {
       const cells = Array.from(row.querySelectorAll('td'));
-      // Ambil semua kolom kecuali kolom terakhir (Rekomendasi/tombol)
-      data.push(cells.slice(0, cells.length - 1).map(td => td.textContent.trim()));
+      const rowData = cells.slice(0, cells.length - 1).map(td => td.textContent.trim());
+      rowData[0] = i + 1; // Correct index for export
+      data.push(rowData);
     });
 
     const wb = XLSX.utils.book_new();
@@ -488,6 +879,30 @@
 
   /* ── Refresh ── */
   function refreshData() { location.reload(); }
+
+  /* ── Custom Dropdown Logic ── */
+  function toggleDD(id) {
+    const dd = document.getElementById(id);
+    const wasOpen = dd.classList.contains('open');
+    document.querySelectorAll('.custom-dd.open').forEach(d => d.classList.remove('open'));
+    if (!wasOpen) dd.classList.add('open');
+  }
+
+  function selectDD(ddId, inputId, item) {
+    document.getElementById(inputId).value = item.dataset.val;
+    const dd = document.getElementById(ddId);
+    dd.querySelector('.custom-dd__btn span').textContent = item.textContent;
+    dd.querySelectorAll('.custom-dd__item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    dd.classList.remove('open');
+    applyFilters();
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.custom-dd')) {
+      document.querySelectorAll('.custom-dd.open').forEach(d => d.classList.remove('open'));
+    }
+  });
 </script>
 @endpush
 

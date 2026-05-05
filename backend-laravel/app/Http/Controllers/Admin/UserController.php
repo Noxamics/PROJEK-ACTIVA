@@ -35,7 +35,19 @@ class UserController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $users = $query->paginate(15)->appends($request->query());
+        $users = $query->paginate(50)->appends($request->query());
+
+        // Hitung jumlah kuesioner per user
+        $userIds = $users->pluck('_id')->toArray();
+        $qCounts = \App\Models\Questionnaire::whereIn('user_id', $userIds)
+            ->get()
+            ->groupBy('user_id')
+            ->map(fn($items) => $items->count());
+
+        foreach ($users as $user) {
+            $uid = (string) $user->_id;
+            $user->questionnaire_count = $qCounts[$uid] ?? 0;
+        }
 
         $total = User::count();
 
