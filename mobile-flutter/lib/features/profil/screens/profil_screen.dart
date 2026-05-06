@@ -11,6 +11,7 @@ import '../widgets/setting_item_toggle.dart';
 import '../../grafik/screens/grafik_screen.dart';
 import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
 import '../../kuisioner/screens/kuesioner_screen.dart';
+import '../providers/notification_provider.dart';
 
 class ProfilScreen extends ConsumerStatefulWidget {
   const ProfilScreen({super.key});
@@ -20,7 +21,6 @@ class ProfilScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfilScreenState extends ConsumerState<ProfilScreen> {
-  bool _notifikasiEnabled = true;
 
   // ── Navigation ─────────────────────────────────────────────────────────────
 
@@ -388,8 +388,8 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
                 iconColor: AppColors.blue,
                 title: 'Notifikasi',
                 subtitle: 'Pengingat kuesioner harian',
-                value: _notifikasiEnabled,
-                onChanged: (v) => setState(() => _notifikasiEnabled = v),
+                value: ref.watch(notificationProvider),
+                onChanged: (v) => ref.read(notificationProvider.notifier).toggle(v),
               ),
               SettingItem(
                 icon: Icons.file_download_outlined,
