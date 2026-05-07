@@ -170,6 +170,53 @@ class AuthService {
     }
   }
 
+  // ── Update Profile ─────────────────────────────────────────────────────────
+  /// PUT /api/auth/profile (butuh JWT token)
+  /// Response: { success: true, data: { updated user object } }
+  Future<UserModel> updateProfile({
+    String? name,
+    String? gender,
+    DateTime? dateOfBirth,
+    String? region,
+    String? educationLevel,
+    String? dailyRole,
+    String? incomeLevel,
+  }) async {
+    try {
+      final response = await _client.put(
+        ApiEndpoints.updateProfile,
+        data: {
+          if (name != null) 'name': name,
+          if (gender != null) 'gender': gender,
+          if (dateOfBirth != null)
+            'date_of_birth': dateOfBirth.toIso8601String().split('T').first,
+          if (region != null) 'region': region,
+          if (educationLevel != null) 'education_level': educationLevel,
+          if (dailyRole != null) 'daily_role': dailyRole,
+          if (incomeLevel != null) 'income_level': incomeLevel,
+        },
+      );
+
+      final data = response.data as Map<String, dynamic>;
+
+      // Response: { success: true, data: { ...user } }
+      final userJson = data['data'] as Map<String, dynamic>? ?? data;
+
+      final updatedUser = UserModel.fromJson(userJson);
+
+      // Opsional: Update nama/email di local storage jika berubah
+      await _storage.saveUserData(
+        userId: updatedUser.id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+      );
+
+      return updatedUser;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   // ── Forgot Password ────────────────────────────────────────────────────────
   /// POST /api/auth/forgot-password
   Future<void> forgotPassword(String email) async {

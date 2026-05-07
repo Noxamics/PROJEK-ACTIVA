@@ -12,6 +12,7 @@ import '../../grafik/screens/grafik_screen.dart';
 import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
 import '../../kuisioner/screens/kuesioner_screen.dart';
 import '../providers/notification_provider.dart';
+import 'edit_profil_screen.dart';
 
 class ProfilScreen extends ConsumerStatefulWidget {
   const ProfilScreen({super.key});
@@ -380,7 +381,12 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
                 iconColor: AppColors.teal,
                 title: 'Data Diri',
                 subtitle: 'Edit profil & informasi personal',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const EditProfilScreen()),
+                  );
+                },
               ),
               SettingItemToggle(
                 icon: Icons.notifications_none_rounded,
