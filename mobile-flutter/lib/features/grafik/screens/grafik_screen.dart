@@ -1,11 +1,14 @@
+// lib/features/grafik/screens/grafik_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/bottom_nav.dart';
-import '../../dashboard/providers/dashboard_provider.dart';
 import '../../kuisioner/screens/kuesioner_screen.dart';
 import '../../profil/screens/profil_screen.dart';
 import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
+import '../faker/grafik_faker.dart';
+import '../providers/grafik_provider.dart';
 import '../widgets/v2_charts.dart';
 
 class GrafikScreen extends ConsumerStatefulWidget {
@@ -16,13 +19,20 @@ class GrafikScreen extends ConsumerStatefulWidget {
 }
 
 class _GrafikScreenState extends ConsumerState<GrafikScreen> {
-  int _selectedPeriod = 0; // 0=7Hari, 1=Bulanan, 2=3Bulan
-  static const _periods = ['7 Hari', 'Bulanan', '3 Bulan'];
+  static const _periodLabels = ['7 Hari', 'Bulanan', '3 Bulan'];
+
+  // Map index selector → GrafikPeriod
+  static const _periodMap = [
+    GrafikPeriod.week,
+    GrafikPeriod.month,
+    GrafikPeriod.threeMonths,
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final dashState = ref.watch(dashboardProvider);
-    final analytics = dashState.analytics;
+    final grafikState = ref.watch(grafikProvider);
+    final data = grafikState.data;
+    final selectedPeriodIndex = _periodMap.indexOf(grafikState.period);
 
     return Scaffold(
       backgroundColor: AppColors.bgDark,
@@ -34,114 +44,84 @@ class _GrafikScreenState extends ConsumerState<GrafikScreen> {
               child: Container(
                 decoration: const BoxDecoration(
                   color: AppColors.bgLight,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
                 ),
-                child: analytics == null && dashState.isLoading
-                    ? const Center(
-                        child: CircularProgressIndicator(color: AppColors.teal),
-                      )
-                    : SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-                            _buildPeriodSelector(),
-                            const SizedBox(height: 24),
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+                  child: Column(
+                    children: [
+                      _buildPeriodSelector(selectedPeriodIndex),
+                      const SizedBox(height: 32),
 
-                            // 1. Digital Dependence Trend (Line Chart)
-                            _card(
-                              title: 'Trend Skor Ketergantungan Digital',
-                              child: SimpleLineChart(
-                                values:
-                                    analytics?.dailyTrend
-                                        .map((t) => t.dependenceScore)
-                                        .toList() ??
-                                    [],
-                                labels:
-                                    analytics?.dailyTrend
-                                        .map((t) => t.shortDate)
-                                        .toList() ??
-                                    [],
-                                color: AppColors.teal,
-                                maxValue: 100,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // 2. Screen Time Trend (Line Chart)
-                            _card(
-                              title: 'Screen Time Trend (Jam/Hari)',
-                              child: SimpleLineChart(
-                                values:
-                                    analytics?.dailyTrend
-                                        .map((t) => t.deviceHours)
-                                        .toList() ??
-                                    [],
-                                labels:
-                                    analytics?.dailyTrend
-                                        .map((t) => t.shortDate)
-                                        .toList() ??
-                                    [],
-                                color: AppColors.blue,
-                                maxValue: 15,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // 3. Social Media Usage (Bar Chart)
-                            _card(
-                              title: 'Penggunaan Media Sosial (Menit)',
-                              child: GenericBarChart(
-                                values:
-                                    analytics?.dailyTrend
-                                        .map(
-                                          (t) => t.socialMediaMins.toDouble(),
-                                        )
-                                        .toList() ??
-                                    [],
-                                labels:
-                                    analytics?.dailyTrend
-                                        .map((t) => t.shortDate)
-                                        .toList() ??
-                                    [],
-                                color: AppColors.purple,
-                                maxValue: 500,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // 4. Sleep Tracking (Bar Chart)
-                            _card(
-                              title: 'Sleep Tracking (Jam Tidur)',
-                              child: GenericBarChart(
-                                values:
-                                    analytics?.dailyTrend
-                                        .map((t) => t.sleepHours)
-                                        .toList() ??
-                                    [],
-                                labels:
-                                    analytics?.dailyTrend
-                                        .map((t) => t.shortDate)
-                                        .toList() ??
-                                    [],
-                                color: Colors.indigo,
-                                maxValue: 12,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // 5. Category Donut Chart
-                            _card(
-                              title: 'Frekuensi Kategori Dependensi',
-                              child: DonutChartWidget(
-                                low: analytics?.countLow ?? 0,
-                                medium: analytics?.countMedium ?? 0,
-                                high: analytics?.countHigh ?? 0,
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                          ],
+                      // 1. Trend Skor Dependensi
+                      _card(
+                        title: 'Trend Skor Dependensi',
+                        subtitle: 'Analisis tingkat ketergantungan digital',
+                        child: SimpleLineChart(
+                          values: data.dependenceValues,
+                          labels: data.labels,
+                          color: AppColors.teal,
+                          maxValue: 100,
                         ),
                       ),
+                      const SizedBox(height: 20),
+
+                      // 2. Rata-rata Screen Time
+                      _card(
+                        title: 'Rata-rata Screen Time',
+                        subtitle: 'Durasi penggunaan perangkat dalam jam/hari',
+                        child: SimpleLineChart(
+                          values: data.deviceHourValues,
+                          labels: data.labels,
+                          color: AppColors.blue,
+                          maxValue: 15,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // 3. Media Sosial
+                      _card(
+                        title: 'Media Sosial',
+                        subtitle:
+                            'Menit yang dihabiskan untuk hiburan & sosial',
+                        child: GenericBarChart(
+                          values: data.socialMediaValues,
+                          labels: data.labels,
+                          color: AppColors.purple,
+                          maxValue: 500,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // 4. Kualitas Tidur
+                      _card(
+                        title: 'Kualitas Tidur',
+                        subtitle: 'Durasi istirahat malam (jam tidur)',
+                        child: GenericBarChart(
+                          values: data.sleepHourValues,
+                          labels: data.labels,
+                          color: Colors.indigo,
+                          maxValue: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // 5. Kategori Dependensi
+                      _card(
+                        title: 'Kategori Dependensi',
+                        subtitle:
+                            'Distribusi tingkat dependensi selama periode ini',
+                        child: DonutChartWidget(
+                          low: data.kategori.low,
+                          medium: data.kategori.medium,
+                          high: data.kategori.high,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                    ],
+                  ),
+                ),
               ),
             ),
             BottomNav(
@@ -183,62 +163,86 @@ class _GrafikScreenState extends ConsumerState<GrafikScreen> {
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+    return const Padding(
+      padding: EdgeInsets.fromLTRB(24, 20, 24, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
+        children: [
           Text(
             'Visualisasi Data',
             style: TextStyle(
               color: AppColors.textPrimary,
               fontSize: 24,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
             ),
           ),
-          SizedBox(height: 4),
+          SizedBox(height: 6),
           Text(
-            'Analisis detail aktivitas digital harianmu',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+            'Analisis aktivitas digital harianmu',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPeriodSelector() {
+  Widget _buildPeriodSelector(int selectedIndex) {
     return Container(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         color: AppColors.bgWhite,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.lightBorder),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
-        children: List.generate(_periods.length, (i) => _buildPeriodItem(i)),
+        children: List.generate(
+          _periodLabels.length,
+          (i) => _buildPeriodItem(i, selectedIndex),
+        ),
       ),
     );
   }
 
-  Widget _buildPeriodItem(int i) {
-    final isSelected = _selectedPeriod == i;
+  Widget _buildPeriodItem(int i, int selectedIndex) {
+    final isSelected = selectedIndex == i;
     return Expanded(
       child: GestureDetector(
-        onTap: () => setState(() => _selectedPeriod = i),
+        onTap: () => ref.read(grafikProvider.notifier).setPeriod(_periodMap[i]),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: isSelected ? AppColors.bgDark : Colors.transparent,
-            borderRadius: BorderRadius.circular(9),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: AppColors.bgDark.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
           child: Text(
-            _periods[i],
+            _periodLabels[i],
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: isSelected ? Colors.white : Colors.grey.shade500,
+              color: isSelected ? Colors.white : AppColors.textMuted,
               fontSize: 13,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
             ),
           ),
         ),
@@ -246,18 +250,22 @@ class _GrafikScreenState extends ConsumerState<GrafikScreen> {
     );
   }
 
-  Widget _card({required String title, required Widget child}) {
+  Widget _card({
+    required String title,
+    String? subtitle,
+    required Widget child,
+  }) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: AppColors.bgWhite,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -268,11 +276,23 @@ class _GrafikScreenState extends ConsumerState<GrafikScreen> {
             title,
             style: const TextStyle(
               color: AppColors.textDark,
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.3,
             ),
           ),
-          const SizedBox(height: 20),
+          if (subtitle != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: TextStyle(
+                color: AppColors.textMuted.withValues(alpha: 0.7),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+          const SizedBox(height: 24),
           child,
         ],
       ),
