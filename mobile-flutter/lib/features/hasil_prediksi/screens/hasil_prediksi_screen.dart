@@ -15,75 +15,407 @@ import '../../grafik/screens/grafik_screen.dart';
 import '../../profil/screens/profil_screen.dart';
 
 /// Warna berdasarkan skor dependensi digital
-/// Rendah  < 33.47  → hijau  (teal)
-/// Sedang  33.47–61.34 → kuning (amber)
-/// Tinggi  > 61.34  → merah  (red)
 Color _scoreColor(double score) {
   if (score < 33.47) return AppColors.teal;
   if (score <= 61.34) return AppColors.amber;
   return AppColors.red;
 }
 
-class HasilPrediksiScreen extends ConsumerWidget {
-  /// Jika null, ambil dari questionnaireResultProvider
-  final MlResultModel? result;
+// ─────────────────────────────────────────────────────────────────────────────
+// Loading Widget: ditampilkan saat FutureBuilder dalam state loading
+// ─────────────────────────────────────────────────────────────────────────────
 
-  const HasilPrediksiScreen({super.key, this.result});
+class _AnalysisLoadingView extends StatefulWidget {
+  const _AnalysisLoadingView();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final data =
-        result ??
-        ref.watch(questionnaireResultProvider) ??
-        ref.watch(resultProvider).latestResult;
+  State<_AnalysisLoadingView> createState() => _AnalysisLoadingViewState();
+}
 
-    return Scaffold(
-      backgroundColor: AppColors.bgDark,
-      body: SafeArea(
+class _AnalysisLoadingViewState extends State<_AnalysisLoadingView>
+    with TickerProviderStateMixin {
+  late final AnimationController _pulseController;
+  late final AnimationController _stepController;
+  late final Animation<double> _pulseAnim;
+  late final Animation<double> _stepAnim;
+
+  int _currentStep = 0;
+
+  /// Tahapan proses yang ditampilkan ke user secara berurutan
+  static const _steps = [
+    (Icons.upload_rounded, 'Mengirim data kuesioner ke server...'),
+    (
+      Icons.psychology_rounded,
+      'Model AI sedang menganalisis pola digitalmu...',
+    ),
+    (Icons.auto_graph_rounded, 'Menghitung skor ketergantungan digital...'),
+    (
+      Icons.check_circle_outline_rounded,
+      'Menyiapkan hasil & rekomendasi untukmu...',
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat(reverse: true);
+
+    _pulseAnim = Tween<double>(begin: 0.6, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
+    _stepController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _stepAnim = CurvedAnimation(parent: _stepController, curve: Curves.easeOut);
+
+    // Siklus maju antar step setiap ~2.2 detik
+    _cycleSteps();
+  }
+
+  void _cycleSteps() async {
+    while (mounted) {
+      await Future.delayed(const Duration(milliseconds: 2200));
+      if (!mounted) break;
+      setState(() {
+        _currentStep = (_currentStep + 1) % _steps.length;
+      });
+      _stepController.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    _stepController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final step = _steps[_currentStep];
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              child: data == null
-                  ? _buildLoading()
-                  : Column(
+            // ── Pulsing brain icon ─────────────────────────────────────────
+            AnimatedBuilder(
+              animation: _pulseAnim,
+              builder: (_, __) => Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.teal.withValues(alpha: 0.08),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.teal.withValues(
+                        alpha: _pulseAnim.value * 0.35,
+                      ),
+                      blurRadius: 40,
+                      spreadRadius: 10,
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.psychology_rounded,
+                  color: AppColors.teal.withValues(alpha: _pulseAnim.value),
+                  size: 48,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 36),
+
+            // ── Judul ──────────────────────────────────────────────────────
+            const Text(
+              'Sedang Menganalisis...',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.3,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            const Text(
+              'Mohon tunggu, jangan tutup aplikasi ini',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+            ),
+
+            const SizedBox(height: 36),
+
+            // ── Step progress card ─────────────────────────────────────────
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              decoration: BoxDecoration(
+                color: AppColors.bgCard,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.cardBorder),
+              ),
+              child: Column(
+                children: List.generate(_steps.length, (i) {
+                  final isDone = i < _currentStep;
+                  final isActive = i == _currentStep;
+                  final color = isDone || isActive
+                      ? AppColors.teal
+                      : AppColors.textSecondary.withValues(alpha: 0.3);
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Row(
                       children: [
-                        _buildHeader(context, data),
+                        // Step icon
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: (isDone || isActive)
+                                ? AppColors.teal.withValues(alpha: 0.15)
+                                : Colors.transparent,
+                            border: Border.all(
+                              color: color,
+                              width: isActive ? 2 : 1.5,
+                            ),
+                          ),
+                          child: isDone
+                              ? const Icon(
+                                  Icons.check_rounded,
+                                  color: AppColors.teal,
+                                  size: 16,
+                                )
+                              : Icon(_steps[i].$1, color: color, size: 16),
+                        ),
+                        const SizedBox(width: 12),
+                        // Step label
                         Expanded(
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Column(
-                              children: [
-                                const SizedBox(height: 24),
-                                _buildLargeScoreCircle(data),
-                                const SizedBox(height: 24),
-                                _buildRiskBadge(data),
-                                const SizedBox(height: 24),
-                                _buildConfidenceDetail(data),
-                                const SizedBox(height: 24),
-                                if (data.pembukaan.isNotEmpty)
-                                  _buildPembukaanCard(data),
-                                const SizedBox(height: 24),
-                                _buildRekomendasiCard(data),
-                                const SizedBox(height: 24),
-                                _buildHistoriButton(context),
-                                const SizedBox(height: 40),
-                              ],
+                          child: Text(
+                            _steps[i].$2,
+                            style: TextStyle(
+                              color: isActive
+                                  ? AppColors.textPrimary
+                                  : isDone
+                                  ? AppColors.teal.withValues(alpha: 0.7)
+                                  : AppColors.textSecondary.withValues(
+                                      alpha: 0.4,
+                                    ),
+                              fontSize: 13,
+                              fontWeight: isActive
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
                             ),
                           ),
                         ),
+                        // Active spinner
+                        if (isActive)
+                          const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.teal,
+                            ),
+                          ),
                       ],
                     ),
+                  );
+                }),
+              ),
             ),
-            BottomNav(currentIndex: 1, onTap: (i) => _onNavTap(context, i)),
+
+            const SizedBox(height: 28),
+
+            // ── Progress bar ───────────────────────────────────────────────
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 600),
+                height: 6,
+                child: LinearProgressIndicator(
+                  value: (_currentStep + 1) / _steps.length,
+                  backgroundColor: AppColors.teal.withValues(alpha: 0.1),
+                  valueColor: const AlwaysStoppedAnimation(AppColors.teal),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            Text(
+              'Langkah ${_currentStep + 1} dari ${_steps.length}',
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 11,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
+}
 
-  // ── Navigation ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Error Widget: ditampilkan saat FutureBuilder dalam state error
+// ─────────────────────────────────────────────────────────────────────────────
 
-  void _onNavTap(BuildContext context, int index) {
+class _AnalysisErrorView extends StatelessWidget {
+  final Object? error;
+  final VoidCallback onRetry;
+
+  const _AnalysisErrorView({required this.error, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.red.withValues(alpha: 0.08),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.red.withValues(alpha: 0.2),
+                    blurRadius: 30,
+                    spreadRadius: 5,
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.wifi_off_rounded,
+                color: AppColors.red,
+                size: 44,
+              ),
+            ),
+            const SizedBox(height: 28),
+            const Text(
+              'Analisis Gagal',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Tidak dapat terhubung ke server.\nPastikan koneksimu stabil dan coba lagi.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 13,
+                height: 1.6,
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Detail error (opsional, hanya untuk debugging)
+            if (error != null)
+              Text(
+                error.toString(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.red.withValues(alpha: 0.5),
+                  fontSize: 11,
+                ),
+              ),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text(
+                  'Coba Lagi',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.red.withValues(alpha: 0.15),
+                  foregroundColor: AppColors.red,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(
+                      color: AppColors.red.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main Screen
+// ─────────────────────────────────────────────────────────────────────────────
+
+class HasilPrediksiScreen extends ConsumerStatefulWidget {
+  /// Jika null, Future akan memanggil service untuk fetch hasil
+  final MlResultModel? result;
+
+  const HasilPrediksiScreen({super.key, this.result});
+
+  @override
+  ConsumerState<HasilPrediksiScreen> createState() =>
+      _HasilPrediksiScreenState();
+}
+
+class _HasilPrediksiScreenState extends ConsumerState<HasilPrediksiScreen> {
+  late Future<MlResultModel> _resultFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _resultFuture = _loadResult();
+  }
+
+  /// Jika result sudah di-pass langsung (dari navigator argument), langsung
+  /// return. Kalau tidak, ambil dari provider / service.
+  Future<MlResultModel> _loadResult() async {
+    if (widget.result != null) return widget.result!;
+
+    // Tunggu sebentar agar provider sempat update (opsional, sesuaikan kebutuhan)
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    final fromQuestionnaire = ref.read(questionnaireResultProvider);
+    if (fromQuestionnaire != null) return fromQuestionnaire;
+
+    final fromLatest = ref.read(resultProvider).latestResult;
+    if (fromLatest != null) return fromLatest;
+
+    throw Exception('Hasil analisis tidak ditemukan. Silakan coba lagi.');
+  }
+
+  void _retry() {
+    setState(() {
+      _resultFuture = _loadResult();
+    });
+  }
+
+  void _onNavTap(int index) {
     switch (index) {
       case 0:
         Navigator.popUntil(context, (route) => route.isFirst);
@@ -115,25 +447,73 @@ class HasilPrediksiScreen extends ConsumerWidget {
     }
   }
 
-  Widget _buildLoading() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(color: AppColors.teal),
-          SizedBox(height: 16),
-          Text(
-            'Menganalisis data kamu...',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-          ),
-        ],
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.bgDark,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: FutureBuilder<MlResultModel>(
+                future: _resultFuture,
+                builder: (context, snapshot) {
+                  // ── Loading ───────────────────────────────────────────────
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const _AnalysisLoadingView();
+                  }
+
+                  // ── Error ─────────────────────────────────────────────────
+                  if (snapshot.hasError) {
+                    return _AnalysisErrorView(
+                      error: snapshot.error,
+                      onRetry: _retry,
+                    );
+                  }
+
+                  // ── Data tersedia ─────────────────────────────────────────
+                  final data = snapshot.data!;
+                  return Column(
+                    children: [
+                      _buildHeader(data),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 24),
+                              _buildLargeScoreCircle(data),
+                              const SizedBox(height: 24),
+                              _buildRiskBadge(data),
+                              const SizedBox(height: 24),
+                              _buildConfidenceDetail(data),
+                              const SizedBox(height: 24),
+                              if (data.pembukaan.isNotEmpty)
+                                _buildPembukaanCard(data),
+                              const SizedBox(height: 24),
+                              _buildRekomendasiCard(data),
+                              const SizedBox(height: 24),
+                              _buildHistoriButton(),
+                              const SizedBox(height: 40),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            BottomNav(currentIndex: 1, onTap: _onNavTap),
+          ],
+        ),
       ),
     );
   }
 
-  // ── Header ─────────────────────────────────────────────────────────────────
+  // ── Header ──────────────────────────────────────────────────────────────────
 
-  Widget _buildHeader(BuildContext context, MlResultModel data) {
+  Widget _buildHeader(MlResultModel data) {
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 16, 20, 16),
       child: Row(
@@ -188,7 +568,7 @@ class HasilPrediksiScreen extends ConsumerWidget {
     );
   }
 
-  // ── Score Components ───────────────────────────────────────────────────────
+  // ── Score ────────────────────────────────────────────────────────────────────
 
   Widget _buildLargeScoreCircle(MlResultModel data) {
     final color = _scoreColor(data.digitalDependenceScore);
@@ -208,7 +588,6 @@ class HasilPrediksiScreen extends ConsumerWidget {
     final cat = data.category.toLowerCase();
     final isHigh = cat == 'tinggi' || cat == 'high';
     final isMedium = cat == 'sedang' || cat == 'moderate';
-
     final color = _scoreColor(data.digitalDependenceScore);
 
     final label = isHigh
@@ -309,7 +688,7 @@ class HasilPrediksiScreen extends ConsumerWidget {
     );
   }
 
-  // ── Pembukaan AI ───────────────────────────────────────────────────────────
+  // ── Pembukaan AI ──────────────────────────────────────────────────────────────
 
   Widget _buildPembukaanCard(MlResultModel data) {
     return Container(
@@ -351,7 +730,7 @@ class HasilPrediksiScreen extends ConsumerWidget {
     );
   }
 
-  // ── Rekomendasi ────────────────────────────────────────────────────────────
+  // ── Rekomendasi ───────────────────────────────────────────────────────────────
 
   Widget _buildRekomendasiCard(MlResultModel data) {
     return Container(
@@ -417,9 +796,9 @@ class HasilPrediksiScreen extends ConsumerWidget {
     );
   }
 
-  // ── Histori Button ─────────────────────────────────────────────────────────
+  // ── Histori Button ────────────────────────────────────────────────────────────
 
-  Widget _buildHistoriButton(BuildContext context) {
+  Widget _buildHistoriButton() {
     return SizedBox(
       width: double.infinity,
       height: 56,
