@@ -28,31 +28,34 @@ class SettingItemToggle extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
           child: Row(
             children: [
               _buildIcon(),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               Expanded(child: _buildLabel()),
               _buildSwitch(),
             ],
           ),
         ),
         if (showDivider)
-          const Divider(height: 1, indent: 68, color: AppColors.lightBorder),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Divider(height: 1, color: AppColors.textMuted.withValues(alpha: 0.05)),
+          ),
       ],
     );
   }
 
   Widget _buildIcon() {
     return Container(
-      width: 40,
-      height: 40,
+      width: 46,
+      height: 46,
       decoration: BoxDecoration(
         color: iconBg,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(14),
       ),
-      child: Icon(icon, color: iconColor, size: 20),
+      child: Icon(icon, color: iconColor, size: 22),
     );
   }
 
@@ -64,14 +67,19 @@ class SettingItemToggle extends StatelessWidget {
           title,
           style: const TextStyle(
             color: AppColors.textDark,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
           ),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 4),
         Text(
           subtitle,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+          style: TextStyle(
+            color: AppColors.textMuted.withValues(alpha: 0.7), 
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
@@ -81,15 +89,11 @@ class SettingItemToggle extends StatelessWidget {
     return Switch(
       value: value,
       onChanged: onChanged,
-      thumbColor: WidgetStateProperty.resolveWith((states) {
-        return Colors.white;
-      }),
-      trackColor: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.selected)) {
-          return AppColors.teal;
-        }
-        return Colors.grey.shade300;
-      }),
+      activeColor: AppColors.teal,
+      activeTrackColor: AppColors.teal.withValues(alpha: 0.2),
+      inactiveThumbColor: Colors.white,
+      inactiveTrackColor: Colors.grey.shade200,
+      trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
     );
   }
 }

@@ -266,6 +266,7 @@ Layout utama Activa Admin Panel
       flex: 1;
       display: flex;
       flex-direction: column;
+      min-width: 0; /* Penting: mencegah konten memaksa lebar parent di flexbox */
     }
 
     /* TOPBAR */
@@ -399,20 +400,9 @@ Layout utama Activa Admin Panel
 
       <div class="nav-group">
         <div class="nav-group-label">Analitik</div>
-        <a href="{{ route('admin.monitoring') }}"
-          class="nav-link {{ request()->routeIs('admin.monitoring') ? 'active' : '' }}">
-          <div class="nav-icon">◎</div> Monitoring ML
-        </a>
         <a href="{{ route('admin.kuesioner') }}"
           class="nav-link {{ request()->routeIs('admin.kuesioner*') ? 'active' : '' }}">
           <div class="nav-icon">≡</div> Data Kuesioner
-        </a>
-      </div>
-
-      <div class="nav-group">
-        <div class="nav-group-label">Konfigurasi</div>
-        <a href="{{ route('admin.rules') }}" class="nav-link {{ request()->routeIs('admin.rules*') ? 'active' : '' }}">
-          <div class="nav-icon">⌘</div> Rule Rekomendasi
         </a>
       </div>
     </nav>

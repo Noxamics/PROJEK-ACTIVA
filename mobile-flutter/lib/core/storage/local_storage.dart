@@ -15,6 +15,7 @@ class LocalStorage {
   static const String _keyUserName = 'user_name';
   static const String _keyUserEmail = 'user_email';
   static const String _keyIsLoggedIn = 'is_logged_in';
+  static const String _keyNotificationEnabled = 'notification_enabled';
 
   // ── Token ──────────────────────────────────────────────────────────────────
 
@@ -81,6 +82,20 @@ class LocalStorage {
     final token = prefs.getString(_keyToken);
     final loggedIn = prefs.getBool(_keyIsLoggedIn) ?? false;
     return loggedIn && token != null;
+  }
+
+  // ── Settings ──────────────────────────────────────────────────────────────
+
+  /// Simpan status notifikasi.
+  Future<void> saveNotificationSetting(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyNotificationEnabled, enabled);
+  }
+
+  /// Ambil status notifikasi (default true jika belum diset).
+  Future<bool> getNotificationSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyNotificationEnabled) ?? true;
   }
 
   // ── Clear All ──────────────────────────────────────────────────────────────

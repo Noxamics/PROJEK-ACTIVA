@@ -11,6 +11,8 @@ import '../widgets/setting_item_toggle.dart';
 import '../../grafik/screens/grafik_screen.dart';
 import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
 import '../../kuisioner/screens/kuesioner_screen.dart';
+import '../providers/notification_provider.dart';
+import 'edit_profil_screen.dart';
 
 class ProfilScreen extends ConsumerStatefulWidget {
   const ProfilScreen({super.key});
@@ -20,7 +22,6 @@ class ProfilScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfilScreenState extends ConsumerState<ProfilScreen> {
-  bool _notifikasiEnabled = true;
 
   // ── Navigation ─────────────────────────────────────────────────────────────
 
@@ -182,18 +183,31 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
                 decoration: const BoxDecoration(
                   color: AppColors.bgLight,
                   borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(28),
+                    top: Radius.circular(32),
                   ),
                 ),
                 child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+                    padding: const EdgeInsets.fromLTRB(20, 32, 20, 32),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildPengaturanSection(),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 32),
                         _buildKeluarButton(),
+                        const SizedBox(height: 20),
+                        Center(
+                          child: Text(
+                            'DigitalLife Analyzer v1.0.0',
+                            style: TextStyle(
+                              color: AppColors.textMuted.withValues(alpha: 0.4),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -215,35 +229,37 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
 
   Widget _buildProfileHeader(user) {
     final name = user?.name ?? 'Pengguna';
-    final email = user?.email ?? '-';
+    final email = user?.email ?? 'pengguna@email.com';
     final initials = user?.initials ?? '?';
     final age = user?.age.toString() ?? '-';
     final edu = user?.educationLevel ?? '-';
     final region = user?.region ?? '-';
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
+      padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
       child: Column(
         children: [
           _buildAvatar(initials),
-          const SizedBox(height: 14),
+          const SizedBox(height: 20),
           Text(
             name,
             style: const TextStyle(
               color: AppColors.textPrimary,
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             email,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 13,
+            style: TextStyle(
+              color: AppColors.textSecondary.withValues(alpha: 0.8),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 24),
           _buildTags(age: age, edu: edu, region: region),
         ],
       ),
@@ -252,19 +268,31 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
 
   Widget _buildAvatar(String initials) {
     return Container(
-      width: 76,
-      height: 76,
-      decoration: const BoxDecoration(
-        color: AppColors.teal,
+      width: 88,
+      height: 88,
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
         shape: BoxShape.circle,
+        border: Border.all(color: AppColors.teal.withValues(alpha: 0.2), width: 2),
       ),
-      child: Center(
-        child: Text(
-          initials,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 26,
-            fontWeight: FontWeight.w800,
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [AppColors.teal, Color(0xFF2DD4BF)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: Text(
+            initials,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -1,
+            ),
           ),
         ),
       ),
@@ -277,28 +305,39 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
     required String region,
   }) {
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: 10,
+      runSpacing: 10,
       alignment: WrapAlignment.center,
-      children: [_buildTag('$age tahun'), _buildTag(edu), _buildTag(region)],
+      children: [
+        _buildTag(Icons.cake_outlined, '$age thn'),
+        _buildTag(Icons.school_outlined, edu),
+        _buildTag(Icons.location_on_outlined, region),
+      ],
     );
   }
 
-  Widget _buildTag(String text) {
+  Widget _buildTag(IconData icon, String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
       ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white70, size: 14),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -309,25 +348,28 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'PENGATURAN',
-          style: TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.1,
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Text(
+            'PENGATURAN',
+            style: TextStyle(
+              color: AppColors.textMuted.withValues(alpha: 0.6),
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.5,
+            ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
             color: AppColors.bgWhite,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
@@ -335,35 +377,40 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
             children: [
               SettingItem(
                 icon: Icons.person_outline_rounded,
-                iconBg: AppColors.tealOverlay,
+                iconBg: AppColors.teal.withValues(alpha: 0.08),
                 iconColor: AppColors.teal,
                 title: 'Data Diri',
-                subtitle: 'Edit profil & informasi',
-                onTap: () {},
+                subtitle: 'Edit profil & informasi personal',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const EditProfilScreen()),
+                  );
+                },
               ),
               SettingItemToggle(
-                icon: Icons.notifications_outlined,
-                iconBg: AppColors.tealOverlay,
-                iconColor: AppColors.teal,
+                icon: Icons.notifications_none_rounded,
+                iconBg: AppColors.blue.withValues(alpha: 0.08),
+                iconColor: AppColors.blue,
                 title: 'Notifikasi',
-                subtitle: 'Pengingat kuesioner',
-                value: _notifikasiEnabled,
-                onChanged: (v) => setState(() => _notifikasiEnabled = v),
+                subtitle: 'Pengingat kuesioner harian',
+                value: ref.watch(notificationProvider),
+                onChanged: (v) => ref.read(notificationProvider.notifier).toggle(v),
               ),
               SettingItem(
-                icon: Icons.add_box_outlined,
-                iconBg: AppColors.amberOverlay,
+                icon: Icons.file_download_outlined,
+                iconBg: AppColors.amber.withValues(alpha: 0.08),
                 iconColor: AppColors.amber,
                 title: 'Ekspor Data',
-                subtitle: 'Unduh hasil analisis',
+                subtitle: 'Unduh hasil analisis periode ini',
                 onTap: () {},
               ),
               SettingItem(
-                icon: Icons.info_outline_rounded,
-                iconBg: const Color(0xFFF1F5F9),
-                iconColor: AppColors.textMuted,
-                title: 'Tentang Aplikasi',
-                subtitle: 'v1.0.0 · DigitalLife Analyzer',
+                icon: Icons.help_outline_rounded,
+                iconBg: Colors.purple.withValues(alpha: 0.08),
+                iconColor: Colors.purple,
+                title: 'Bantuan',
+                subtitle: 'Pusat bantuan & FAQ',
                 onTap: () {},
                 showDivider: false,
               ),
@@ -377,22 +424,40 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
   // ── Keluar Button ──────────────────────────────────────────────────────────
 
   Widget _buildKeluarButton() {
-    return SizedBox(
+    return Container(
       width: double.infinity,
-      height: 54,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.red.withValues(alpha: 0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
       child: ElevatedButton(
         onPressed: _showKeluarDialog,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.red.withValues(alpha: 0.12),
+          backgroundColor: AppColors.red.withValues(alpha: 0.06),
           foregroundColor: AppColors.red,
           elevation: 0,
+          padding: const EdgeInsets.symmetric(vertical: 18),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(18),
+            side: BorderSide(color: AppColors.red.withValues(alpha: 0.1), width: 1.5),
           ),
         ),
-        child: const Text(
-          'Keluar dari Akun',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.logout_rounded, size: 20),
+            SizedBox(width: 10),
+            Text(
+              'Keluar dari Akun',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
+          ],
         ),
       ),
     );
@@ -402,37 +467,57 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        backgroundColor: AppColors.bgWhite,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
           'Keluar dari Akun?',
+          textAlign: TextAlign.center,
           style: TextStyle(
             color: AppColors.textDark,
-            fontWeight: FontWeight.w700,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
           ),
         ),
         content: const Text(
-          'Kamu yakin ingin keluar dari akun ini?',
-          style: TextStyle(color: AppColors.textMuted),
+          'Sesi Anda akan berakhir dan Anda perlu masuk kembali nanti.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColors.textMuted, fontSize: 14, fontWeight: FontWeight.w500),
         ),
+        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Batal',
-              style: TextStyle(color: AppColors.textMuted),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: _onLogout,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.red,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                  child: const Text(
+                    'Batal',
+                    style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w700),
+                  ),
+                ),
               ),
-            ),
-            child: const Text('Keluar'),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _onLogout,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.red,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: const Text('Keluar', style: TextStyle(fontWeight: FontWeight.w700)),
+                ),
+              ),
+            ],
           ),
         ],
       ),

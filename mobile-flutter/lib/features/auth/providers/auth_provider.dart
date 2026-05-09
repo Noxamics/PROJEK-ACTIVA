@@ -193,6 +193,39 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 
+  // ── Update Profile ─────────────────────────────────────────────────────────
+  Future<bool> updateProfile({
+    String? name,
+    String? gender,
+    DateTime? dateOfBirth,
+    String? region,
+    String? educationLevel,
+    String? dailyRole,
+    String? incomeLevel,
+  }) async {
+    state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
+    try {
+      final updatedUser = await _service.updateProfile(
+        name: name,
+        gender: gender,
+        dateOfBirth: dateOfBirth,
+        region: region,
+        educationLevel: educationLevel,
+        dailyRole: dailyRole,
+        incomeLevel: incomeLevel,
+      );
+
+      state = AuthState(status: AuthStatus.authenticated, user: updatedUser);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        status: AuthStatus.authenticated, // Tetap auth meski gagal update
+        errorMessage: e.toString(),
+      );
+      return false;
+    }
+  }
+
   // ── Clear Error ────────────────────────────────────────────────────────────
   void clearError() {
     state = AuthState(

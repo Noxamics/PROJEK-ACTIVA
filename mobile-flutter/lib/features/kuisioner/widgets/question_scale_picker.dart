@@ -34,8 +34,26 @@ class QuestionScalePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [_buildScaleRow(), const SizedBox(height: 10), _buildLabels()],
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.bgWhite,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          _buildScaleRow(), 
+          const SizedBox(height: 16), 
+          _buildLabels()
+        ],
+      ),
     );
   }
 
@@ -49,28 +67,37 @@ class QuestionScalePicker extends StatelessWidget {
       final color = _colorForValue(number);
 
       return Padding(
-        padding: EdgeInsets.only(right: i < total - 1 ? 4 : 0),
+        padding: EdgeInsets.only(right: i < total - 1 ? 6 : 0),
         child: GestureDetector(
           onTap: () => onChanged(number),
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutBack,
             width: _boxWidth(total),
-            height: 44,
+            height: _boxHeight(total),
             decoration: BoxDecoration(
-              color: isSelected ? color : color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
+              color: isSelected ? color : color.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: isSelected ? color : color.withValues(alpha: 0.25),
-                width: isSelected ? 2 : 1,
+                color: isSelected ? color : color.withValues(alpha: 0.15),
+                width: isSelected ? 2.5 : 1,
               ),
+              boxShadow: [
+                if (isSelected)
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+              ],
             ),
             child: Center(
               child: Text(
                 '$number',
                 style: TextStyle(
                   color: isSelected ? Colors.white : color,
-                  fontSize: total > 15 ? 10 : total > 10 ? 12 : 14,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  fontSize: _fontSize(total),
+                  fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
                 ),
               ),
             ),
@@ -79,38 +106,63 @@ class QuestionScalePicker extends StatelessWidget {
       );
     });
 
-    // Always use horizontal scroll to avoid overflow on narrow screens
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: Row(children: children),
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: children
+      ),
     );
   }
 
   Widget _buildLabels() {
     if (lowLabel == null && highLabel == null) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(top: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            lowLabel ?? '',
-            style: TextStyle(color: Colors.grey.shade400, fontSize: 11),
+          Expanded(
+            child: Text(
+              lowLabel ?? '',
+              style: TextStyle(
+                color: AppColors.textMuted.withValues(alpha: 0.7),
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
-          Text(
-            highLabel ?? '',
-            style: TextStyle(color: Colors.grey.shade400, fontSize: 11),
+          Expanded(
+            child: Text(
+              highLabel ?? '',
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                color: AppColors.textMuted.withValues(alpha: 0.7),
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  // ── Lebar kotak menyesuaikan jumlah item ──────────────────────────────────
   double _boxWidth(int total) {
-    if (total <= 5) return 56;
-    if (total <= 10) return 30;
-    return 24;
+    if (total <= 5) return 58;
+    if (total <= 10) return 42;
+    return 34;
+  }
+
+  double _boxHeight(int total) {
+    if (total <= 10) return 50;
+    return 44;
+  }
+
+  double _fontSize(int total) {
+    if (total <= 10) return 16;
+    return 13;
   }
 
   // ── Warna berdasarkan posisi & mode ───────────────────────────────────────
@@ -118,7 +170,6 @@ class QuestionScalePicker extends StatelessWidget {
     final total = max - min + 1;
     final position = val - min; // 0-based
 
-    // Bagi jadi 3 zona: rendah / sedang / tinggi
     final lowEnd = (total * 0.33).floor();
     final highEnd = (total * 0.67).floor();
 
@@ -126,12 +177,10 @@ class QuestionScalePicker extends StatelessWidget {
     final isHigh = position >= highEnd;
 
     if (invertColor) {
-      // Tinggi = buruk (anxiety, depresi, stres)
       if (isHigh) return AppColors.red;
       if (isLow) return AppColors.green;
       return AppColors.amber;
     } else {
-      // Tinggi = bagus (happiness)
       if (isHigh) return AppColors.green;
       if (isLow) return AppColors.red;
       return AppColors.amber;

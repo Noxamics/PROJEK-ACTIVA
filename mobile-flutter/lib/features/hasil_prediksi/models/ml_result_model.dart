@@ -177,6 +177,10 @@ class MlResultModel {
         (json['questionnaire'] as Map<String, dynamic>?)?['_id']?.toString() ??
         '';
 
+    final rawCreatedAt = json['created_at'] 
+        ?? mlResult?['created_at'] 
+        ?? (json['questionnaire'] as Map?)?['created_at'];
+
     return MlResultModel(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       userId: json['user_id']?.toString() ?? json['userId']?.toString() ?? '',
@@ -191,8 +195,8 @@ class MlResultModel {
       aiModel: aiModel,
       highRiskFlag: highRiskFlag,
       weekGroup: json['week_group']?.toString() ?? '',
-      createdAt: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'].toString())?.toLocal() ?? DateTime.now()
+      createdAt: rawCreatedAt != null
+          ? DateTime.tryParse(rawCreatedAt.toString())?.toLocal() ?? DateTime.now()
           : DateTime.now(),
     );
   }

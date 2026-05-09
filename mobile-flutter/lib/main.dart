@@ -5,6 +5,7 @@ import 'core/theme/app_colors.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/dashboard/screens/dashboard_screen.dart';
 import 'features/onboarding/screens/onboarding_screen.dart';
+import 'core/services/notification_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +15,10 @@ void main() {
       statusBarIconBrightness: Brightness.light,
     ),
   );
+
+  // Initialize Notifications
+  NotificationService.init();
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
