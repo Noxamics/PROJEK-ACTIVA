@@ -16,133 +16,185 @@ resources/views/admin/users.blade.php
 @push('styles')
   <link rel="stylesheet" href="{{ asset('css/users.css') }}">
   <style>
-    /* Sinkronisasi dengan desain Kuesioner */
-    .table-wrap {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      margin-top: 10px;
+    /* ══════════════════════════════════════
+       GLOBAL SEARCH BAR — Premium Design
+       ══════════════════════════════════════ */
+    .global-search {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 22px; margin-top: 10px;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow);
+      animation: fadeUp .35s ease both;
     }
-    .toolbar {
-      display: flex; gap: 12px; flex-wrap: wrap; align-items: center; padding: 20px;
-      background: #FAFCFF; border-bottom: 1px solid var(--border);
+    .global-search__icon {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--teal), #34d399);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(13,148,136,.25);
     }
-    .toolbar-group { display: flex; align-items: center; gap: 8px; }
-    .toolbar label { font-size: 12px; font-weight: 600; color: var(--text2); }
-    .toolbar select, .toolbar input {
-      padding: 9px 14px; border: 1px solid var(--border2); border-radius: 10px;
-      font-size: 13px; font-weight: 500; outline: none; color: var(--navy);
-      background: #fff; transition: all 0.25s ease; font-family: var(--sans);
+    .global-search__icon svg { width: 18px; height: 18px; }
+    .global-search__wrap { flex: 1; position: relative; }
+    .global-search__input {
+      width: 100%; padding: 11px 16px 11px 40px;
+      border: 1.5px solid #E2E8F0; border-radius: 12px;
+      font-size: 14px; font-weight: 500; color: var(--navy);
+      background: #FAFCFF; outline: none; font-family: var(--sans);
+      transition: all .3s cubic-bezier(.4,0,.2,1);
     }
-    .toolbar input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(13,148,136,.12); }
-    .toolbar input:hover { border-color: var(--navy); background: #FAFCFF; }
-
-    /* Custom Dropdown — Premium */
-    .custom-dd { position: relative; min-width: 130px; }
-    .custom-dd__btn {
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      padding: 10px 14px; background: #fff; border: 1.5px solid #E2E8F0;
-      border-radius: 11px; font-size: 13px; font-weight: 500; color: var(--navy);
-      cursor: pointer; transition: all 0.3s cubic-bezier(.4,0,.2,1);
-      font-family: var(--sans); user-select: none; white-space: nowrap;
-      box-shadow: 0 1px 2px rgba(15,31,53,.04);
-    }
-    .custom-dd__btn:hover {
-      border-color: #94A3B8; background: #FAFCFF;
-      box-shadow: 0 2px 8px rgba(15,31,53,.06);
-    }
-    .custom-dd.open .custom-dd__btn {
+    .global-search__input:focus {
       border-color: var(--teal); background: #fff;
-      box-shadow: 0 0 0 4px rgba(13,148,136,.08), 0 2px 8px rgba(15,31,53,.06);
+      box-shadow: 0 0 0 4px rgba(13,148,136,.1), 0 2px 8px rgba(15,31,53,.06);
     }
-    .custom-dd__arrow {
-      width: 15px; height: 15px; flex-shrink: 0; color: #94A3B8;
-      transition: all 0.3s cubic-bezier(.4,0,.2,1);
+    .global-search__input::placeholder { color: #94A3B8; font-weight: 400; }
+    .global-search__search-icon {
+      position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+      color: #94A3B8; pointer-events: none; display: flex;
     }
-    .custom-dd.open .custom-dd__arrow { transform: rotate(180deg); color: var(--teal); }
-    .custom-dd__menu {
-      position: absolute; top: calc(100% + 8px); left: 0; min-width: 100%; z-index: 100;
-      background: rgba(255,255,255,.98); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(226,232,240,.8); border-radius: 14px;
-      box-shadow: 0 16px 48px rgba(15,31,53,.10), 0 4px 12px rgba(15,31,53,.04);
-      padding: 5px; opacity: 0; transform: translateY(-6px) scale(.98);
-      pointer-events: none; transition: all 0.25s cubic-bezier(.4,0,.2,1);
-      max-height: 280px; overflow-y: auto;
+    .global-search__search-icon svg { width: 16px; height: 16px; }
+    .global-search__info {
+      font-size: 12px; color: var(--text3); font-weight: 500;
+      white-space: nowrap; display: flex; align-items: center; gap: 6px;
     }
-    .custom-dd__menu::-webkit-scrollbar { width: 5px; }
-    .custom-dd__menu::-webkit-scrollbar-track { background: transparent; }
-    .custom-dd__menu::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
-    .custom-dd.open .custom-dd__menu {
-      opacity: 1; transform: translateY(0) scale(1); pointer-events: auto;
+    .global-search__info span { color: var(--teal); font-weight: 700; }
+    .global-search__clear {
+      padding: 6px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px;
+      background: #fff; font-size: 12px; font-weight: 600; color: var(--text2);
+      cursor: pointer; transition: all .2s; white-space: nowrap;
     }
-    .custom-dd__item {
-      padding: 10px 13px; border-radius: 9px; font-size: 13px; font-weight: 500;
-      color: #475569; cursor: pointer; transition: all 0.18s ease;
-      display: flex; align-items: center; gap: 10px; margin: 1px 0;
-    }
-    .custom-dd__item:hover {
-      background: linear-gradient(135deg, #F0FDFA 0%, #F0F9FF 100%);
-      color: var(--navy); padding-left: 16px;
-    }
-    .custom-dd__item.active {
-      background: linear-gradient(135deg, rgba(13,148,136,.06) 0%, rgba(13,148,136,.03) 100%);
-      color: var(--teal); font-weight: 600;
-    }
-    .custom-dd__item.active::before {
-      content: ''; width: 6px; height: 6px; border-radius: 50%;
-      background: var(--teal); box-shadow: 0 0 0 3px rgba(13,148,136,.15);
-      flex-shrink: 0;
+    .global-search__clear:hover { border-color: var(--red); color: var(--red); background: var(--red-lt); }
+
+    /* ══════════════════════════════════════
+       TABLE WRAP & CONTAINER
+       ══════════════════════════════════════ */
+    .table-wrap {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
+      box-shadow: var(--shadow); display: flex; flex-direction: column;
+      margin-top: 14px; animation: fadeUp .4s ease .1s both;
     }
     .table-container {
-      overflow: auto; width: 100%; max-height: 70vh; position: relative;
+      overflow: auto; width: 100%; max-height: 65vh; position: relative;
+      -webkit-overflow-scrolling: touch;
     }
+    .table-container::-webkit-scrollbar { height: 7px; width: 7px; }
+    .table-container::-webkit-scrollbar-track { background: #f8fafc; }
+    .table-container::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+    .table-container::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
     table { width: 100%; border-collapse: separate; border-spacing: 0; }
+
+    /* ══════════════════════════════════════
+       THEAD — Dual Row (Label + Filter)
+       ══════════════════════════════════════ */
     thead th {
-      position: sticky; top: 0; z-index: 20; padding: 14px 16px;
-      text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--navy);
+      position: sticky; top: 0; z-index: 20; padding: 13px 14px 10px;
+      text-align: left; font-size: 10px; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase; color: var(--navy);
       background: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%);
-      border-bottom: 2px solid var(--border); white-space: nowrap;
+      border-bottom: 1px solid var(--border); white-space: nowrap;
       box-shadow: 0 2px 4px rgba(15,31,53,.04);
     }
-    tbody tr { transition: all 0.2s ease; }
+    /* Filter row */
+    thead tr.filter-row th {
+      position: sticky; top: 42px; z-index: 19;
+      padding: 8px 6px 10px; background: #F1F5F9;
+      border-bottom: 2px solid var(--border);
+      box-shadow: 0 2px 6px rgba(15,31,53,.05);
+    }
+    .col-filter {
+      width: 100%; padding: 6px 8px; border: 1px solid #E2E8F0;
+      border-radius: 7px; font-size: 11px; font-weight: 500;
+      color: var(--navy); background: #fff; outline: none;
+      font-family: var(--sans); transition: all .2s;
+      -webkit-appearance: none; appearance: none; cursor: pointer;
+    }
+    select.col-filter {
+      padding-right: 22px;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='3'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 7px center;
+      background-size: 10px;
+    }
+    .col-filter:focus { border-color: var(--teal); box-shadow: 0 0 0 2px rgba(13,148,136,.1); }
+    .col-filter::placeholder { color: #B0BEC5; font-weight: 400; }
+    .col-filter.active-filter { border-color: var(--teal); background: rgba(13,148,136,.04); }
+
+    /* ══════════════════════════════════════
+       TBODY
+       ══════════════════════════════════════ */
+    tbody tr { transition: all .2s ease; }
     tbody tr:nth-child(even) { background: #FAFCFE; }
     tbody tr:hover {
       background: linear-gradient(90deg, rgba(13,148,136,.04) 0%, rgba(30,58,95,.04) 100%);
       transform: scale(1.001);
     }
     tbody tr td {
-      padding: 13px 16px; font-size: 13px; color: var(--text2);
-      border-bottom: 1px solid #EEF2F7; white-space: nowrap;
-      transition: all 0.15s ease;
+      padding: 12px 14px; font-size: 13px; color: var(--text2);
+      border-bottom: 1px solid #EEF2F7; white-space: nowrap; transition: all .15s;
     }
     tbody tr:last-child td { border-bottom: none; }
     tbody tr:hover td { color: var(--navy); }
-    tbody tr:hover td:first-child { border-left: 3px solid var(--teal); padding-left: 13px; }
+    tbody tr:hover td:first-child { border-left: 3px solid var(--teal); padding-left: 11px; }
+
     .badge {
       display: inline-flex; padding: 4px 10px; border-radius: 99px;
       font-size: 11px; font-weight: 600; border: 1px solid transparent;
     }
+
+    /* ══════════════════════════════════════
+       BOTTOM BAR
+       ══════════════════════════════════════ */
     .bottom-bar {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 20px; background: #F8FAFC; border-top: 1px solid var(--border);
+      padding: 14px 20px; background: #F8FAFC; border-top: 1px solid var(--border);
       flex-wrap: wrap; gap: 12px;
     }
     .count-info { font-size: 13px; color: var(--text3); font-weight: 500; }
     .no-data { text-align: center; padding: 40px; color: var(--text3); }
-    .pagination-wrap { display: flex; align-items: center; gap: 12px; }
+    .pagination-wrap { display: flex; align-items: center; gap: 8px; }
     .pagination-btn {
-      padding: 8px 16px; background: #fff; border: 1px solid var(--border2);
-      border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--text2);
-      cursor: pointer; transition: all 0.2s; outline: none;
+      padding: 7px 14px; background: #fff; border: 1px solid var(--border2);
+      border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--text2);
+      cursor: pointer; transition: all .2s; outline: none;
     }
     .pagination-btn:hover:not(:disabled) { background: var(--ice); border-color: var(--teal); color: var(--teal); }
-    .pagination-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .page-info { font-size: 13px; font-weight: 600; color: var(--navy); min-width: 120px; text-align: center; }
+    .pagination-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .page-info { font-size: 13px; font-weight: 600; color: var(--navy); min-width: 110px; text-align: center; }
+
+    /* Active filter count badge */
+    .filter-count {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 20px; height: 20px; padding: 0 6px;
+      border-radius: 99px; font-size: 10px; font-weight: 700;
+      background: var(--teal); color: #fff;
+      box-shadow: 0 2px 6px rgba(13,148,136,.3);
+    }
+    .filter-count.hidden { display: none; }
+
+    /* Sortable headers */
+    thead tr:first-child th.sortable {
+      cursor: pointer; user-select: none; position: relative; padding-right: 22px;
+    }
+    thead tr:first-child th.sortable:hover { color: var(--teal); }
+    thead tr:first-child th.sortable::after {
+      content: '⇅'; position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+      font-size: 11px; color: #CBD5E1; transition: color .2s;
+    }
+    thead tr:first-child th.sortable:hover::after { color: var(--teal); }
+    thead tr:first-child th.sort-asc::after { content: '↑'; color: var(--teal); font-weight: 700; }
+    thead tr:first-child th.sort-desc::after { content: '↓'; color: var(--teal); font-weight: 700; }
+
+    /* Rows-per-page */
+    .rpp-group { display: flex; align-items: center; gap: 8px; }
+    .rpp-group label { font-size: 12px; color: var(--text3); font-weight: 500; white-space: nowrap; }
+    .rpp-select {
+      padding: 5px 24px 5px 10px; border: 1px solid var(--border2); border-radius: 8px;
+      font-size: 12px; font-weight: 600; color: var(--navy); background: #fff;
+      outline: none; cursor: pointer; font-family: var(--sans);
+      -webkit-appearance: none; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='3'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 7px center; background-size: 10px;
+    }
+    .rpp-select:focus { border-color: var(--teal); box-shadow: 0 0 0 2px rgba(13,148,136,.1); }
   </style>
 @endpush
 
@@ -183,68 +235,84 @@ resources/views/admin/users.blade.php
     </div>
   </div>
 
-  <div class="table-wrap">
-    {{-- TOOLBAR --}}
-    <div class="toolbar">
-      <div class="toolbar-group">
-        <label>Cari:</label>
-        <input type="text" id="searchInput" placeholder="Nama atau email..." oninput="applyFilters()" style="width:200px;">
-      </div>
-      <div class="toolbar-group">
-        <label>Peran:</label>
-        <div class="custom-dd" id="ddRole">
-          <div class="custom-dd__btn" onclick="toggleDD('ddRole')">
-            <span>Semua</span>
-            <svg class="custom-dd__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-          <div class="custom-dd__menu">
-            <div class="custom-dd__item active" data-val="" onclick="selectDD('ddRole','fRole',this)">Semua</div>
-            <div class="custom-dd__item" data-val="Student" onclick="selectDD('ddRole','fRole',this)">Mahasiswa</div>
-            <div class="custom-dd__item" data-val="Worker" onclick="selectDD('ddRole','fRole',this)">Pekerja</div>
-            <div class="custom-dd__item" data-val="Unemployed" onclick="selectDD('ddRole','fRole',this)">Tidak Bekerja</div>
-          </div>
-          <input type="hidden" id="fRole" value="">
-        </div>
-      </div>
-      <div class="toolbar-group">
-        <label>Gender:</label>
-        <div class="custom-dd" id="ddGender">
-          <div class="custom-dd__btn" onclick="toggleDD('ddGender')">
-            <span>Semua</span>
-            <svg class="custom-dd__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-          <div class="custom-dd__menu">
-            <div class="custom-dd__item active" data-val="" onclick="selectDD('ddGender','fGender',this)">Semua</div>
-            <div class="custom-dd__item" data-val="Male" onclick="selectDD('ddGender','fGender',this)">Laki-laki</div>
-            <div class="custom-dd__item" data-val="Female" onclick="selectDD('ddGender','fGender',this)">Perempuan</div>
-          </div>
-          <input type="hidden" id="fGender" value="">
-        </div>
-      </div>
-      <div class="toolbar-group">
-        <label>Urutkan:</label>
-        <div class="custom-dd" id="ddSort">
-          <div class="custom-dd__btn" onclick="toggleDD('ddSort')">
-            <span>Terbaru</span>
-            <svg class="custom-dd__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-          <div class="custom-dd__menu">
-            <div class="custom-dd__item active" data-val="latest" onclick="selectDD('ddSort','sortBy',this)">Terbaru</div>
-            <div class="custom-dd__item" data-val="oldest" onclick="selectDD('ddSort','sortBy',this)">Terlama</div>
-          </div>
-          <input type="hidden" id="sortBy" value="latest">
-        </div>
-      </div>
+  {{-- GLOBAL SEARCH BAR --}}
+  <div class="global-search">
+    <div class="global-search__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     </div>
+    <div class="global-search__wrap">
+      <span class="global-search__search-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </span>
+      <input type="text" id="globalSearch" class="global-search__input" placeholder="Cari di semua kolom — nama, email, daerah, pendidikan, peran...">
+    </div>
+    <div class="global-search__info">
+      <span id="searchMatchCount">{{ count($users) }}</span> hasil
+      <span class="filter-count hidden" id="activeFilterCount">0</span>
+    </div>
+    <button class="global-search__clear" id="clearAllBtn" onclick="clearAll()">✕ Reset</button>
+  </div>
 
-    {{-- TABLE CONTAINER --}}
+  {{-- TABLE --}}
+  <div class="table-wrap">
     <div class="table-container">
       <table>
         <thead>
+          {{-- Label Row (sortable) --}}
           <tr>
-            <th>No</th><th>Nama</th><th>Email</th><th>Gender</th><th>Umur</th>
-            <th>Daerah Asal</th><th>Pendidikan</th><th>Peran Harian</th>
-            <th>Total Kuesioner</th><th style="text-align:center;">Aksi</th>
+            <th style="width:50px">No</th>
+            <th class="sortable" data-sort="name" onclick="toggleSort('name')">Nama</th>
+            <th class="sortable" data-sort="email" onclick="toggleSort('email')">Email</th>
+            <th class="sortable" data-sort="gender" onclick="toggleSort('gender')">Gender</th>
+            <th class="sortable" data-sort="age" onclick="toggleSort('age')">Umur</th>
+            <th class="sortable" data-sort="region" onclick="toggleSort('region')">Daerah Asal</th>
+            <th class="sortable" data-sort="education" onclick="toggleSort('education')">Pendidikan</th>
+            <th class="sortable" data-sort="role" onclick="toggleSort('role')">Peran Harian</th>
+            <th class="sortable" data-sort="qcount" onclick="toggleSort('qcount')">Total Kuesioner</th>
+            <th style="text-align:center">Aksi</th>
+          </tr>
+          {{-- Per-Column Filter Row --}}
+          <tr class="filter-row">
+            <th></th>
+            <th><input type="text" class="col-filter" id="fName" placeholder="Filter nama..." oninput="applyFilters()"></th>
+            <th><input type="text" class="col-filter" id="fEmail" placeholder="Filter email..." oninput="applyFilters()"></th>
+            <th>
+              <select class="col-filter" id="fGender" onchange="applyFilters()">
+                <option value="">Semua</option>
+                <option value="Male">Laki-laki</option>
+                <option value="Female">Perempuan</option>
+              </select>
+            </th>
+            <th>
+              <select class="col-filter" id="fAge" onchange="applyFilters()">
+                <option value="">Semua</option>
+                <option value="0-17">≤ 17</option>
+                <option value="18-25">18 – 25</option>
+                <option value="26-35">26 – 35</option>
+                <option value="36-50">36 – 50</option>
+                <option value="51+">51+</option>
+              </select>
+            </th>
+            <th><input type="text" class="col-filter" id="fRegion" placeholder="Filter daerah..." oninput="applyFilters()"></th>
+            <th><input type="text" class="col-filter" id="fEducation" placeholder="Filter..." oninput="applyFilters()"></th>
+            <th>
+              <select class="col-filter" id="fRole" onchange="applyFilters()">
+                <option value="">Semua</option>
+                <option value="Student">Mahasiswa</option>
+                <option value="Worker">Pekerja</option>
+                <option value="Unemployed">Tidak Bekerja</option>
+              </select>
+            </th>
+            <th>
+              <select class="col-filter" id="fQcount" onchange="applyFilters()">
+                <option value="">Semua</option>
+                <option value="0">0</option>
+                <option value="1+">≥ 1</option>
+                <option value="3+">≥ 3</option>
+                <option value="5+">≥ 5</option>
+              </select>
+            </th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="tableBody">
@@ -253,10 +321,16 @@ resources/views/admin/users.blade.php
               $roleMap = ['Student'=>'Mahasiswa','Worker'=>'Pekerja','Unemployed'=>'Tidak Bekerja'];
               $roleIndo = $roleMap[$user->daily_role] ?? ($user->daily_role ?? '-');
             @endphp
-            <tr data-search="{{ strtolower($user->name.' '.$user->email) }}"
+            <tr data-name="{{ strtolower($user->name) }}"
+                data-email="{{ strtolower($user->email) }}"
                 data-gender="{{ $user->gender }}"
+                data-age="{{ $user->age ?? '' }}"
+                data-region="{{ strtolower($user->region ?? '') }}"
+                data-education="{{ strtolower($user->education_level ?? '') }}"
                 data-role="{{ $user->daily_role }}"
-                data-created="{{ $user->created_at }}">
+                data-qcount="{{ $user->questionnaire_count ?? 0 }}"
+                data-created="{{ $user->created_at }}"
+                data-search="{{ strtolower($user->name.' '.$user->email.' '.($user->region ?? '').' '.($user->education_level ?? '').' '.$roleIndo.' '.($user->daily_role ?? '')) }}">
               <td style="color:var(--text3); font-weight:600;">{{ $index + 1 }}</td>
               <td>
                 <div style="display:flex;align-items:center;gap:10px;">
@@ -298,10 +372,20 @@ resources/views/admin/users.blade.php
         <span class="page-info" id="pageInfo">Halaman 1 dari 1</span>
         <button class="pagination-btn" id="nextBtn" onclick="nextPage()">Selanjutnya →</button>
       </div>
-      <span class="count-info" id="countInfo">Menampilkan 0 data</span>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div class="rpp-group">
+          <label>Baris/halaman:</label>
+          <select class="rpp-select" id="rowsPerPageSelect" onchange="changeRowsPerPage()">
+            <option value="25">25</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+            <option value="200">200</option>
+          </select>
+        </div>
+        <span class="count-info" id="countInfo">Menampilkan 0 data</span>
+      </div>
     </div>
   </div>
-
 
   {{-- Route bridge for JS --}}
   <div id="route-data" data-destroy-base="/admin/users" data-csrf="{{ csrf_token() }}" hidden></div>
@@ -311,34 +395,111 @@ resources/views/admin/users.blade.php
 @push('scripts')
 <script>
 let currentPage = 1;
-const rowsPerPage = 50;
+let rowsPerPage = 50;
 let filteredRows = [];
+let currentSort = { key: '', dir: '' };
 
 window.onload = () => applyFilters();
 
-function applyFilters() {
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const gender = document.getElementById('fGender').value;
-  const role   = document.getElementById('fRole').value;
-  const sort   = document.getElementById('sortBy').value;
-  const tbody  = document.getElementById('tableBody');
-  const allRows = Array.from(tbody.querySelectorAll('tr[data-search]'));
+document.getElementById('globalSearch').addEventListener('input', () => applyFilters());
 
-  filteredRows = allRows.filter(row => {
-    const ok1 = !search || row.dataset.search.includes(search);
-    const ok2 = !gender || row.dataset.gender === gender;
-    const ok3 = !role   || row.dataset.role   === role;
-    return ok1 && ok2 && ok3;
-  });
-
-  if (sort === 'oldest') {
-    filteredRows.sort((a, b) => (a.dataset.created || '').localeCompare(b.dataset.created || ''));
+/* ── Column Sorting ── */
+function toggleSort(key) {
+  if (currentSort.key === key) {
+    currentSort.dir = currentSort.dir === 'asc' ? 'desc' : (currentSort.dir === 'desc' ? '' : 'asc');
+    if (!currentSort.dir) currentSort.key = '';
   } else {
-    filteredRows.sort((a, b) => (b.dataset.created || '').localeCompare(a.dataset.created || ''));
+    currentSort.key = key;
+    currentSort.dir = 'asc';
   }
+  // Update header UI
+  document.querySelectorAll('thead tr:first-child th.sortable').forEach(th => {
+    th.classList.remove('sort-asc','sort-desc');
+    if (th.dataset.sort === currentSort.key && currentSort.dir) {
+      th.classList.add('sort-' + currentSort.dir);
+    }
+  });
+  sortAndRender();
+}
 
+function sortAndRender() {
+  if (currentSort.key && currentSort.dir) {
+    const k = currentSort.key;
+    const dir = currentSort.dir === 'asc' ? 1 : -1;
+    filteredRows.sort((a, b) => {
+      let va = a.dataset[k] || '';
+      let vb = b.dataset[k] || '';
+      // Numeric columns
+      if (['age','qcount'].includes(k)) {
+        return (parseFloat(va||0) - parseFloat(vb||0)) * dir;
+      }
+      return va.localeCompare(vb) * dir;
+    });
+  } else {
+    filteredRows.sort((a, b) => (b.dataset.created||'').localeCompare(a.dataset.created||''));
+  }
   currentPage = 1;
   renderTable();
+}
+
+/* ── Filters ── */
+function applyFilters() {
+  const gs = document.getElementById('globalSearch').value.toLowerCase().trim();
+  const fN = document.getElementById('fName').value.toLowerCase().trim();
+  const fE = document.getElementById('fEmail').value.toLowerCase().trim();
+  const fG = document.getElementById('fGender').value;
+  const fA = document.getElementById('fAge').value;
+  const fR = document.getElementById('fRegion').value.toLowerCase().trim();
+  const fEd = document.getElementById('fEducation').value.toLowerCase().trim();
+  const fRo = document.getElementById('fRole').value;
+  const fQ = document.getElementById('fQcount').value;
+
+  const allRows = Array.from(document.getElementById('tableBody').querySelectorAll('tr[data-search]'));
+
+  filteredRows = allRows.filter(row => {
+    if (gs && !row.dataset.search.includes(gs)) return false;
+    if (fN && !row.dataset.name.includes(fN)) return false;
+    if (fE && !row.dataset.email.includes(fE)) return false;
+    if (fG && row.dataset.gender !== fG) return false;
+    if (fR && !row.dataset.region.includes(fR)) return false;
+    if (fEd && !row.dataset.education.includes(fEd)) return false;
+    if (fRo && row.dataset.role !== fRo) return false;
+    if (fA) {
+      const age = parseInt(row.dataset.age);
+      if (isNaN(age)) return false;
+      if (fA === '0-17' && age > 17) return false;
+      if (fA === '18-25' && (age < 18 || age > 25)) return false;
+      if (fA === '26-35' && (age < 26 || age > 35)) return false;
+      if (fA === '36-50' && (age < 36 || age > 50)) return false;
+      if (fA === '51+' && age < 51) return false;
+    }
+    if (fQ) {
+      const qc = parseInt(row.dataset.qcount || 0);
+      if (fQ === '0' && qc !== 0) return false;
+      if (fQ === '1+' && qc < 1) return false;
+      if (fQ === '3+' && qc < 3) return false;
+      if (fQ === '5+' && qc < 5) return false;
+    }
+    return true;
+  });
+
+  updateFilterUI();
+  sortAndRender();
+}
+
+function updateFilterUI() {
+  let count = 0;
+  ['fName','fEmail','fGender','fAge','fRegion','fEducation','fRole','fQcount'].forEach(id => {
+    const el = document.getElementById(id);
+    const on = el.value.trim() !== '';
+    if (on) count++;
+    el.classList.toggle('active-filter', on);
+  });
+  if (document.getElementById('globalSearch').value.trim()) count++;
+  const badge = document.getElementById('activeFilterCount');
+  badge.textContent = count;
+  badge.classList.toggle('hidden', count === 0);
+  document.getElementById('searchMatchCount').textContent = filteredRows.length;
 }
 
 function renderTable() {
@@ -350,8 +511,7 @@ function renderTable() {
   const start = (currentPage - 1) * rowsPerPage;
   const end = start + rowsPerPage;
 
-  const allRows = Array.from(tbody.querySelectorAll('tr[data-search]'));
-  allRows.forEach(r => r.style.display = 'none');
+  Array.from(tbody.querySelectorAll('tr[data-search]')).forEach(r => r.style.display = 'none');
 
   const pageRows = filteredRows.slice(start, end);
   pageRows.forEach((row, i) => {
@@ -370,21 +530,18 @@ function renderTable() {
 function nextPage() { currentPage++; renderTable(); }
 function prevPage() { currentPage--; renderTable(); }
 
-/* ── Custom Dropdown Logic ── */
-function toggleDD(id) {
-  const dd = document.getElementById(id);
-  const wasOpen = dd.classList.contains('open');
-  document.querySelectorAll('.custom-dd.open').forEach(d => d.classList.remove('open'));
-  if (!wasOpen) dd.classList.add('open');
+function changeRowsPerPage() {
+  rowsPerPage = parseInt(document.getElementById('rowsPerPageSelect').value);
+  currentPage = 1;
+  renderTable();
 }
 
-function selectDD(ddId, inputId, item) {
-  document.getElementById(inputId).value = item.dataset.val;
-  const dd = document.getElementById(ddId);
-  dd.querySelector('.custom-dd__btn span').textContent = item.textContent;
-  dd.querySelectorAll('.custom-dd__item').forEach(i => i.classList.remove('active'));
-  item.classList.add('active');
-  dd.classList.remove('open');
+function clearAll() {
+  document.getElementById('globalSearch').value = '';
+  ['fName','fEmail','fRegion','fEducation'].forEach(id => document.getElementById(id).value = '');
+  ['fGender','fAge','fRole','fQcount'].forEach(id => document.getElementById(id).value = '');
+  currentSort = { key: '', dir: '' };
+  document.querySelectorAll('thead tr:first-child th.sortable').forEach(th => th.classList.remove('sort-asc','sort-desc'));
   applyFilters();
 }
 
