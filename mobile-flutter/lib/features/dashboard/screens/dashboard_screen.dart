@@ -61,7 +61,7 @@ class DashboardScreen extends ConsumerWidget {
                         else ...[
                           _buildScoreCards(ref),
                           const SizedBox(height: 24),
-                          _buildInsightCard(context, analytics, laporanState.data),
+                          _buildInsightCard(context, analytics, laporanState.data, historiCount),
                           const SizedBox(height: 24),
                           _buildQuickInfo(),
                         ],
@@ -237,108 +237,152 @@ class DashboardScreen extends ConsumerWidget {
 
   // ── Insight Card ───────────────────────────────────────────────────────────
 
-  Widget _buildInsightCard(BuildContext context, AnalyticsModel? analytics, LaporanModel? laporanData) {
+  Widget _buildInsightCard(BuildContext context, AnalyticsModel? analytics, LaporanModel? laporanData, int historiCount) {
     // Prioritaskan insight dari laporan (14 hari) jika tersedia
     final insightText = laporanData?.insights.digitalDependence ?? 
         analytics?.insightText ??
         'Isi kuesioner untuk melihat insight pertamamu.';
     
-    final changeLabel = analytics?.dependenceChangeLabelFormatted ?? '';
-    final isPositive = (analytics?.dependenceChangePercentage ?? 0) < 0;
+    final isLocked = historiCount < 14;
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.bgWhite,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Tooltip(
-        message: 'Ketuk untuk detail insight minggu ini',
-        decoration: BoxDecoration(
-          color: AppColors.bgDark.withValues(alpha: 0.9),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        textStyle: const TextStyle(color: Colors.white, fontSize: 12),
-        preferBelow: false,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => _showInsightPreview(context, analytics, laporanData),
+    return Stack(
+      children: [
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: AppColors.bgWhite,
             borderRadius: BorderRadius.circular(24),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Tooltip(
+            message: isLocked ? 'Kumpulkan 14 data untuk membuka insight' : 'Ketuk untuk detail insight minggu ini',
+            decoration: BoxDecoration(
+              color: AppColors.bgDark.withValues(alpha: 0.9),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            textStyle: const TextStyle(color: Colors.white, fontSize: 12),
+            preferBelow: false,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: isLocked ? null : () => _showInsightPreview(context, analytics, laporanData),
+                borderRadius: BorderRadius.circular(24),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppColors.blue.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(Icons.auto_awesome_rounded, color: AppColors.blue, size: 18),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.blue.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(Icons.auto_awesome_rounded, color: AppColors.blue, size: 18),
+                              ),
+                              const SizedBox(width: 12),
+                              const Text(
+                                'Insight Minggu Ini',
+                                style: TextStyle(
+                                  color: AppColors.textMuted, 
+                                  fontSize: 13, 
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 12),
-                          const Text(
-                            'Insight Minggu Ini',
-                            style: TextStyle(
-                              color: AppColors.textMuted, 
-                              fontSize: 13, 
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
+                          const Icon(Icons.info_outline_rounded, color: AppColors.textDisabled, size: 20),
                         ],
                       ),
-                      const Icon(Icons.info_outline_rounded, color: AppColors.textDisabled, size: 20),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    insightText,
-                    style: const TextStyle(
-                      color: AppColors.textDark,
-                      fontSize: 16,
-                      height: 1.6,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
-                  if (changeLabel.isNotEmpty) ...[
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildChangeBadge(changeLabel, isPositive),
-                        const Text(
-                          'Detail Preview',
-                          style: TextStyle(
-                            color: AppColors.blue,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
+                      const SizedBox(height: 20),
+                      Text(
+                        insightText,
+                        style: const TextStyle(
+                          color: AppColors.textDark,
+                          fontSize: 16,
+                          height: 1.6,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                      if (!isLocked) ...[
+                        const SizedBox(height: 20),
+                        const Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            'Detail Preview',
+                            style: TextStyle(
+                              color: AppColors.blue,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ],
-                    ),
-                  ],
-                ],
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
         ),
-      ),
+        if (isLocked)
+          Positioned.fill(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                child: Container(
+                  color: AppColors.bgWhite.withValues(alpha: 0.7),
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.blue.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.lock_rounded, color: AppColors.blue, size: 24),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Terkunci: $historiCount/14 Kuesioner',
+                        style: const TextStyle(
+                          color: AppColors.textDark,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Isi 14 kali untuk melihat analisis trend',
+                        style: TextStyle(
+                          color: AppColors.textMuted.withValues(alpha: 0.7),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -490,36 +534,6 @@ class DashboardScreen extends ConsumerWidget {
   }
 
 
-  Widget _buildChangeBadge(String label, bool isPositive) {
-    final color = isPositive ? AppColors.teal : AppColors.red;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.15)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isPositive ? Icons.trending_down_rounded : Icons.trending_up_rounded,
-            color: color,
-            size: 18,
-          ),
-          const SizedBox(width: 10),
-          Text(
-            'Dependensi $label minggu ini',
-            style: TextStyle(
-              color: color,
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildQuickInfo() {
     return Container(

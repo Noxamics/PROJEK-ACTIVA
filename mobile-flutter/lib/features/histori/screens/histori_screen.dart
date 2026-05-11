@@ -122,7 +122,7 @@ class HistoriScreen extends ConsumerWidget {
 
   Widget _buildFilterButton(BuildContext context, WidgetRef ref) {
     final state = ref.watch(historiProvider);
-    final hasActiveFilter = state.filterCategory != HistoriFilterCategory.semua || state.sortOption != HistoriSortOption.terbaru;
+    final hasActiveFilter = state.sortOption != HistoriSortOption.terbaru;
     
     return Builder(
       builder: (innerContext) {
@@ -372,19 +372,6 @@ class _FilterDrawer extends ConsumerWidget {
                   _buildSortChip('Skor Terendah', HistoriSortOption.skorTerendah, state, notifier),
                 ],
               ),
-              const SizedBox(height: 32),
-              const Text('Kategori', style: TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  _buildFilterChip('Semua', HistoriFilterCategory.semua, state, notifier),
-                  _buildFilterChip('Rendah', HistoriFilterCategory.rendah, state, notifier),
-                  _buildFilterChip('Sedang', HistoriFilterCategory.sedang, state, notifier),
-                  _buildFilterChip('Tinggi', HistoriFilterCategory.tinggi, state, notifier),
-                ],
-              ),
             ],
           ),
         ),
@@ -408,19 +395,4 @@ class _FilterDrawer extends ConsumerWidget {
     );
   }
 
-  Widget _buildFilterChip(String label, HistoriFilterCategory category, HistoriState state, HistoriNotifier notifier) {
-    final isSelected = state.filterCategory == category;
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      selectedColor: AppColors.blue,
-      labelStyle: TextStyle(color: isSelected ? Colors.white : AppColors.textDark, fontSize: 13, fontWeight: FontWeight.w600),
-      backgroundColor: AppColors.bgLight,
-      showCheckmark: false,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(color: isSelected ? AppColors.blue : AppColors.lightBorder)),
-      onSelected: (selected) {
-        if (selected) notifier.setFilterCategory(category);
-      },
-    );
-  }
 }

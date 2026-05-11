@@ -7,21 +7,18 @@ import '../../auth/providers/auth_provider.dart';
 
 enum HistoriStatus { initial, loading, success, empty, error }
 enum HistoriSortOption { terbaru, terlama, skorTertinggi, skorTerendah }
-enum HistoriFilterCategory { semua, rendah, sedang, tinggi }
 
 class HistoriState {
   final HistoriStatus status;
   final List<MlResultModel> items;
   final String? errorMessage;
   final HistoriSortOption sortOption;
-  final HistoriFilterCategory filterCategory;
 
   const HistoriState({
     this.status = HistoriStatus.initial,
     this.items = const [],
     this.errorMessage,
     this.sortOption = HistoriSortOption.terbaru,
-    this.filterCategory = HistoriFilterCategory.semua,
   });
 
   bool get isLoading => status == HistoriStatus.loading;
@@ -32,14 +29,12 @@ class HistoriState {
     List<MlResultModel>? items,
     String? errorMessage,
     HistoriSortOption? sortOption,
-    HistoriFilterCategory? filterCategory,
   }) {
     return HistoriState(
       status: status ?? this.status,
       items: items ?? this.items,
       errorMessage: errorMessage ?? this.errorMessage,
       sortOption: sortOption ?? this.sortOption,
-      filterCategory: filterCategory ?? this.filterCategory,
     );
   }
 
@@ -64,15 +59,8 @@ class HistoriState {
 
     final Map<String, List<MlResultModel>> grouped = {};
 
-    // 1. Filter
-    var filteredItems = items.where((item) {
-      if (filterCategory == HistoriFilterCategory.semua) return true;
-      final cat = item.category.toLowerCase();
-      if (filterCategory == HistoriFilterCategory.rendah && cat == 'rendah') return true;
-      if (filterCategory == HistoriFilterCategory.sedang && cat == 'sedang') return true;
-      if (filterCategory == HistoriFilterCategory.tinggi && cat == 'tinggi') return true;
-      return false;
-    }).toList();
+    // 1. Copy list for sorting
+    var filteredItems = List<MlResultModel>.from(items);
 
     // 2. Sort
     filteredItems.sort((a, b) {
@@ -134,10 +122,6 @@ class HistoriNotifier extends StateNotifier<HistoriState> {
   // ── Filter & Sort ──────────────────────────────────────────────────────────
   void setSortOption(HistoriSortOption option) {
     state = state.copyWith(sortOption: option);
-  }
-
-  void setFilterCategory(HistoriFilterCategory category) {
-    state = state.copyWith(filterCategory: category);
   }
 
   // ── Tambah item baru setelah submit kuesioner ──────────────────────────────

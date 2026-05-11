@@ -33,11 +33,6 @@ class AnalisisCard extends StatelessWidget {
             _buildDivider(),
             const SizedBox(width: 14),
             Expanded(child: _buildContent()),
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.textDisabled,
-              size: 20,
-            ),
           ],
         ),
       ),
@@ -101,23 +96,30 @@ class AnalisisCard extends StatelessWidget {
   }
 
   Widget _buildBadges() {
-    final isHighRisk = data.category.toLowerCase() == 'tinggi';
+    final category = data.category.toLowerCase();
+    Color statusColor;
+    
+    if (category.contains('tinggi') || category.contains('high')) {
+      statusColor = AppColors.red;
+    } else if (category.contains('sedang') || category.contains('moderate')) {
+      statusColor = AppColors.amber;
+    } else {
+      statusColor = AppColors.green;
+    }
+
     return Wrap(
       spacing: 6,
       runSpacing: 6,
       children: [
-        _scoreBadge(
-          'Dep ${data.dep}',
-          isHighRisk ? AppColors.red : AppColors.amber,
-        ),
+        _scoreBadge('Dep ${data.dep}', statusColor),
         _scoreBadge(
           data.category.isNotEmpty
               ? data.category[0].toUpperCase() + data.category.substring(1)
               : 'N/A',
-          isHighRisk ? AppColors.red : AppColors.teal,
+          statusColor,
         ),
-        if (data.note != null && data.noteColor != null)
-          _scoreBadge(data.note!, data.noteColor!),
+        if (data.note != null)
+          _scoreBadge(data.note!, statusColor),
       ],
     );
   }
