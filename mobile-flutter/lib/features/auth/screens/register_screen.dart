@@ -70,8 +70,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
   String? _konfirmasiError;
   String? _tglLahirError;
 
-  // ── Manual email entry (when Google is not used) ────────────────────────
-  final _manualEmailController = TextEditingController();
+  // (manual email entry removed — Google verification is mandatory)
 
   // ── Google Sign-In verification ─────────────────────────────────────────
   bool _googleVerified = false;
@@ -116,7 +115,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
   void dispose() {
     _namaController.dispose();
     _emailController.dispose();
-    _manualEmailController.dispose();
     _passwordController.dispose();
     _konfirmasiController.dispose();
     _shakeController.dispose();
@@ -252,19 +250,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
   // ── Submit ─────────────────────────────────────────────────────────────
 
   Future<void> _onRegister() async {
+    // Google verification is mandatory
+    if (!_googleVerified) {
+      setState(() {
+        _googleError = 'Verifikasi Google wajib dilakukan sebelum mendaftar';
+      });
+      _shakeController.forward(from: 0);
+      HapticFeedback.mediumImpact();
+      return;
+    }
+
     final nama = _namaController.text.trim();
-    // Use Google-verified email if available, otherwise use manual email
-    final email = _googleVerified
-        ? _emailController.text.trim()
-        : _manualEmailController.text.trim();
+    final email = _emailController.text.trim();
     final password = _passwordController.text;
     final konfirmasi = _konfirmasiController.text;
     final umur = _ageFromBirthdate;
-
-    // Sync manual email to main controller if not Google-verified
-    if (!_googleVerified) {
-      _emailController.text = _manualEmailController.text.trim();
-    }
 
     // Mark as submitted → show all errors
     setState(() {
@@ -576,7 +576,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
               ),
               const SizedBox(height: 8),
               const Text(
-                'Verifikasi Akun Google',
+                'Verifikasi Akun Google (Wajib)',
                 style: TextStyle(
                   color: AppColors.textDark,
                   fontSize: 15,
@@ -585,7 +585,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
               ),
               const SizedBox(height: 4),
               const Text(
-                'Opsional — verifikasi dengan Google\natau isi email secara manual di bawah',
+                'Untuk keamanan akun, verifikasi identitas\nanda melalui Google terlebih dahulu',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: AppColors.textMuted, fontSize: 12),
               ),
@@ -659,36 +659,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
 
   // ── Informasi Akun ─────────────────────────────────────────────────────
 
-  void _onManualEmailChanged(String val) {
-    setState(() {
-      if (_submitted) _emailError = _validateEmail(val.trim());
-    });
-    ref.read(authProvider.notifier).clearError();
-  }
-
-  bool get _manualEmailValid =>
-      _emailRegex.hasMatch(_manualEmailController.text.trim());
-
   Widget _buildInfoAkunSection() {
     return Column(
       children: [
-        // ── Google Verification Button (optional) ───────────────────────
+        // ── Google Verification (mandatory) ─────────────────────────────
         _buildGoogleVerifySection(),
         const SizedBox(height: 16),
-        // ── Manual email field (shown when Google is not verified) ──────
-        if (!_googleVerified) ...[
-          AuthTextField(
-            label: 'Email',
-            hint: 'nama@email.com',
-            prefixIcon: Icons.mail_outline_rounded,
-            controller: _manualEmailController,
-            keyboardType: TextInputType.emailAddress,
-            isValid: _manualEmailValid,
-            errorText: _emailError,
-            onChanged: _onManualEmailChanged,
-          ),
-          const SizedBox(height: 16),
-        ],
         AuthTextField(
           label: 'Nama Lengkap',
           hint: 'Masukkan nama lengkap',

@@ -138,11 +138,94 @@ resources/views/admin/dashboard.blade.php
     </div>
 
     {{-- ══════════════════════════════════════════════════════════
-         ROW 4 — Card 6: Summary Insight  |  Card 7: Threshold
+         ROW 4 — ML Performance | Threshold | Summary Insight
+         Modern 3-column layout
     ══════════════════════════════════════════════════════════ --}}
-    <div class="grid-2 mb-charts">
+    <div class="grid-bottom mb-charts">
 
-        {{-- 6. Summary Insight --}}
+        {{-- ① Machine Learning Performance --}}
+        <div class="card ml-perf-card">
+            <div class="ml-perf-header">
+                <h3 class="ml-perf-title">Machine Learning Performance</h3>
+                <p class="ml-perf-subtitle">Evaluasi performa model prediksi berdasarkan nilai akurasi, error, dan kestabilan model</p>
+            </div>
+
+            <div class="ml-perf-metrics">
+                <div class="ml-perf-metric-row">
+                    <span class="ml-perf-metric-label">Algoritma</span>
+                    <span class="ml-perf-metric-sep">:</span>
+                    <span class="ml-perf-metric-value ml-perf-metric-value--algo">{{ $mlPerformance['algorithm'] ?? 'Multiple Linear Regression' }}</span>
+                </div>
+                <div class="ml-perf-metric-row">
+                    <span class="ml-perf-metric-label">R² Score</span>
+                    <span class="ml-perf-metric-sep">:</span>
+                    <span class="ml-perf-metric-value ml-perf-metric-value--r2">
+                        {{ $mlPerformance['r2_score'] ?? '87.39' }}%
+                        @php $r2Val = (float)($mlPerformance['r2_score'] ?? 87.39); @endphp
+                        @if($r2Val >= 80)
+                            <span class="ml-perf-badge-inline ml-perf-badge-inline--good">Excellent</span>
+                        @elseif($r2Val >= 60)
+                            <span class="ml-perf-badge-inline ml-perf-badge-inline--ok">Good</span>
+                        @else
+                            <span class="ml-perf-badge-inline ml-perf-badge-inline--low">Needs Improvement</span>
+                        @endif
+                    </span>
+                </div>
+                <div class="ml-perf-metric-row">
+                    <span class="ml-perf-metric-label">MAE</span>
+                    <span class="ml-perf-metric-sep">:</span>
+                    <span class="ml-perf-metric-value">{{ $mlPerformance['mae'] ?? '3.58' }}</span>
+                </div>
+                <div class="ml-perf-metric-row">
+                    <span class="ml-perf-metric-label">RMSE</span>
+                    <span class="ml-perf-metric-sep">:</span>
+                    <span class="ml-perf-metric-value">{{ $mlPerformance['rmse'] ?? '4.84' }}</span>
+                </div>
+                <div class="ml-perf-metric-row">
+                    <span class="ml-perf-metric-label">Status</span>
+                    <span class="ml-perf-metric-sep">:</span>
+                    <span class="ml-perf-metric-value ml-perf-metric-value--status">
+                        @php $statusText = $mlPerformance['status'] ?? 'Model stabil & tidak overfitting'; @endphp
+                        <span class="ml-perf-status-dot"></span>
+                        {{ $statusText }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        {{-- ② Threshold Kategori Skor --}}
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Threshold Kategori Skor</div>
+                    <div class="card-sub">Acuan pengelompokan tingkat ketergantungan</div>
+                </div>
+            </div>
+
+            @php
+                $thresholds = $thresholds ?? [
+                    ['label' => 'Rendah', 'range' => '0 – 39',   'color' => 'teal',  'desc' => 'Ketergantungan digital masih dalam batas normal'],
+                    ['label' => 'Sedang', 'range' => '40 – 69',  'color' => 'amber', 'desc' => 'Mulai menunjukkan pola penggunaan yang berlebihan'],
+                    ['label' => 'Tinggi', 'range' => '70 – 100', 'color' => 'red',   'desc' => 'Ketergantungan digital sudah pada level mengkhawatirkan'],
+                ];
+            @endphp
+
+            <div class="threshold-cards">
+                @foreach($thresholds as $t)
+                    <div class="threshold-card threshold-card--{{ $t['color'] }}">
+                        <div class="threshold-card-top">
+                            <span class="threshold-card-label">{{ $t['label'] }}</span>
+                            <span class="threshold-card-range">{{ $t['range'] }}</span>
+                        </div>
+                        @if(isset($t['desc']))
+                            <div class="threshold-card-desc">{{ $t['desc'] }}</div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- ③ Summary Insight --}}
         <div class="card">
             <div class="card-header">
                 <div>
@@ -194,38 +277,6 @@ resources/views/admin/dashboard.blade.php
                         <span class="insight-text">12 user masuk kategori High Risk, perlu perhatian segera</span>
                     </div>
                 @endforelse
-            </div>
-        </div>
-
-        {{-- 7. Threshold Kategori Skor --}}
-        <div class="card">
-            <div class="card-header">
-                <div>
-                    <div class="card-title">Threshold Kategori Skor</div>
-                    <div class="card-sub">Acuan pengelompokan tingkat ketergantungan</div>
-                </div>
-            </div>
-
-            @php
-                $thresholds = $thresholds ?? [
-                    ['label' => 'Rendah', 'range' => '0 – 39',   'color' => 'teal',  'desc' => 'Ketergantungan digital masih dalam batas normal'],
-                    ['label' => 'Sedang', 'range' => '40 – 69',  'color' => 'amber', 'desc' => 'Mulai menunjukkan pola penggunaan yang berlebihan'],
-                    ['label' => 'Tinggi', 'range' => '70 – 100', 'color' => 'red',   'desc' => 'Ketergantungan digital sudah pada level mengkhawatirkan'],
-                ];
-            @endphp
-
-            <div class="threshold-cards">
-                @foreach($thresholds as $t)
-                    <div class="threshold-card threshold-card--{{ $t['color'] }}">
-                        <div class="threshold-card-top">
-                            <span class="threshold-card-label">{{ $t['label'] }}</span>
-                            <span class="threshold-card-range">{{ $t['range'] }}</span>
-                        </div>
-                        @if(isset($t['desc']))
-                            <div class="threshold-card-desc">{{ $t['desc'] }}</div>
-                        @endif
-                    </div>
-                @endforeach
             </div>
         </div>
 

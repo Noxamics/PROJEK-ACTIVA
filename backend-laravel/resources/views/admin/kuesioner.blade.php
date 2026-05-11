@@ -237,90 +237,299 @@
   }
   .btn-export:active { transform: translateY(0); }
 
-  /* ── Modal ── */
+  /* ══════════════════════════════════════════════
+     PREMIUM MODAL — International Grade Design
+  ══════════════════════════════════════════════ */
   .modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(15, 31, 53, 0.6);
-    backdrop-filter: blur(4px);
+    background: rgba(10, 20, 40, 0.55);
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
     z-index: 1000;
     align-items: center;
     justify-content: center;
-    padding: 20px;
-    transition: all 0.3s;
+    padding: 24px;
+    opacity: 0;
+    transition: opacity 0.35s cubic-bezier(.4,0,.2,1);
   }
-  .modal-overlay.open { display: flex; }
+  .modal-overlay.open { display: flex; opacity: 1; }
 
   .modal-box {
-    background: #fff;
-    border-radius: 20px;
-    padding: 32px;
-    width: 480px;
+    background: #FFFFFF;
+    border-radius: 24px;
+    width: 560px;
     max-width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    max-height: 88vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative; /* Penting untuk posisi absolute tombol X */
+    box-shadow:
+      0 0 0 1px rgba(30,58,95,.06),
+      0 8px 24px rgba(15,31,53,.08),
+      0 32px 64px -16px rgba(15,31,53,.18);
+    animation: modalPopIn 0.4s cubic-bezier(.16,1,.3,1) both;
+  }
+
+  @keyframes modalPopIn {
+    from { opacity: 0; transform: translateY(24px) scale(.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ── Modal Header ── */
+  .modal-header {
+    padding: 28px 32px 22px;
+    background: linear-gradient(135deg, #1E3A5F 0%, #264875 50%, #0D9488 100%);
     position: relative;
-    animation: modalSlideUp 0.3s ease-out;
+    overflow: hidden;
   }
-
-  @keyframes modalSlideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+  .modal-header::before {
+    content: '';
+    position: absolute;
+    top: -40%; right: -20%;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(13,148,136,.25) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
   }
-
-  .modal-box h3 {
+  .modal-header::after {
+    content: '';
+    position: absolute;
+    bottom: -30%; left: -10%;
+    width: 150px; height: 150px;
+    background: radial-gradient(circle, rgba(255,255,255,.08) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .modal-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+  }
+  .modal-header-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .modal-header-icon {
+    width: 44px; height: 44px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.15);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .modal-header-icon svg {
+    width: 22px; height: 22px;
+    color: #fff;
+    stroke: currentColor;
+  }
+  .modal-header h3 {
     font-size: 18px;
     font-weight: 700;
-    color: var(--navy);
-    margin-bottom: 20px;
+    color: #FFFFFF;
+    margin: 0;
+    letter-spacing: -0.3px;
+  }
+  .modal-header-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,.6);
+    margin-top: 2px;
+  }
+  .modal-close-x {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.25);
+    background: rgba(255,255,255,.15);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all .25s ease;
+    color: #fff;
+    z-index: 100;
+    padding: 0;
+    outline: none;
+  }
+  .modal-close-x:hover {
+    background: rgba(255,255,255,.2);
+    border-color: rgba(255,255,255,.35);
+    color: #fff;
+    transform: rotate(90deg);
+  }
+  .modal-close-x svg { width: 16px; height: 16px; }
+
+  /* ── Modal Body ── */
+  .modal-body {
+    padding: 28px 32px 32px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .modal-body::-webkit-scrollbar { width: 5px; }
+  .modal-body::-webkit-scrollbar-track { background: transparent; }
+  .modal-body::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+
+  /* Section */
+  .modal-section {
+    margin-bottom: 28px;
+  }
+  .modal-section:last-child { margin-bottom: 0; }
+  .modal-section-header {
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-bottom: 16px;
   }
-  
-  .modal-rec-item {
+  .modal-section-icon {
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .modal-section-icon svg { width: 16px; height: 16px; }
+  .modal-section-icon--danger {
+    background: linear-gradient(135deg, rgba(224,82,82,.12), rgba(224,82,82,.06));
+    color: #DC2626;
+  }
+  .modal-section-icon--teal {
+    background: linear-gradient(135deg, rgba(13,148,136,.12), rgba(13,148,136,.06));
+    color: var(--teal);
+  }
+  .modal-section-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.2px;
+  }
+  .modal-section-count {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text3);
+    background: #F1F5F9;
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-left: auto;
+  }
+
+  /* Cards */
+  .modal-card {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
-    padding: 12px 16px;
+    gap: 14px;
+    padding: 16px 18px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    font-size: 13.5px;
+    line-height: 1.65;
+    border: 1px solid;
+    transition: all .2s ease;
+    animation: cardFadeIn .4s ease both;
+  }
+  .modal-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,.04);
+  }
+  @keyframes cardFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal-card--danger {
+    background: linear-gradient(135deg, #FFF5F5 0%, #FFF0F0 100%);
+    border-color: #FED7D7;
+    color: #9B2C2C;
+  }
+  .modal-card--teal {
+    background: linear-gradient(135deg, #F0FDFA 0%, #F0FFF4 100%);
+    border-color: #C6F6D5;
+    color: #234E52;
+  }
+  .modal-card-num {
+    width: 24px; height: 24px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .modal-card--danger .modal-card-num {
+    background: rgba(220,38,38,.12);
+    color: #DC2626;
+  }
+  .modal-card--teal .modal-card-num {
+    background: rgba(13,148,136,.12);
+    color: var(--teal);
+  }
+  .modal-card-text {
+    font-weight: 500;
+    flex: 1;
+  }
+
+  .modal-empty {
+    text-align: center;
+    padding: 20px;
     background: #F8FAFC;
     border-radius: 12px;
-    margin-bottom: 10px;
-    font-size: 14px;
-    color: var(--text);
-    line-height: 1.6;
-    border: 1px solid #E2EAF2;
+    border: 1px dashed #E2E8F0;
+  }
+  .modal-empty-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+    opacity: .5;
+  }
+  .modal-empty-text {
+    font-size: 13px;
+    color: var(--text3);
+    font-weight: 500;
   }
 
-  .rec-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--teal);
-    flex-shrink: 0;
-    margin-top: 7px;
-    box-shadow: 0 0 0 3px var(--teal-lt);
+  /* Footer */
+  .modal-footer {
+    padding: 0 32px 28px;
+    display: flex;
+    gap: 10px;
   }
-
   .modal-close-btn {
-    margin-top: 24px;
-    width: 100%;
-    padding: 12px;
-    border: 1px solid var(--border2);
-    border-radius: 12px;
+    flex: 1;
+    padding: 13px;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 14px;
     background: #fff;
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 600;
     cursor: pointer;
     color: var(--text2);
-    transition: all 0.2s;
+    font-family: var(--sans);
+    transition: all 0.25s cubic-bezier(.4,0,.2,1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
-  .modal-close-btn:hover { 
-    background: #F1F5F9;
-    color: var(--navy);
+  .modal-close-btn:hover {
+    background: var(--navy);
+    color: #fff;
     border-color: var(--navy);
+    box-shadow: 0 4px 16px rgba(30,58,95,.2);
+    transform: translateY(-1px);
   }
+  .modal-close-btn:active { transform: translateY(0); }
+  .modal-close-btn svg { width: 16px; height: 16px; }
 
   .no-data {
     text-align: center;
@@ -380,6 +589,108 @@
     min-width: 120px;
     text-align: center;
   }
+
+  /* ── Global Search Bar ── */
+  .global-search {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 22px; margin-bottom: 14px;
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow);
+    animation: fadeUp .35s ease both;
+  }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+  .global-search__icon {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--teal), #34d399);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; flex-shrink: 0; box-shadow: 0 4px 12px rgba(13,148,136,.25);
+  }
+  .global-search__icon svg { width: 18px; height: 18px; }
+  .global-search__wrap { flex: 1; position: relative; }
+  .global-search__input {
+    width: 100%; padding: 11px 16px 11px 40px;
+    border: 1.5px solid #E2E8F0; border-radius: 12px;
+    font-size: 14px; font-weight: 500; color: var(--navy);
+    background: #FAFCFF; outline: none; font-family: var(--sans);
+    transition: all .3s cubic-bezier(.4,0,.2,1);
+  }
+  .global-search__input:focus {
+    border-color: var(--teal); background: #fff;
+    box-shadow: 0 0 0 4px rgba(13,148,136,.1), 0 2px 8px rgba(15,31,53,.06);
+  }
+  .global-search__input::placeholder { color: #94A3B8; font-weight: 400; }
+  .global-search__search-icon {
+    position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+    color: #94A3B8; pointer-events: none; display: flex;
+  }
+  .global-search__search-icon svg { width: 16px; height: 16px; }
+  .global-search__info {
+    font-size: 12px; color: var(--text3); font-weight: 500;
+    white-space: nowrap; display: flex; align-items: center; gap: 6px;
+  }
+  .global-search__info span { color: var(--teal); font-weight: 700; }
+  .global-search__clear {
+    padding: 6px 14px; border: 1.5px solid #E2E8F0; border-radius: 9px;
+    background: #fff; font-size: 12px; font-weight: 600; color: var(--text2);
+    cursor: pointer; transition: all .2s; white-space: nowrap;
+  }
+  .global-search__clear:hover { border-color: var(--red); color: var(--red); background: var(--red-lt); }
+  .filter-count {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 20px; height: 20px; padding: 0 6px; border-radius: 99px;
+    font-size: 10px; font-weight: 700; background: var(--teal); color: #fff;
+    box-shadow: 0 2px 6px rgba(13,148,136,.3);
+  }
+  .filter-count.hidden { display: none; }
+
+  /* ── Per-Column Filter Row ── */
+  thead tr.filter-row th {
+    position: sticky; top: 42px; z-index: 19;
+    padding: 6px 4px 8px; background: #F1F5F9;
+    border-bottom: 2px solid var(--border);
+    box-shadow: 0 2px 6px rgba(15,31,53,.05);
+  }
+  .col-filter {
+    width: 100%; padding: 5px 6px; border: 1px solid #E2E8F0;
+    border-radius: 6px; font-size: 10px; font-weight: 500;
+    color: var(--navy); background: #fff; outline: none;
+    font-family: var(--sans); transition: all .2s;
+    -webkit-appearance: none; appearance: none;
+  }
+  select.col-filter {
+    padding-right: 18px;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='3'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 5px center;
+    background-size: 9px;
+  }
+  .col-filter:focus { border-color: var(--teal); box-shadow: 0 0 0 2px rgba(13,148,136,.1); }
+  .col-filter::placeholder { color: #B0BEC5; font-weight: 400; }
+  .col-filter.active-filter { border-color: var(--teal); background: rgba(13,148,136,.04); }
+
+  /* ── Sortable Headers ── */
+  thead tr:first-child th.sortable {
+    cursor: pointer; user-select: none; position: relative; padding-right: 20px;
+  }
+  thead tr:first-child th.sortable:hover { color: var(--teal); }
+  thead tr:first-child th.sortable::after {
+    content: '⇅'; position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+    font-size: 10px; color: #CBD5E1; transition: color .2s;
+  }
+  thead tr:first-child th.sortable:hover::after { color: var(--teal); }
+  thead tr:first-child th.sort-asc::after { content: '↑'; color: var(--teal); font-weight: 700; }
+  thead tr:first-child th.sort-desc::after { content: '↓'; color: var(--teal); font-weight: 700; }
+
+  /* ── Rows Per Page ── */
+  .rpp-group { display: flex; align-items: center; gap: 8px; }
+  .rpp-group label { font-size: 12px; color: var(--text3); font-weight: 500; white-space: nowrap; }
+  .rpp-select {
+    padding: 5px 24px 5px 10px; border: 1px solid var(--border2); border-radius: 8px;
+    font-size: 12px; font-weight: 600; color: var(--navy); background: #fff;
+    outline: none; cursor: pointer; font-family: var(--sans);
+    -webkit-appearance: none; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='3'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 7px center; background-size: 10px;
+  }
+  .rpp-select:focus { border-color: var(--teal); box-shadow: 0 0 0 2px rgba(13,148,136,.1); }
 </style>
 @endpush
 
@@ -394,140 +705,95 @@
   </div>
 </div>
 
+{{-- GLOBAL SEARCH BAR --}}
+<div class="global-search">
+  <div class="global-search__icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  </div>
+  <div class="global-search__wrap">
+    <span class="global-search__search-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </span>
+    <input type="text" id="globalSearch" class="global-search__input" placeholder="Cari di semua kolom — kategori, wilayah, gender, peran...">
+  </div>
+  <div class="global-search__info">
+    <span id="searchMatchCount">0</span> hasil
+    <span class="filter-count hidden" id="activeFilterCount">0</span>
+  </div>
+  <button class="global-search__clear" onclick="clearAll()">✕ Reset</button>
+</div>
+
 {{-- TABLE WRAP --}}
 <div class="table-wrap">
-
-  {{-- TOOLBAR --}}
-  <div class="toolbar">
-    {{-- Search Group --}}
-    <div class="toolbar-group">
-      <label>Cari:</label>
-      <input type="text" id="searchInput" placeholder="Kategori, region..." oninput="applyFilters()">
-    </div>
-
-    {{-- Filter Groups --}}
-    <div class="toolbar-group">
-      <label>Gender:</label>
-      <div class="custom-dd" id="ddGender">
-        <div class="custom-dd__btn" onclick="toggleDD('ddGender')">
-          <span>Semua</span>
-          <svg class="custom-dd__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="custom-dd__menu">
-          <div class="custom-dd__item active" data-val="" onclick="selectDD('ddGender','fGender',this)">Semua</div>
-          <div class="custom-dd__item" data-val="Male" onclick="selectDD('ddGender','fGender',this)">Laki-laki</div>
-          <div class="custom-dd__item" data-val="Female" onclick="selectDD('ddGender','fGender',this)">Perempuan</div>
-        </div>
-        <input type="hidden" id="fGender" value="">
-      </div>
-    </div>
-
-    <div class="toolbar-group">
-      <label>Wilayah:</label>
-      <div class="custom-dd" id="ddRegion">
-        <div class="custom-dd__btn" onclick="toggleDD('ddRegion')">
-          <span>Semua</span>
-          <svg class="custom-dd__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="custom-dd__menu">
-          <div class="custom-dd__item active" data-val="" onclick="selectDD('ddRegion','fRegion',this)">Semua</div>
-          @foreach($regions as $r)
-            <div class="custom-dd__item" data-val="{{ $r }}" onclick="selectDD('ddRegion','fRegion',this)">{{ $r }}</div>
-          @endforeach
-        </div>
-        <input type="hidden" id="fRegion" value="">
-      </div>
-    </div>
-
-    <div class="toolbar-group">
-      <label>Kategori:</label>
-      <div class="custom-dd" id="ddKategori">
-        <div class="custom-dd__btn" onclick="toggleDD('ddKategori')">
-          <span>Semua</span>
-          <svg class="custom-dd__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="custom-dd__menu">
-          <div class="custom-dd__item active" data-val="" onclick="selectDD('ddKategori','fKategori',this)">Semua</div>
-          <div class="custom-dd__item" data-val="Sangat Tinggi" onclick="selectDD('ddKategori','fKategori',this)">Sangat Tinggi</div>
-          <div class="custom-dd__item" data-val="Tinggi" onclick="selectDD('ddKategori','fKategori',this)">Tinggi</div>
-          <div class="custom-dd__item" data-val="Sedang" onclick="selectDD('ddKategori','fKategori',this)">Sedang</div>
-          <div class="custom-dd__item" data-val="Rendah" onclick="selectDD('ddKategori','fKategori',this)">Rendah</div>
-        </div>
-        <input type="hidden" id="fKategori" value="">
-      </div>
-    </div>
-
-    <div class="toolbar-group">
-      <label>Peran:</label>
-      <div class="custom-dd" id="ddRole">
-        <div class="custom-dd__btn" onclick="toggleDD('ddRole')">
-          <span>Semua</span>
-          <svg class="custom-dd__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="custom-dd__menu">
-          <div class="custom-dd__item active" data-val="" onclick="selectDD('ddRole','fRole',this)">Semua</div>
-          @foreach($roles as $r)
-            <div class="custom-dd__item" data-val="{{ $r }}" onclick="selectDD('ddRole','fRole',this)">{{ $r }}</div>
-          @endforeach
-        </div>
-        <input type="hidden" id="fRole" value="">
-      </div>
-    </div>
-
-    {{-- Sort Group --}}
-    <div class="toolbar-group">
-      <label>Urutkan:</label>
-      <div class="custom-dd" id="ddSort" style="min-width:200px;">
-        <div class="custom-dd__btn" onclick="toggleDD('ddSort')">
-          <span>— Pilih —</span>
-          <svg class="custom-dd__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="custom-dd__menu">
-          <div class="custom-dd__item active" data-val="" onclick="selectDD('ddSort','sortBy',this)">— Pilih —</div>
-          <div class="custom-dd__item" data-val="skor_desc" onclick="selectDD('ddSort','sortBy',this)">Skor tertinggi → rendah</div>
-          <div class="custom-dd__item" data-val="skor_asc" onclick="selectDD('ddSort','sortBy',this)">Skor terendah → tinggi</div>
-          <div class="custom-dd__item" data-val="umur_desc" onclick="selectDD('ddSort','sortBy',this)">Umur tertinggi → rendah</div>
-          <div class="custom-dd__item" data-val="umur_asc" onclick="selectDD('ddSort','sortBy',this)">Umur terendah → tinggi</div>
-          <div class="custom-dd__item" data-val="device_desc" onclick="selectDD('ddSort','sortBy',this)">Jam perangkat ↓</div>
-          <div class="custom-dd__item" data-val="device_asc" onclick="selectDD('ddSort','sortBy',this)">Jam perangkat ↑</div>
-          <div class="custom-dd__item" data-val="sleep_desc" onclick="selectDD('ddSort','sortBy',this)">Jam tidur ↓</div>
-          <div class="custom-dd__item" data-val="sleep_asc" onclick="selectDD('ddSort','sortBy',this)">Jam tidur ↑</div>
-          <div class="custom-dd__item" data-val="anxiety_desc" onclick="selectDD('ddSort','sortBy',this)">Kecemasan ↓</div>
-          <div class="custom-dd__item" data-val="anxiety_asc" onclick="selectDD('ddSort','sortBy',this)">Kecemasan ↑</div>
-        </div>
-        <input type="hidden" id="sortBy" value="">
-      </div>
-    </div>
-  </div>
-
   <div class="table-container">
     <table id="mainTable">
       <thead>
+        {{-- Sortable Header Row --}}
         <tr>
-          <th>No</th>
-          <th>Skor</th>
-          <th>Kategori</th>
-          <th>Gender</th>
-          <th>Umur</th>
-          <th>Wilayah</th>
-          <th>Pendidikan</th>
-          <th>Peran Harian</th>
-          <th>Pendapatan</th>
-          <th>Jam Perangkat</th>
-          <th>Buka HP/Hari</th>
-          <th>Notif/Hari</th>
-          <th>Mnt Medsos</th>
-          <th>Mnt Belajar</th>
-          <th>Aktif Fisik</th>
-          <th>Jam Tidur</th>
-          <th>Kualitas Tidur</th>
-          <th>Kecemasan</th>
-          <th>Depresi</th>
-          <th>Stres</th>
-          <th>Kebahagiaan</th>
-          <th>Jenis Perangkat</th>
+          <th style="width:45px">No</th>
+          <th class="sortable" data-sort="skor" onclick="toggleSort('skor')">Skor</th>
+          <th class="sortable" data-sort="kategori" onclick="toggleSort('kategori')">Kategori</th>
+          <th class="sortable" data-sort="gender" onclick="toggleSort('gender')">Gender</th>
+          <th class="sortable" data-sort="umur" onclick="toggleSort('umur')">Umur</th>
+          <th class="sortable" data-sort="region" onclick="toggleSort('region')">Wilayah</th>
+          <th class="sortable" data-sort="pendidikan" onclick="toggleSort('pendidikan')">Pendidikan</th>
+          <th class="sortable" data-sort="role" onclick="toggleSort('role')">Peran</th>
+          <th class="sortable" data-sort="pendapatan" onclick="toggleSort('pendapatan')">Pendapatan</th>
+          <th class="sortable" data-sort="device" onclick="toggleSort('device')">Jam Device</th>
+          <th class="sortable" data-sort="bukahp" onclick="toggleSort('bukahp')">Buka HP</th>
+          <th class="sortable" data-sort="notif" onclick="toggleSort('notif')">Notif</th>
+          <th class="sortable" data-sort="medsos" onclick="toggleSort('medsos')">Medsos</th>
+          <th class="sortable" data-sort="belajar" onclick="toggleSort('belajar')">Belajar</th>
+          <th class="sortable" data-sort="fisik" onclick="toggleSort('fisik')">Fisik</th>
+          <th class="sortable" data-sort="sleep" onclick="toggleSort('sleep')">Tidur</th>
+          <th class="sortable" data-sort="sleepq" onclick="toggleSort('sleepq')">Kual. Tidur</th>
+          <th class="sortable" data-sort="anxiety" onclick="toggleSort('anxiety')">Cemas</th>
+          <th class="sortable" data-sort="depresi" onclick="toggleSort('depresi')">Depresi</th>
+          <th class="sortable" data-sort="stres" onclick="toggleSort('stres')">Stres</th>
+          <th class="sortable" data-sort="happy" onclick="toggleSort('happy')">Bahagia</th>
+          <th>Perangkat</th>
           <th>Status</th>
           <th>Aksi</th>
+        </tr>
+        {{-- Per-Column Filter Row --}}
+        <tr class="filter-row">
+          <th></th>
+          <th></th>
+          <th>
+            <select class="col-filter" id="fKategori" onchange="applyFilters()">
+              <option value="">Semua</option>
+              <option value="Sangat Tinggi">Sangat Tinggi</option>
+              <option value="Tinggi">Tinggi</option>
+              <option value="Sedang">Sedang</option>
+              <option value="Rendah">Rendah</option>
+            </select>
+          </th>
+          <th>
+            <select class="col-filter" id="fGender" onchange="applyFilters()">
+              <option value="">Semua</option>
+              <option value="Male">Laki-laki</option>
+              <option value="Female">Perempuan</option>
+            </select>
+          </th>
+          <th>
+            <select class="col-filter" id="fAge" onchange="applyFilters()">
+              <option value="">Semua</option>
+              <option value="0-17">≤ 17</option>
+              <option value="18-25">18–25</option>
+              <option value="26-35">26–35</option>
+              <option value="36-50">36–50</option>
+              <option value="51+">51+</option>
+            </select>
+          </th>
+          <th><input type="text" class="col-filter" id="fRegion" placeholder="Filter..." oninput="applyFilters()"></th>
+          <th><input type="text" class="col-filter" id="fPendidikan" placeholder="Filter..." oninput="applyFilters()"></th>
+          <th><input type="text" class="col-filter" id="fRole" placeholder="Filter..." oninput="applyFilters()"></th>
+          <th><input type="text" class="col-filter" id="fPendapatan" placeholder="Filter..." oninput="applyFilters()"></th>
+          <th></th><th></th><th></th><th></th><th></th><th></th>
+          <th></th><th></th><th></th><th></th><th></th><th></th>
+          <th><input type="text" class="col-filter" id="fPerangkat" placeholder="Filter..." oninput="applyFilters()"></th>
+          <th></th>
+          <th></th>
         </tr>
       </thead>
       <tbody id="tableBody">
@@ -541,16 +807,28 @@
             };
           @endphp
           <tr
-            data-search="{{ strtolower($item['user_id'] . ' ' . $item['kategori'] . ' ' . $item['gender'] . ' ' . $item['region'] . ' ' . $item['peran_harian']) }}"
+            data-search="{{ strtolower($item['skor_ketergantungan'].' '.$item['kategori'].' '.$item['gender'].' '.$item['umur'].' '.$item['region'].' '.$item['tingkat_pendidikan'].' '.$item['peran_harian'].' '.$item['tingkat_pendapatan'].' '.$item['jam_perangkat_per_hari'].' '.$item['buka_hp_per_hari'].' '.$item['notifikasi_per_hari'].' '.$item['menit_medsos'].' '.$item['menit_belajar'].' '.$item['hari_aktif_fisik'].' '.$item['jam_tidur'].' '.$item['kualitas_tidur'].' '.$item['skor_kecemasan'].' '.$item['skor_depresi'].' '.$item['tingkat_stres'].' '.$item['skor_kebahagiaan'].' '.$item['jenis_perangkat']) }}"
             data-gender="{{ $item['gender'] }}"
-            data-region="{{ $item['region'] }}"
+            data-region="{{ strtolower($item['region']) }}"
             data-kategori="{{ $item['kategori'] }}"
-            data-role="{{ $item['peran_harian'] }}"
+            data-role="{{ strtolower($item['peran_harian']) }}"
+            data-pendidikan="{{ strtolower($item['tingkat_pendidikan']) }}"
+            data-pendapatan="{{ strtolower($item['tingkat_pendapatan']) }}"
+            data-perangkat="{{ strtolower($item['jenis_perangkat']) }}"
             data-skor="{{ $item['skor_ketergantungan'] }}"
             data-umur="{{ $item['umur'] }}"
             data-device="{{ $item['jam_perangkat_per_hari'] }}"
+            data-bukahp="{{ $item['buka_hp_per_hari'] }}"
+            data-notif="{{ $item['notifikasi_per_hari'] }}"
+            data-medsos="{{ $item['menit_medsos'] }}"
+            data-belajar="{{ $item['menit_belajar'] }}"
+            data-fisik="{{ $item['hari_aktif_fisik'] }}"
             data-sleep="{{ $item['jam_tidur'] }}"
+            data-sleepq="{{ $item['kualitas_tidur'] }}"
             data-anxiety="{{ $item['skor_kecemasan'] }}"
+            data-depresi="{{ $item['skor_depresi'] }}"
+            data-stres="{{ $item['tingkat_stres'] }}"
+            data-happy="{{ $item['skor_kebahagiaan'] }}"
           >
             <td style="text-align:center; color: var(--text3); font-weight: 600;">{{ $index + 1 }}</td>
             <td style="font-weight:700;color:var(--teal);">{{ $item['skor_ketergantungan'] }}</td>
@@ -603,124 +881,191 @@
   {{-- BOTTOM BAR --}}
   <div class="bottom-bar">
     <div class="pagination-wrap">
-      <button class="pagination-btn" id="prevBtn" onclick="prevPage()">Sebelumnya</button>
+      <button class="pagination-btn" id="prevBtn" onclick="prevPage()">← Sebelumnya</button>
       <span class="page-info" id="pageInfo">Halaman 1 dari 1</span>
-      <button class="pagination-btn" id="nextBtn" onclick="nextPage()">Selanjutnya</button>
+      <button class="pagination-btn" id="nextBtn" onclick="nextPage()">Selanjutnya →</button>
     </div>
-
-    <div style="display:flex; align-items:center; gap:20px;">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div class="rpp-group">
+        <label>Baris/halaman:</label>
+        <select class="rpp-select" id="rowsPerPageSelect" onchange="changeRowsPerPage()">
+          <option value="25">25</option>
+          <option value="50" selected>50</option>
+          <option value="100">100</option>
+          <option value="200">200</option>
+        </select>
+      </div>
       <span class="count-info" id="countInfo">Menampilkan 0 data</span>
-      <button class="btn-export" onclick="exportXlsx()">
-        ⬇ Export data ke .xlsx
-      </button>
+      <button class="btn-export" onclick="exportXlsx()">⬇ Export .xlsx</button>
     </div>
   </div>
 </div>
 
-{{-- MODAL REKOMENDASI --}}
+{{-- MODAL REKOMENDASI — Premium Design --}}
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal-box">
-    <h3 id="modalTitle">Analisis & Rekomendasi</h3>
-    <div id="modalContent"></div>
-    <button class="modal-close-btn" onclick="document.getElementById('modalOverlay').classList.remove('open')">Tutup</button>
+    {{-- Button Close di Pojok --}}
+    <button class="modal-close-x" onclick="document.getElementById('modalOverlay').classList.remove('open')" title="Tutup">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+
+    {{-- Header --}}
+    <div class="modal-header">
+      <div class="modal-header-top">
+        <div class="modal-header-info">
+          <div class="modal-header-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          </div>
+          <div>
+            <h3 id="modalTitle">Analisis & Rekomendasi</h3>
+            <div class="modal-header-sub" id="modalSub">Hasil analisis ketergantungan digital</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{-- Body --}}
+    <div class="modal-body" id="modalContent"></div>
+    {{-- Footer --}}
+    <div class="modal-footer">
+      <button class="modal-close-btn" onclick="document.getElementById('modalOverlay').classList.remove('open')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        Kembali ke Tabel
+      </button>
+    </div>
   </div>
 </div>
 
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-  /* ── State ── */
-  let currentPage = 1;
-  const rowsPerPage = 50;
-  let filteredRows = [];
+/* ── State ── */
+let currentPage = 1;
+let rowsPerPage = 50;
+let filteredRows = [];
+let currentSort = { key: '', dir: '' };
+const numericCols = ['skor','umur','device','bukahp','notif','medsos','belajar','fisik','sleep','sleepq','anxiety','depresi','stres','happy'];
 
-  // Initial render
-  window.onload = () => {
-    applyFilters();
-  };
+window.onload = () => applyFilters();
+document.getElementById('globalSearch').addEventListener('input', () => applyFilters());
 
-  /* ── Filter & Sort ── */
-  function applyFilters() {
-    const search   = document.getElementById('searchInput').value.toLowerCase();
-    const gender   = document.getElementById('fGender').value;
-    const region   = document.getElementById('fRegion').value;
-    const kategori = document.getElementById('fKategori').value;
-    const role     = document.getElementById('fRole').value;
-    const sort     = document.getElementById('sortBy').value;
+/* ── Column Sorting ── */
+function toggleSort(key) {
+  if (currentSort.key === key) {
+    currentSort.dir = currentSort.dir === 'asc' ? 'desc' : (currentSort.dir === 'desc' ? '' : 'asc');
+    if (!currentSort.dir) currentSort.key = '';
+  } else {
+    currentSort.key = key; currentSort.dir = 'asc';
+  }
+  document.querySelectorAll('thead tr:first-child th.sortable').forEach(th => {
+    th.classList.remove('sort-asc','sort-desc');
+    if (th.dataset.sort === currentSort.key && currentSort.dir) th.classList.add('sort-' + currentSort.dir);
+  });
+  sortAndRender();
+}
 
-    const tbody = document.getElementById('tableBody');
-    let allRows = Array.from(tbody.querySelectorAll('tr[data-search]'));
-
-    // Filter
-    filteredRows = allRows.filter(row => {
-      const matchSearch   = !search   || row.dataset.search.includes(search);
-      const matchGender   = !gender   || row.dataset.gender   === gender;
-      const matchRegion   = !region   || row.dataset.region   === region;
-      const matchKategori = !kategori || row.dataset.kategori === kategori;
-      const matchRole     = !role     || row.dataset.role     === role;
-      return matchSearch && matchGender && matchRegion && matchKategori && matchRole;
+function sortAndRender() {
+  if (currentSort.key && currentSort.dir) {
+    const k = currentSort.key, dir = currentSort.dir === 'asc' ? 1 : -1;
+    filteredRows.sort((a, b) => {
+      let va = a.dataset[k] || '', vb = b.dataset[k] || '';
+      if (numericCols.includes(k)) return (parseFloat(va||0) - parseFloat(vb||0)) * dir;
+      return va.localeCompare(vb) * dir;
     });
+  }
+  currentPage = 1;
+  renderTable();
+}
 
-    // Sort
-    if (sort) {
-      const [field, dir] = sort.split('_');
-      const key = { skor: 'skor', umur: 'umur', device: 'device', sleep: 'sleep', anxiety: 'anxiety' }[field];
-      filteredRows.sort((a, b) => {
-        const va = parseFloat(a.dataset[key]);
-        const vb = parseFloat(b.dataset[key]);
-        return dir === 'desc' ? vb - va : va - vb;
-      });
+/* ── Filters ── */
+function applyFilters() {
+  const gs = document.getElementById('globalSearch').value.toLowerCase().trim();
+  const fK = document.getElementById('fKategori').value;
+  const fG = document.getElementById('fGender').value;
+  const fA = document.getElementById('fAge').value;
+  const fR = document.getElementById('fRegion').value.toLowerCase().trim();
+  const fP = document.getElementById('fPendidikan').value.toLowerCase().trim();
+  const fRo = document.getElementById('fRole').value.toLowerCase().trim();
+  const fPd = document.getElementById('fPendapatan').value.toLowerCase().trim();
+  const fPe = document.getElementById('fPerangkat').value.toLowerCase().trim();
+
+  const allRows = Array.from(document.getElementById('tableBody').querySelectorAll('tr[data-search]'));
+
+  filteredRows = allRows.filter(row => {
+    if (gs && !row.dataset.search.includes(gs)) return false;
+    if (fK && row.dataset.kategori !== fK) return false;
+    if (fG && row.dataset.gender !== fG) return false;
+    if (fR && !row.dataset.region.includes(fR)) return false;
+    if (fP && !row.dataset.pendidikan.includes(fP)) return false;
+    if (fRo && !row.dataset.role.includes(fRo)) return false;
+    if (fPd && !row.dataset.pendapatan.includes(fPd)) return false;
+    if (fPe && !row.dataset.perangkat.includes(fPe)) return false;
+    if (fA) {
+      const age = parseInt(row.dataset.umur);
+      if (isNaN(age)) return false;
+      if (fA === '0-17' && age > 17) return false;
+      if (fA === '18-25' && (age < 18 || age > 25)) return false;
+      if (fA === '26-35' && (age < 26 || age > 35)) return false;
+      if (fA === '36-50' && (age < 36 || age > 50)) return false;
+      if (fA === '51+' && age < 51) return false;
     }
+    return true;
+  });
 
-    // Reset to page 1 on filter
-    currentPage = 1;
-    renderTable();
-  }
+  updateFilterUI();
+  sortAndRender();
+}
 
-  function renderTable() {
-    const tbody = document.getElementById('tableBody');
-    const totalFiltered = filteredRows.length;
-    const totalPages = Math.ceil(totalFiltered / rowsPerPage) || 1;
+function updateFilterUI() {
+  let count = 0;
+  ['fKategori','fGender','fAge','fRegion','fPendidikan','fRole','fPendapatan','fPerangkat'].forEach(id => {
+    const el = document.getElementById(id);
+    const on = el.value.trim() !== '';
+    if (on) count++;
+    el.classList.toggle('active-filter', on);
+  });
+  if (document.getElementById('globalSearch').value.trim()) count++;
+  const badge = document.getElementById('activeFilterCount');
+  badge.textContent = count;
+  badge.classList.toggle('hidden', count === 0);
+  document.getElementById('searchMatchCount').textContent = filteredRows.length;
+}
 
-    if (currentPage > totalPages) currentPage = totalPages;
-    if (currentPage < 1) currentPage = 1;
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const total = filteredRows.length;
+  const totalPages = Math.ceil(total / rowsPerPage) || 1;
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+  const start = (currentPage - 1) * rowsPerPage;
+  const end = start + rowsPerPage;
 
-    const start = (currentPage - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
+  Array.from(tbody.querySelectorAll('tr[data-search]')).forEach(r => r.style.display = 'none');
+  const pageRows = filteredRows.slice(start, end);
+  pageRows.forEach((row, i) => {
+    row.style.display = '';
+    row.querySelector('td:first-child').textContent = start + i + 1;
+    tbody.appendChild(row);
+  });
 
-    // Hide all rows first
-    const allRows = Array.from(tbody.querySelectorAll('tr[data-search]'));
-    allRows.forEach(r => r.style.display = 'none');
+  document.getElementById('pageInfo').textContent = 'Halaman ' + currentPage + ' dari ' + totalPages;
+  document.getElementById('prevBtn').disabled = currentPage === 1;
+  document.getElementById('nextBtn').disabled = currentPage === totalPages;
+  document.getElementById('countInfo').textContent = 'Menampilkan ' + pageRows.length + ' dari ' + total + ' data';
+  document.querySelector('.table-container').scrollTop = 0;
+}
 
-    // Show only rows for the current page
-    const pageRows = filteredRows.slice(start, end);
-    pageRows.forEach((row, i) => {
-      row.style.display = '';
-      row.querySelector('td:first-child').textContent = start + i + 1;
-      tbody.appendChild(row); // Keep DOM order aligned with sorted array
-    });
+function nextPage() { currentPage++; renderTable(); }
+function prevPage() { currentPage--; renderTable(); }
+function changeRowsPerPage() { rowsPerPage = parseInt(document.getElementById('rowsPerPageSelect').value); currentPage = 1; renderTable(); }
 
-    // Update Pagination UI
-    document.getElementById('pageInfo').textContent = `Halaman ${currentPage} dari ${totalPages}`;
-    document.getElementById('prevBtn').disabled = currentPage === 1;
-    document.getElementById('nextBtn').disabled = currentPage === totalPages;
-    
-    // Update count info
-    document.getElementById('countInfo').textContent = `Menampilkan ${pageRows.length} dari ${totalFiltered} data`;
-    
-    // Optional: Scroll table to top when page changes
-    document.querySelector('.table-container').scrollTop = 0;
-  }
-
-  function nextPage() {
-    currentPage++;
-    renderTable();
-  }
-
-  function prevPage() {
-    currentPage--;
-    renderTable();
-  }
+function clearAll() {
+  document.getElementById('globalSearch').value = '';
+  ['fRegion','fPendidikan','fRole','fPendapatan','fPerangkat'].forEach(id => document.getElementById(id).value = '');
+  ['fKategori','fGender','fAge'].forEach(id => document.getElementById(id).value = '');
+  currentSort = { key: '', dir: '' };
+  document.querySelectorAll('thead tr:first-child th.sortable').forEach(th => th.classList.remove('sort-asc','sort-desc'));
+  applyFilters();
+}
 
   /* ── Peta terjemahan penyebab ke Bahasa Indonesia ── */
   const penyebabTranslations = {
@@ -805,45 +1150,66 @@
     const recs = JSON.parse(btn.dataset.recs);
     const penyebab = JSON.parse(btn.dataset.penyebab || '[]');
     const userId = btn.dataset.uid;
-    
-    document.getElementById('modalTitle').textContent = `Analisis & Rekomendasi`;
+
+    document.getElementById('modalTitle').textContent = 'Analisis & Rekomendasi';
+    document.getElementById('modalSub').textContent = 'Hasil analisis ketergantungan digital';
     const content = document.getElementById('modalContent');
-    
+
     let html = '';
-    
-    // ── Penyebab Utama ──
-    html += `<div style="margin-bottom:24px;">
-                <h4 style="font-size:11px; color:var(--text3); text-transform:uppercase; margin-bottom:12px; letter-spacing:0.08em; font-weight:700;">Penyebab Utama</h4>`;
+
+    // ══ Section 1: Penyebab Utama ══
+    html += `<div class="modal-section">`;
+    html += `<div class="modal-section-header">
+               <div class="modal-section-icon modal-section-icon--danger">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+               </div>
+               <span class="modal-section-label">Penyebab Utama</span>
+               <span class="modal-section-count">${penyebab && penyebab.length > 0 ? penyebab.length + ' faktor' : '—'}</span>
+             </div>`;
     if (penyebab && penyebab.length > 0) {
-        html += penyebab.map(p => {
-          const label = translatePenyebab(p);
-          return `
-          <div class="modal-rec-item" style="background:#FFF5F5; border-color:#FED7D7;">
-            <div class="rec-dot" style="background:#E53E3E; box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);"></div>
-            <div style="color:#C53030; font-weight:500;">${label}</div>
-          </div>`;
-        }).join('');
+      html += penyebab.map((p, i) => {
+        const label = translatePenyebab(p);
+        return `<div class="modal-card modal-card--danger" style="animation-delay:${i * 0.06}s">
+                  <div class="modal-card-num">${i + 1}</div>
+                  <div class="modal-card-text">${label}</div>
+                </div>`;
+      }).join('');
     } else {
-        html += `<div style="font-size:13px; color:var(--text3); padding:10px; background:#F8FAFC; border-radius:8px; text-align:center;">Data penyebab tidak tersedia</div>`;
+      html += `<div class="modal-empty">
+                 <div class="modal-empty-icon">📋</div>
+                 <div class="modal-empty-text">Data penyebab tidak tersedia</div>
+               </div>`;
     }
     html += `</div>`;
-    
-    // ── Rekomendasi Tindakan ──
-    html += `<div>
-                <h4 style="font-size:11px; color:var(--text3); text-transform:uppercase; margin-bottom:12px; letter-spacing:0.08em; font-weight:700;">Rekomendasi Tindakan</h4>`;
+
+    // ══ Section 2: Rekomendasi Tindakan ══
+    html += `<div class="modal-section">`;
+    html += `<div class="modal-section-header">
+               <div class="modal-section-icon modal-section-icon--teal">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+               </div>
+               <span class="modal-section-label">Rekomendasi Tindakan</span>
+               <span class="modal-section-count">${recs && recs.length > 0 ? recs.length + ' langkah' : '—'}</span>
+             </div>`;
     if (recs && recs.length > 0) {
-        html += recs.map(r => {
-          const text = extractText(r);
-          return `<div class="modal-rec-item"><div class="rec-dot"></div><div>${text}</div></div>`;
-        }).join('');
+      html += recs.map((r, i) => {
+        const text = extractText(r);
+        return `<div class="modal-card modal-card--teal" style="animation-delay:${(penyebab ? penyebab.length : 0) * 0.06 + i * 0.06}s">
+                  <div class="modal-card-num">${i + 1}</div>
+                  <div class="modal-card-text">${text}</div>
+                </div>`;
+      }).join('');
     } else {
-        html += `<div style="font-size:13px; color:var(--text3); padding:10px; background:#F8FAFC; border-radius:8px; text-align:center;">Data rekomendasi tidak tersedia</div>`;
+      html += `<div class="modal-empty">
+                 <div class="modal-empty-icon">💡</div>
+                 <div class="modal-empty-text">Data rekomendasi tidak tersedia</div>
+               </div>`;
     }
     html += `</div>`;
-    
+
     content.innerHTML = html;
     document.getElementById('modalOverlay').classList.add('open');
-}
+  }
 
   function closeModal(e) {
     if (e.target === document.getElementById('modalOverlay')) {
@@ -880,29 +1246,6 @@
   /* ── Refresh ── */
   function refreshData() { location.reload(); }
 
-  /* ── Custom Dropdown Logic ── */
-  function toggleDD(id) {
-    const dd = document.getElementById(id);
-    const wasOpen = dd.classList.contains('open');
-    document.querySelectorAll('.custom-dd.open').forEach(d => d.classList.remove('open'));
-    if (!wasOpen) dd.classList.add('open');
-  }
-
-  function selectDD(ddId, inputId, item) {
-    document.getElementById(inputId).value = item.dataset.val;
-    const dd = document.getElementById(ddId);
-    dd.querySelector('.custom-dd__btn span').textContent = item.textContent;
-    dd.querySelectorAll('.custom-dd__item').forEach(i => i.classList.remove('active'));
-    item.classList.add('active');
-    dd.classList.remove('open');
-    applyFilters();
-  }
-
-  document.addEventListener('click', function(e) {
-    if (!e.target.closest('.custom-dd')) {
-      document.querySelectorAll('.custom-dd.open').forEach(d => d.classList.remove('open'));
-    }
-  });
 </script>
 @endpush
 
