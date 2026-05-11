@@ -301,3 +301,202 @@ body {
     font-family : 'DM Sans', sans-serif;
     line-height : 1.4;
 }
+
+/* ── Bottom 3-Column Grid ──────────────────────────────────── */
+.grid-bottom {
+    display               : grid;
+    grid-template-columns : 1fr 1fr 1fr;
+    gap                   : 16px;
+    align-items           : start;
+}
+
+@media (max-width: 1100px) {
+    .grid-bottom {
+        grid-template-columns : 1fr 1fr;
+    }
+    .grid-bottom > .ml-perf-card {
+        grid-column : 1 / -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .grid-bottom {
+        grid-template-columns : 1fr;
+    }
+}
+
+/* ── Machine Learning Performance Panel ────────────────────── */
+.ml-perf-card {
+    position        : relative;
+    overflow        : hidden;
+    border          : 1px solid rgba(13, 148, 136, 0.18) !important;
+    background      : linear-gradient(135deg, #ffffff 0%, #F0FDFA 100%) !important;
+    box-shadow      : 0 4px 24px rgba(13, 148, 136, 0.10),
+                      0 1px 4px rgba(30, 58, 95, 0.06) !important;
+}
+
+.ml-perf-card::before {
+    content       : '';
+    position      : absolute;
+    top           : -40px;
+    right         : -40px;
+    width         : 120px;
+    height        : 120px;
+    background    : radial-gradient(circle, rgba(13,148,136,0.08) 0%, transparent 70%);
+    border-radius : 50%;
+    pointer-events: none;
+}
+
+.ml-perf-header {
+    margin-bottom : 20px;
+}
+
+.ml-perf-title {
+    font-size      : 18px;
+    font-weight    : 700;
+    color          : #1E3A5F;
+    font-family    : 'DM Sans', sans-serif;
+    margin         : 0 0 6px 0;
+    letter-spacing : -0.01em;
+}
+
+.ml-perf-subtitle {
+    font-size      : 13px;
+    font-weight    : 400;
+    color          : #6B8BAE;
+    font-family    : 'DM Sans', sans-serif;
+    margin         : 0;
+    line-height    : 1.5;
+    letter-spacing : 0.01em;
+}
+
+/* Metrics list */
+.ml-perf-metrics {
+    display        : flex;
+    flex-direction : column;
+    gap            : 0;
+    background     : rgba(30, 58, 95, 0.025);
+    border-radius  : 10px;
+    padding        : 4px 0;
+    overflow       : hidden;
+}
+
+.ml-perf-metric-row {
+    display     : flex;
+    align-items : center;
+    padding     : 10px 18px;
+    transition  : background 0.15s;
+}
+
+.ml-perf-metric-row:hover {
+    background : rgba(13, 148, 136, 0.04);
+}
+
+.ml-perf-metric-row:not(:last-child) {
+    border-bottom : 1px solid rgba(30, 58, 95, 0.06);
+}
+
+.ml-perf-metric-label {
+    font-size   : 13.5px;
+    font-weight : 500;
+    color       : #4A6180;
+    font-family : 'DM Sans', sans-serif;
+    min-width   : 100px;
+    flex-shrink : 0;
+}
+
+.ml-perf-metric-sep {
+    font-size   : 13.5px;
+    color       : #93ABC4;
+    font-family : 'DM Mono', 'Fira Mono', monospace;
+    margin      : 0 12px 0 4px;
+    flex-shrink : 0;
+}
+
+.ml-perf-metric-value {
+    font-size   : 14px;
+    font-weight : 600;
+    color       : #1E3A5F;
+    font-family : 'DM Sans', sans-serif;
+    display     : flex;
+    align-items : center;
+    gap         : 8px;
+    flex-wrap   : wrap;
+}
+
+.ml-perf-metric-value--algo {
+    font-family : 'DM Mono', 'Fira Mono', monospace;
+    font-size   : 13px;
+    font-weight : 500;
+    color       : #1E3A5F;
+    background  : rgba(30, 58, 95, 0.06);
+    padding     : 3px 10px;
+    border-radius : 6px;
+}
+
+.ml-perf-metric-value--r2 {
+    font-family    : 'DM Mono', 'Fira Mono', monospace;
+    font-size      : 15px;
+    font-weight    : 700;
+    color          : #0D9488;
+    letter-spacing : 0.01em;
+}
+
+/* Inline badges for R² quality */
+.ml-perf-badge-inline {
+    display       : inline-flex;
+    padding       : 2px 8px;
+    font-size     : 10px;
+    font-weight   : 600;
+    font-family   : 'DM Sans', sans-serif;
+    border-radius : 12px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.ml-perf-badge-inline--good {
+    background : rgba(13, 148, 136, 0.12);
+    color      : #0D9488;
+}
+
+.ml-perf-badge-inline--ok {
+    background : rgba(217, 119, 6, 0.12);
+    color      : #D97706;
+}
+
+.ml-perf-badge-inline--low {
+    background : rgba(224, 82, 82, 0.12);
+    color      : #E05252;
+}
+
+/* Status with animated dot */
+.ml-perf-metric-value--status {
+    color       : #0D9488;
+    font-weight : 600;
+    font-size   : 13.5px;
+}
+
+.ml-perf-status-dot {
+    display        : inline-block;
+    width          : 8px;
+    height         : 8px;
+    background     : #0D9488;
+    border-radius  : 50%;
+    animation      : mlPerfPulse 2s ease-in-out infinite;
+    flex-shrink    : 0;
+}
+
+@keyframes mlPerfPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.4); }
+    50%      { box-shadow: 0 0 0 6px rgba(13, 148, 136, 0); }
+}
+
+@media (max-width: 640px) {
+    .ml-perf-metric-label {
+        min-width : 80px;
+    }
+
+    .ml-perf-metric-row {
+        padding : 9px 14px;
+    }
+}

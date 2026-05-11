@@ -11,8 +11,7 @@ Layout utama Activa Admin Panel
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <link rel="icon" type="image/svg+xml" href="{{ asset('../images/NewLogoEmblem2.svg') }}">
-  <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
+  <link rel="icon" type="image/svg+xml" href="{{ asset('images/NewLogoEmblem2.svg') }}">
   <title>@yield('title', 'Activa Admin')</title>
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap"
@@ -380,7 +379,7 @@ Layout utama Activa Admin Panel
     <div class="sidebar-logo">
       <div>
         <div class="brand-icon">
-          <img src="../images/NewLogoPutih.svg" alt="Logo" class="logo-img">
+          <img src="{{ asset('images/NewLogoPutih.svg') }}" alt="Logo" class="logo-img">
         </div>
         <div class="logo-sub">Admin Panel</div>
       </div>
@@ -391,10 +390,14 @@ Layout utama Activa Admin Panel
         <div class="nav-group-label">Utama</div>
         <a href="{{ route('admin.dashboard') }}"
           class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-          <div class="nav-icon">◈</div> Dashboard
+          <div class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          </div> Dashboard
         </a>
         <a href="{{ route('admin.users') }}" class="nav-link {{ request()->routeIs('admin.users*') ? 'active' : '' }}">
-          <div class="nav-icon">⊞</div> User Management
+          <div class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div> User Management
         </a>
       </div>
 
@@ -402,7 +405,9 @@ Layout utama Activa Admin Panel
         <div class="nav-group-label">Analitik</div>
         <a href="{{ route('admin.kuesioner') }}"
           class="nav-link {{ request()->routeIs('admin.kuesioner*') ? 'active' : '' }}">
-          <div class="nav-icon">≡</div> Data Kuesioner
+          <div class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          </div> Data Kuesioner
         </a>
       </div>
     </nav>
@@ -418,7 +423,9 @@ Layout utama Activa Admin Panel
         </div>
         <form method="POST" action="{{ route('admin.logout') }}" style="margin-left:auto">
           @csrf
-          <button type="submit" class="logout-btn" title="Logout">⏻</button>
+          <button type="submit" class="logout-btn" title="Logout">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          </button>
         </form>
       </div>
     </div>
