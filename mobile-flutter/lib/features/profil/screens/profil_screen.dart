@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
+import 'dart:io';
+import 'package:dio/dio.dart';
+import '../../../core/network/api_client.dart';
+import '../../../core/network/api_endpoints.dart';
+import '../../../core/storage/local_storage.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/bottom_nav.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -403,7 +412,7 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
                 iconColor: AppColors.amber,
                 title: 'Ekspor Data',
                 subtitle: 'Unduh hasil analisis periode ini',
-                onTap: () {},
+                onTap: _showExportOptions,
               ),
               SettingItem(
                 icon: Icons.help_outline_rounded,
@@ -522,5 +531,253 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
         ],
       ),
     );
+  }
+
+  // ── Export Logic ───────────────────────────────────────────────────────────
+
+  void _showExportOptions() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: AppColors.bgWhite,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: AppColors.textMuted.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Text(
+              'Ekspor Data Analisis',
+              style: TextStyle(
+                color: AppColors.textDark,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Pilih format file untuk mengunduh riwayat analisis Anda',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: AppColors.textMuted,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildExportCard(
+                    icon: Icons.picture_as_pdf_rounded,
+                    color: AppColors.red,
+                    label: 'Format PDF',
+                    subtitle: 'Laporan Visual',
+                    onTap: () => _handleExport('pdf'),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildExportCard(
+                    icon: Icons.table_chart_rounded,
+                    color: AppColors.teal,
+                    label: 'Format Excel',
+                    subtitle: 'Data Mentah (CSV)',
+                    onTap: () => _handleExport('excel'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExportCard({
+    required IconData icon,
+    required Color color,
+    required String label,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: () {
+        Navigator.pop(context);
+        onTap();
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withValues(alpha: 0.1)),
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 28),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: TextStyle(
+                color: color.withValues(alpha: 0.6),
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleExport(String format) async {
+    // 1. Ambil token (diperlukan untuk download via URL di Web)
+    final storage = ref.read(localStorageProvider);
+    final token = await storage.getToken();
+
+    if (token == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Sesi berakhir, silakan login kembali')),
+        );
+      }
+      return;
+    }
+
+    // 2. Jika di WEB, gunakan launchUrl agar browser yang menangani download
+    if (kIsWeb) {
+      final url = Uri.parse(
+        '${ApiEndpoints.baseUrl}${ApiEndpoints.export}?format=$format&token=$token',
+      );
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Mengunduh $format melalui browser...'), backgroundColor: AppColors.teal),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Tidak dapat membuka link download'), backgroundColor: AppColors.red),
+          );
+        }
+      }
+      return;
+    }
+
+    // 3. Jika di MOBILE (Android/iOS), gunakan Dio Download + OpenFile
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
+              const SizedBox(width: 16),
+              Text('Mengunduh file $format...'),
+            ],
+          ),
+          backgroundColor: AppColors.teal,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+
+    try {
+      final apiClient = ref.read(apiClientProvider);
+      
+      // Tentukan lokasi simpan
+      Directory? directory;
+      if (Platform.isAndroid) {
+        directory = Directory('/storage/emulated/0/Download');
+        if (!await directory.exists()) {
+          directory = await getExternalStorageDirectory();
+        }
+      } else {
+        directory = await getApplicationDocumentsDirectory();
+      }
+
+      final fileName = format == 'pdf' 
+          ? "activa_report_${DateTime.now().millisecondsSinceEpoch}.pdf"
+          : "activa_data_${DateTime.now().millisecondsSinceEpoch}.csv";
+      
+      final savePath = "${directory!.path}/$fileName";
+
+      // Download via ApiClient
+      await apiClient.download(
+        ApiEndpoints.export,
+        savePath,
+        queryParams: {'format': format},
+      );
+
+      // Berhasil! Tawarkan untuk buka file
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Berhasil mengunduh ke: $fileName'),
+            backgroundColor: AppColors.teal,
+            behavior: SnackBarBehavior.floating,
+            action: SnackBarAction(
+              label: 'BUKA',
+              textColor: Colors.white,
+              onPressed: () => OpenFile.open(savePath),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        String errorMessage = 'Gagal mengunduh file';
+        
+        if (e is DioException) {
+          final data = e.response?.data;
+          if (data is Map<String, dynamic> && data['message'] != null) {
+            errorMessage = data['message'];
+          } else if (e.type == DioExceptionType.connectionError) {
+            errorMessage = 'Tidak dapat terhubung ke server';
+          }
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: AppColors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 }

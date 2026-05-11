@@ -165,17 +165,23 @@ class AuthController extends Controller
         /** @var \App\Models\User $user */
         $user = auth()->user();
 
-        $user->update(
-            $request->only([
-                'name',
-                'gender',
-                'date_of_birth',
-                'region',
-                'education_level',
-                'daily_role',
-                'income_level',
-            ])
-        );
+        $data = $request->only([
+            'name',
+            'gender',
+            'region',
+            'education_level',
+            'daily_role',
+            'income_level',
+        ]);
+
+        if ($request->has('date_of_birth')) {
+            $dob = new \DateTime($request->date_of_birth);
+            $now = new \DateTime();
+            $data['tgl_lahir'] = $dob->format('Y-m-d H:i:s');
+            $data['age'] = $now->diff($dob)->y;
+        }
+
+        $user->update($data);
 
         return response()->json([
             'success' => true,

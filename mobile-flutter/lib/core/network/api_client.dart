@@ -52,6 +52,11 @@ class ApiClient {
   Future<Response> delete(String path) async {
     return _dio.delete(path);
   }
+
+  // ── DOWNLOAD ───────────────────────────────────────────────────────────────
+  Future<Response> download(String path, String savePath, {Map<String, dynamic>? queryParams}) async {
+    return _dio.download(path, savePath, queryParameters: queryParams);
+  }
 }
 
 // ── Auth Interceptor ──────────────────────────────────────────────────────────

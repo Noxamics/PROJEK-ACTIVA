@@ -35,8 +35,8 @@ class UserModel {
       name: json['name']?.toString() ?? 'User',
       email: json['email']?.toString() ?? '',
       gender: json['gender']?.toString() ?? 'Male',
-      dateOfBirth: json['date_of_birth'] != null
-          ? DateTime.tryParse(json['date_of_birth'].toString())
+      dateOfBirth: (json['date_of_birth'] ?? json['tgl_lahir']) != null
+          ? DateTime.tryParse((json['date_of_birth'] ?? json['tgl_lahir']).toString())
           : null,
       age: _parseInt(json['age']), // computed dari backend
       region: json['region']?.toString() ?? 'Asia',
@@ -68,6 +68,7 @@ class UserModel {
     'email': email,
     'gender': gender,
     'date_of_birth': dateOfBirth?.toIso8601String(),
+    'tgl_lahir': dateOfBirth?.toIso8601String(),
     'age': age,
     'region': region,
     'education_level': educationLevel,

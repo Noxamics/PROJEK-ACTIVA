@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\SurveyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\LaporanController;
+use App\Http\Controllers\Api\ExportController;
 
 /*
 |══════════════════════════════════════════════════════════════
@@ -99,6 +100,7 @@ Route::middleware('jwt.auth')->group(function () {
     });
 
     Route::get('/laporan', [LaporanController::class, 'getLaporan']);
+    Route::get('/export', [ExportController::class, 'export']);
 
 });
 

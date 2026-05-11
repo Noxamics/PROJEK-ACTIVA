@@ -106,15 +106,6 @@ class ScoreCard extends StatelessWidget {
                         letterSpacing: -1,
                       ),
                     ),
-                    const SizedBox(width: 2),
-                    const Text(
-                      'pt',
-                      style: TextStyle(
-                        color: AppColors.textMuted,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
                     if (catLabel.isNotEmpty) ...[
                       const SizedBox(width: 8),
                       Text(
