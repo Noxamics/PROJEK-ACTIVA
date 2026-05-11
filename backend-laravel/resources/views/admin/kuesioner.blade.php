@@ -237,90 +237,299 @@
   }
   .btn-export:active { transform: translateY(0); }
 
-  /* ── Modal ── */
+  /* ══════════════════════════════════════════════
+     PREMIUM MODAL — International Grade Design
+  ══════════════════════════════════════════════ */
   .modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(15, 31, 53, 0.6);
-    backdrop-filter: blur(4px);
+    background: rgba(10, 20, 40, 0.55);
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
     z-index: 1000;
     align-items: center;
     justify-content: center;
-    padding: 20px;
-    transition: all 0.3s;
+    padding: 24px;
+    opacity: 0;
+    transition: opacity 0.35s cubic-bezier(.4,0,.2,1);
   }
-  .modal-overlay.open { display: flex; }
+  .modal-overlay.open { display: flex; opacity: 1; }
 
   .modal-box {
-    background: #fff;
-    border-radius: 20px;
-    padding: 32px;
-    width: 480px;
+    background: #FFFFFF;
+    border-radius: 24px;
+    width: 560px;
     max-width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    max-height: 88vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative; /* Penting untuk posisi absolute tombol X */
+    box-shadow:
+      0 0 0 1px rgba(30,58,95,.06),
+      0 8px 24px rgba(15,31,53,.08),
+      0 32px 64px -16px rgba(15,31,53,.18);
+    animation: modalPopIn 0.4s cubic-bezier(.16,1,.3,1) both;
+  }
+
+  @keyframes modalPopIn {
+    from { opacity: 0; transform: translateY(24px) scale(.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ── Modal Header ── */
+  .modal-header {
+    padding: 28px 32px 22px;
+    background: linear-gradient(135deg, #1E3A5F 0%, #264875 50%, #0D9488 100%);
     position: relative;
-    animation: modalSlideUp 0.3s ease-out;
+    overflow: hidden;
   }
-
-  @keyframes modalSlideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+  .modal-header::before {
+    content: '';
+    position: absolute;
+    top: -40%; right: -20%;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(13,148,136,.25) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
   }
-
-  .modal-box h3 {
+  .modal-header::after {
+    content: '';
+    position: absolute;
+    bottom: -30%; left: -10%;
+    width: 150px; height: 150px;
+    background: radial-gradient(circle, rgba(255,255,255,.08) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .modal-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+  }
+  .modal-header-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .modal-header-icon {
+    width: 44px; height: 44px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.15);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .modal-header-icon svg {
+    width: 22px; height: 22px;
+    color: #fff;
+    stroke: currentColor;
+  }
+  .modal-header h3 {
     font-size: 18px;
     font-weight: 700;
-    color: var(--navy);
-    margin-bottom: 20px;
+    color: #FFFFFF;
+    margin: 0;
+    letter-spacing: -0.3px;
+  }
+  .modal-header-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,.6);
+    margin-top: 2px;
+  }
+  .modal-close-x {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.25);
+    background: rgba(255,255,255,.15);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all .25s ease;
+    color: #fff;
+    z-index: 100;
+    padding: 0;
+    outline: none;
+  }
+  .modal-close-x:hover {
+    background: rgba(255,255,255,.2);
+    border-color: rgba(255,255,255,.35);
+    color: #fff;
+    transform: rotate(90deg);
+  }
+  .modal-close-x svg { width: 16px; height: 16px; }
+
+  /* ── Modal Body ── */
+  .modal-body {
+    padding: 28px 32px 32px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .modal-body::-webkit-scrollbar { width: 5px; }
+  .modal-body::-webkit-scrollbar-track { background: transparent; }
+  .modal-body::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+
+  /* Section */
+  .modal-section {
+    margin-bottom: 28px;
+  }
+  .modal-section:last-child { margin-bottom: 0; }
+  .modal-section-header {
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-bottom: 16px;
   }
-  
-  .modal-rec-item {
+  .modal-section-icon {
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .modal-section-icon svg { width: 16px; height: 16px; }
+  .modal-section-icon--danger {
+    background: linear-gradient(135deg, rgba(224,82,82,.12), rgba(224,82,82,.06));
+    color: #DC2626;
+  }
+  .modal-section-icon--teal {
+    background: linear-gradient(135deg, rgba(13,148,136,.12), rgba(13,148,136,.06));
+    color: var(--teal);
+  }
+  .modal-section-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.2px;
+  }
+  .modal-section-count {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text3);
+    background: #F1F5F9;
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-left: auto;
+  }
+
+  /* Cards */
+  .modal-card {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
-    padding: 12px 16px;
+    gap: 14px;
+    padding: 16px 18px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    font-size: 13.5px;
+    line-height: 1.65;
+    border: 1px solid;
+    transition: all .2s ease;
+    animation: cardFadeIn .4s ease both;
+  }
+  .modal-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,.04);
+  }
+  @keyframes cardFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal-card--danger {
+    background: linear-gradient(135deg, #FFF5F5 0%, #FFF0F0 100%);
+    border-color: #FED7D7;
+    color: #9B2C2C;
+  }
+  .modal-card--teal {
+    background: linear-gradient(135deg, #F0FDFA 0%, #F0FFF4 100%);
+    border-color: #C6F6D5;
+    color: #234E52;
+  }
+  .modal-card-num {
+    width: 24px; height: 24px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .modal-card--danger .modal-card-num {
+    background: rgba(220,38,38,.12);
+    color: #DC2626;
+  }
+  .modal-card--teal .modal-card-num {
+    background: rgba(13,148,136,.12);
+    color: var(--teal);
+  }
+  .modal-card-text {
+    font-weight: 500;
+    flex: 1;
+  }
+
+  .modal-empty {
+    text-align: center;
+    padding: 20px;
     background: #F8FAFC;
     border-radius: 12px;
-    margin-bottom: 10px;
-    font-size: 14px;
-    color: var(--text);
-    line-height: 1.6;
-    border: 1px solid #E2EAF2;
+    border: 1px dashed #E2E8F0;
+  }
+  .modal-empty-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+    opacity: .5;
+  }
+  .modal-empty-text {
+    font-size: 13px;
+    color: var(--text3);
+    font-weight: 500;
   }
 
-  .rec-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--teal);
-    flex-shrink: 0;
-    margin-top: 7px;
-    box-shadow: 0 0 0 3px var(--teal-lt);
+  /* Footer */
+  .modal-footer {
+    padding: 0 32px 28px;
+    display: flex;
+    gap: 10px;
   }
-
   .modal-close-btn {
-    margin-top: 24px;
-    width: 100%;
-    padding: 12px;
-    border: 1px solid var(--border2);
-    border-radius: 12px;
+    flex: 1;
+    padding: 13px;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 14px;
     background: #fff;
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 600;
     cursor: pointer;
     color: var(--text2);
-    transition: all 0.2s;
+    font-family: var(--sans);
+    transition: all 0.25s cubic-bezier(.4,0,.2,1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
-  .modal-close-btn:hover { 
-    background: #F1F5F9;
-    color: var(--navy);
+  .modal-close-btn:hover {
+    background: var(--navy);
+    color: #fff;
     border-color: var(--navy);
+    box-shadow: 0 4px 16px rgba(30,58,95,.2);
+    transform: translateY(-1px);
   }
+  .modal-close-btn:active { transform: translateY(0); }
+  .modal-close-btn svg { width: 16px; height: 16px; }
 
   .no-data {
     text-align: center;
@@ -692,12 +901,37 @@
   </div>
 </div>
 
-{{-- MODAL REKOMENDASI --}}
+{{-- MODAL REKOMENDASI — Premium Design --}}
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal-box">
-    <h3 id="modalTitle">Analisis & Rekomendasi</h3>
-    <div id="modalContent"></div>
-    <button class="modal-close-btn" onclick="document.getElementById('modalOverlay').classList.remove('open')">Tutup</button>
+    {{-- Button Close di Pojok --}}
+    <button class="modal-close-x" onclick="document.getElementById('modalOverlay').classList.remove('open')" title="Tutup">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+
+    {{-- Header --}}
+    <div class="modal-header">
+      <div class="modal-header-top">
+        <div class="modal-header-info">
+          <div class="modal-header-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          </div>
+          <div>
+            <h3 id="modalTitle">Analisis & Rekomendasi</h3>
+            <div class="modal-header-sub" id="modalSub">Hasil analisis ketergantungan digital</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{-- Body --}}
+    <div class="modal-body" id="modalContent"></div>
+    {{-- Footer --}}
+    <div class="modal-footer">
+      <button class="modal-close-btn" onclick="document.getElementById('modalOverlay').classList.remove('open')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        Kembali ke Tabel
+      </button>
+    </div>
   </div>
 </div>
 
@@ -916,45 +1150,66 @@ function clearAll() {
     const recs = JSON.parse(btn.dataset.recs);
     const penyebab = JSON.parse(btn.dataset.penyebab || '[]');
     const userId = btn.dataset.uid;
-    
-    document.getElementById('modalTitle').textContent = `Analisis & Rekomendasi`;
+
+    document.getElementById('modalTitle').textContent = 'Analisis & Rekomendasi';
+    document.getElementById('modalSub').textContent = 'Hasil analisis ketergantungan digital';
     const content = document.getElementById('modalContent');
-    
+
     let html = '';
-    
-    // ── Penyebab Utama ──
-    html += `<div style="margin-bottom:24px;">
-                <h4 style="font-size:11px; color:var(--text3); text-transform:uppercase; margin-bottom:12px; letter-spacing:0.08em; font-weight:700;">Penyebab Utama</h4>`;
+
+    // ══ Section 1: Penyebab Utama ══
+    html += `<div class="modal-section">`;
+    html += `<div class="modal-section-header">
+               <div class="modal-section-icon modal-section-icon--danger">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+               </div>
+               <span class="modal-section-label">Penyebab Utama</span>
+               <span class="modal-section-count">${penyebab && penyebab.length > 0 ? penyebab.length + ' faktor' : '—'}</span>
+             </div>`;
     if (penyebab && penyebab.length > 0) {
-        html += penyebab.map(p => {
-          const label = translatePenyebab(p);
-          return `
-          <div class="modal-rec-item" style="background:#FFF5F5; border-color:#FED7D7;">
-            <div class="rec-dot" style="background:#E53E3E; box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);"></div>
-            <div style="color:#C53030; font-weight:500;">${label}</div>
-          </div>`;
-        }).join('');
+      html += penyebab.map((p, i) => {
+        const label = translatePenyebab(p);
+        return `<div class="modal-card modal-card--danger" style="animation-delay:${i * 0.06}s">
+                  <div class="modal-card-num">${i + 1}</div>
+                  <div class="modal-card-text">${label}</div>
+                </div>`;
+      }).join('');
     } else {
-        html += `<div style="font-size:13px; color:var(--text3); padding:10px; background:#F8FAFC; border-radius:8px; text-align:center;">Data penyebab tidak tersedia</div>`;
+      html += `<div class="modal-empty">
+                 <div class="modal-empty-icon">📋</div>
+                 <div class="modal-empty-text">Data penyebab tidak tersedia</div>
+               </div>`;
     }
     html += `</div>`;
-    
-    // ── Rekomendasi Tindakan ──
-    html += `<div>
-                <h4 style="font-size:11px; color:var(--text3); text-transform:uppercase; margin-bottom:12px; letter-spacing:0.08em; font-weight:700;">Rekomendasi Tindakan</h4>`;
+
+    // ══ Section 2: Rekomendasi Tindakan ══
+    html += `<div class="modal-section">`;
+    html += `<div class="modal-section-header">
+               <div class="modal-section-icon modal-section-icon--teal">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+               </div>
+               <span class="modal-section-label">Rekomendasi Tindakan</span>
+               <span class="modal-section-count">${recs && recs.length > 0 ? recs.length + ' langkah' : '—'}</span>
+             </div>`;
     if (recs && recs.length > 0) {
-        html += recs.map(r => {
-          const text = extractText(r);
-          return `<div class="modal-rec-item"><div class="rec-dot"></div><div>${text}</div></div>`;
-        }).join('');
+      html += recs.map((r, i) => {
+        const text = extractText(r);
+        return `<div class="modal-card modal-card--teal" style="animation-delay:${(penyebab ? penyebab.length : 0) * 0.06 + i * 0.06}s">
+                  <div class="modal-card-num">${i + 1}</div>
+                  <div class="modal-card-text">${text}</div>
+                </div>`;
+      }).join('');
     } else {
-        html += `<div style="font-size:13px; color:var(--text3); padding:10px; background:#F8FAFC; border-radius:8px; text-align:center;">Data rekomendasi tidak tersedia</div>`;
+      html += `<div class="modal-empty">
+                 <div class="modal-empty-icon">💡</div>
+                 <div class="modal-empty-text">Data rekomendasi tidak tersedia</div>
+               </div>`;
     }
     html += `</div>`;
-    
+
     content.innerHTML = html;
     document.getElementById('modalOverlay').classList.add('open');
-}
+  }
 
   function closeModal(e) {
     if (e.target === document.getElementById('modalOverlay')) {
