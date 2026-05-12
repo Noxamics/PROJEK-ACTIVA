@@ -17,7 +17,6 @@ class MonitoringController extends Controller
             'avg_focus' => 7.8,
             'avg_productivity' => 6.5,
             'avg_dependence' => 5.2,
-            'avg_screen' => 4.2,
         ];
         
         return view('admin.monitoring', compact('metrics'));

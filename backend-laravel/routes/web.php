@@ -7,6 +7,8 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\MonitoringController;
 use App\Http\Controllers\Admin\KuesionerController;
 use App\Http\Controllers\Admin\RuleController;
+use App\Http\Controllers\Admin\ExportCenterController;
+use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\SurveyController;
 
 // ════════════════════════════════════════════════════
@@ -35,6 +37,15 @@ Route::middleware(['admin'])->prefix('admin')->group(function () {
     Route::post('/rules', [RuleController::class, 'store'])->name('admin.rules.store');
     Route::patch('/rules/{id}/toggle', [RuleController::class, 'toggle'])->name('admin.rules.toggle');
     Route::delete('/rules/{id}', [RuleController::class, 'destroy'])->name('admin.rules.destroy');
+
+    // Export Center
+    Route::get('/export', [ExportCenterController::class, 'index'])->name('admin.export');
+    Route::get('/export/download', [ExportCenterController::class, 'download'])->name('admin.export.download');
+
+    // Announcements
+    Route::get('/announcements', [AnnouncementController::class, 'index'])->name('admin.announcements');
+    Route::post('/announcements', [AnnouncementController::class, 'store'])->name('admin.announcements.store');
+    Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy'])->name('admin.announcements.destroy');
 });
 
 // Predict routes
