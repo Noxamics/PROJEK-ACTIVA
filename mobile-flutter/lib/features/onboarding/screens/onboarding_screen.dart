@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
-import '../widgets/dot_indicator.dart';
 import '../../auth/screens/login_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -23,7 +22,6 @@ class OnboardingScreen extends StatelessWidget {
               const SizedBox(height: 16),
               _buildSubtitle(),
               const Spacer(flex: 2),
-              const DotIndicator(totalDots: 3, activeIndex: 0),
               const Spacer(),
               _buildPrimaryButton(context),
               const SizedBox(height: 16),

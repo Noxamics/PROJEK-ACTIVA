@@ -415,12 +415,38 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
                 onTap: _showExportOptions,
               ),
               SettingItem(
-                icon: Icons.help_outline_rounded,
-                iconBg: Colors.purple.withValues(alpha: 0.08),
-                iconColor: Colors.purple,
-                title: 'Bantuan',
-                subtitle: 'Pusat bantuan & FAQ',
-                onTap: () {},
+                icon: Icons.chat_bubble_outline_rounded,
+                iconBg: Colors.indigo.withValues(alpha: 0.08),
+                iconColor: Colors.indigo,
+                title: 'Kritik dan Saran',
+                subtitle: 'Kirim masukan Anda via Email',
+                onTap: () async {
+                  final Uri emailLaunchUri = Uri(
+                    scheme: 'mailto',
+                    path: 'activ4aaaaa@gmail.com',
+                    query: encodeQueryParameters(<String, String>{
+                      'subject': 'Kritik dan Saran Pengguna ACTIVA',
+                    }),
+                  );
+
+                  try {
+                    if (await canLaunchUrl(emailLaunchUri)) {
+                      await launchUrl(emailLaunchUri, mode: LaunchMode.externalApplication);
+                    } else {
+                      // Fallback if canLaunchUrl fails but maybe it still can launch
+                      await launchUrl(emailLaunchUri, mode: LaunchMode.externalApplication);
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Tidak dapat membuka aplikasi Email'),
+                          backgroundColor: AppColors.red,
+                        ),
+                      );
+                    }
+                  }
+                },
                 showDivider: false,
               ),
             ],
@@ -779,5 +805,12 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
         );
       }
     }
+  }
+  
+  String? encodeQueryParameters(Map<String, String> params) {
+    return params.entries
+        .map((MapEntry<String, String> e) =>
+            '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .join('&');
   }
 }
