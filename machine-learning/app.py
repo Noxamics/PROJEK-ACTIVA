@@ -204,7 +204,7 @@ def get_category(score: float) -> str:
 
 
 # ============================================================
-# RULE — tentukan penyebab dari SHAP + raw input
+# RULE — tentukan penyebab dari raw input
 # ============================================================
 def apply_rules(raw_data: dict) -> list:
     penyebab = []
