@@ -73,6 +73,15 @@ Route::prefix('user')->group(function () {
     Route::post('/register', [WebAuth::class, 'register'])->name('user.register.post');
     Route::post('/logout', [WebAuth::class, 'logout'])->name('user.logout');
 
+    // Forgot Password Flow (public)
+    Route::get('/forgot', [WebAuth::class, 'showForgotPassword'])->name('user.forgot');
+    Route::post('/forgot', [WebAuth::class, 'sendForgotOtp'])->name('user.forgot.post');
+    Route::get('/otp-verify', [WebAuth::class, 'showOtpVerify'])->name('user.otp-verify');
+    Route::post('/otp-verify', [WebAuth::class, 'verifyOtp'])->name('user.otp-verify.post');
+    Route::post('/forgot-resend', [WebAuth::class, 'resendOtp'])->name('user.forgot-resend');
+    Route::get('/reset-password', [WebAuth::class, 'showResetPassword'])->name('user.reset-password');
+    Route::post('/reset-password', [WebAuth::class, 'resetPassword'])->name('user.reset-password.post');
+
     // Protected (session auth)
     Route::middleware('web.user')->group(function () {
         Route::get('/dashboard', [WebDashboard::class, 'index'])->name('user.dashboard');

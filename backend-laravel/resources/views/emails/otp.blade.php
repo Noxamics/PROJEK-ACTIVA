@@ -100,7 +100,7 @@
         </div>
 
         <div class="content">
-            <p>Halo {{ $user->name }},</p>
+            <p>Halo {{ isset($user) ? $user->name : ($name ?? 'Pengguna') }},</p>
 
             <p>Kami menerima permintaan untuk mereset password akun Anda. Gunakan kode OTP di bawah ini untuk
                 melanjutkan:</p>
