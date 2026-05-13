@@ -61,6 +61,7 @@ class Kernel extends HttpKernel
         // ─── JWT Middleware ───────────────────────────────────────
         'jwt.auth' => \App\Http\Middleware\JwtMiddleware::class,
         'jwt.admin' => \App\Http\Middleware\JwtAdminMiddleware::class,
+        'web.user' => \App\Http\Middleware\WebUser::class,
     ];
 
 
