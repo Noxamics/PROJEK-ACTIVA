@@ -1,65 +1,90 @@
 // lib/features/grafik/faker/grafik_faker.dart
 //
-// ┌─────────────────────────────────────────────────────────────────────────┐
-// │  GRAFIK FAKER                                                           │
-// │  Dummy data generator untuk GrafikScreen selama masa development.       │
-// │                                                                         │
-// │  Cara pakai:                                                            │
-// │    final data = GrafikFaker.generate(period: GrafikPeriod.week);        │
-// │                                                                         │
-// │  Cara ganti ke data asli:                                               │
-// │    Cukup ganti pemanggilan GrafikFaker.generate() di grafik_provider    │
-// │    dengan call ke GrafikService / AnalyticsRepository. Selama model     │
-// │    GrafikData tetap sama, tidak ada perubahan di widget/screen.         │
-// └─────────────────────────────────────────────────────────────────────────┘
-
-import 'dart:math';
+// File ini hanya berisi model data & enum periode.
+// Faker sudah dihapus — data sekarang dari API via grafik_provider.dart.
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Enum periode yang tersedia
+// Enum periode
 // ─────────────────────────────────────────────────────────────────────────────
 
-enum GrafikPeriod { week, month, threeMonths }
+enum GrafikPeriod { week, monthly, yearly }
+
+extension GrafikPeriodExt on GrafikPeriod {
+  /// Query param yang dikirim ke API: ?period=week|monthly|yearly
+  String get apiParam => switch (this) {
+        GrafikPeriod.week    => 'week',
+        GrafikPeriod.monthly => 'monthly',
+        GrafikPeriod.yearly  => 'yearly',
+      };
+
+  /// Label yang tampil di selector
+  String get label => switch (this) {
+        GrafikPeriod.week    => '7 Hari',
+        GrafikPeriod.monthly => 'Bulanan',
+        GrafikPeriod.yearly  => 'Tahunan',
+      };
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Model: satu titik data pada chart
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Satu entry harian / mingguan / bulanan untuk semua chart.
+/// Field nullable karena user mungkin belum mengisi kuesioner hari itu.
 class GrafikEntry {
-  /// Label sumbu-X (misal: 'Sen', 'Sel', '1 Apr', 'Jan')
+  /// Label sumbu-X (misal: 'Sen', 'M1', 'Jan')
   final String label;
 
-  /// Skor dependensi digital 0–100
-  final double dependenceScore;
+  /// Tanggal entry (untuk tooltip atau debug)
+  final String date;
 
-  /// Rata-rata screen time dalam jam/hari (0–15)
-  final double deviceHours;
+  /// Skor dependensi digital 0–100. Null = tidak ada data.
+  final double? dependenceScore;
 
-  /// Durasi media sosial dalam menit (0–500)
-  final double socialMediaMins;
+  /// Kategori dependensi: 'rendah' | 'sedang' | 'tinggi'. Null = tidak ada data.
+  final String? category;
 
-  /// Durasi tidur dalam jam (0–12)
-  final double sleepHours;
+  /// Rata-rata screen time dalam jam/hari (0–15). Null = tidak ada data.
+  final double? deviceHours;
+
+  /// Durasi media sosial dalam menit (0–500). Null = tidak ada data.
+  final double? socialMediaMins;
+
+  /// Durasi tidur dalam jam (0–12). Null = tidak ada data.
+  final double? sleepHours;
+
+  /// Apakah ada data (ml_result atau survey) di periode ini.
+  final bool hasData;
 
   const GrafikEntry({
     required this.label,
-    required this.dependenceScore,
-    required this.deviceHours,
-    required this.socialMediaMins,
-    required this.sleepHours,
+    required this.date,
+    this.dependenceScore,
+    this.category,
+    this.deviceHours,
+    this.socialMediaMins,
+    this.sleepHours,
+    this.hasData = false,
   });
+
+  factory GrafikEntry.fromJson(Map<String, dynamic> json) {
+    return GrafikEntry(
+      label:            json['label'] as String,
+      date:             json['date'] as String,
+      dependenceScore:  (json['dependence_score'] as num?)?.toDouble(),
+      category:         json['category'] as String?,
+      deviceHours:      (json['device_hours'] as num?)?.toDouble(),
+      socialMediaMins:  (json['social_media_mins'] as num?)?.toDouble(),
+      sleepHours:       (json['sleep_hours'] as num?)?.toDouble(),
+      hasData:          json['has_data'] as bool? ?? false,
+    );
+  }
 }
 
-/// Aggregat ringkasan distribusi kategori dependensi.
+/// Agregat distribusi kategori dependensi untuk DonutChart.
 class GrafikKategori {
-  /// Jumlah kuesioner dengan hasil Rendah
   final int low;
-
-  /// Jumlah kuesioner dengan hasil Sedang
   final int medium;
-
-  /// Jumlah kuesioner dengan hasil Tinggi
   final int high;
 
   const GrafikKategori({
@@ -67,6 +92,14 @@ class GrafikKategori {
     required this.medium,
     required this.high,
   });
+
+  factory GrafikKategori.fromJson(Map<String, dynamic> json) {
+    return GrafikKategori(
+      low:    json['low'] as int? ?? 0,
+      medium: json['medium'] as int? ?? 0,
+      high:   json['high'] as int? ?? 0,
+    );
+  }
 }
 
 /// Satu paket data lengkap untuk seluruh GrafikScreen.
@@ -76,168 +109,33 @@ class GrafikData {
 
   const GrafikData({required this.entries, required this.kategori});
 
+  factory GrafikData.fromJson(Map<String, dynamic> json) {
+    return GrafikData(
+      entries:  (json['entries'] as List)
+          .map((e) => GrafikEntry.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      kategori: GrafikKategori.fromJson(json['kategori'] as Map<String, dynamic>),
+    );
+  }
+
   // ── Shortcut getters untuk widget ────────────────────────────────────────
+  // Nilai null diganti 0 agar chart tidak crash (titik kosong tampil di 0)
 
   List<double> get dependenceValues =>
-      entries.map((e) => e.dependenceScore).toList();
+      entries.map((e) => e.dependenceScore ?? 0).toList();
+
   List<double> get deviceHourValues =>
-      entries.map((e) => e.deviceHours).toList();
+      entries.map((e) => e.deviceHours ?? 0).toList();
+
   List<double> get socialMediaValues =>
-      entries.map((e) => e.socialMediaMins).toList();
-  List<double> get sleepHourValues => entries.map((e) => e.sleepHours).toList();
-  List<String> get labels => entries.map((e) => e.label).toList();
-}
+      entries.map((e) => e.socialMediaMins ?? 0).toList();
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Faker utama
-// ─────────────────────────────────────────────────────────────────────────────
+  List<double> get sleepHourValues =>
+      entries.map((e) => e.sleepHours ?? 0).toList();
 
-class GrafikFaker {
-  GrafikFaker._(); // private constructor — pure static
+  List<String> get labels =>
+      entries.map((e) => e.label).toList();
 
-  static final _rng = Random(
-    42,
-  ); // seed tetap → data konsisten antar hot-reload
-
-  // ── Public API ─────────────────────────────────────────────────────────────
-
-  /// Hasilkan [GrafikData] dummy sesuai periode.
-  /// Ganti method ini dengan service call saat backend sudah siap.
-  static GrafikData generate({required GrafikPeriod period}) {
-    return switch (period) {
-      GrafikPeriod.week => _generateWeek(),
-      GrafikPeriod.month => _generateMonth(),
-      GrafikPeriod.threeMonths => _generateThreeMonths(),
-    };
-  }
-
-  // ── Generators per periode ─────────────────────────────────────────────────
-
-  static GrafikData _generateWeek() {
-    const labels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
-
-    // Skor dependensi naik perlahan menuju weekend (orang lebih banyak main HP)
-    final dependence = _smoothSeries(start: 38, end: 62, count: 7, noiseMax: 6);
-
-    final deviceHours = _smoothSeries(
-      start: 5.5,
-      end: 8.5,
-      count: 7,
-      noiseMax: 1.2,
-    );
-    final socialMedia = _smoothSeries(
-      start: 120,
-      end: 280,
-      count: 7,
-      noiseMax: 40,
-    );
-    final sleep = _smoothSeries(start: 7.5, end: 5.8, count: 7, noiseMax: 0.8);
-
-    final entries = List.generate(
-      7,
-      (i) => GrafikEntry(
-        label: labels[i],
-        dependenceScore: dependence[i],
-        deviceHours: deviceHours[i],
-        socialMediaMins: socialMedia[i],
-        sleepHours: sleep[i],
-      ),
-    );
-
-    return GrafikData(
-      entries: entries,
-      kategori: const GrafikKategori(low: 2, medium: 3, high: 2),
-    );
-  }
-
-  static GrafikData _generateMonth() {
-    // 4 minggu
-    const labels = ['M1', 'M2', 'M3', 'M4'];
-
-    final dependence = _smoothSeries(start: 42, end: 55, count: 4, noiseMax: 5);
-    final deviceHours = _smoothSeries(
-      start: 6.0,
-      end: 7.5,
-      count: 4,
-      noiseMax: 0.8,
-    );
-    final socialMedia = _smoothSeries(
-      start: 150,
-      end: 230,
-      count: 4,
-      noiseMax: 30,
-    );
-    final sleep = _smoothSeries(start: 7.0, end: 6.2, count: 4, noiseMax: 0.5);
-
-    final entries = List.generate(
-      4,
-      (i) => GrafikEntry(
-        label: labels[i],
-        dependenceScore: dependence[i],
-        deviceHours: deviceHours[i],
-        socialMediaMins: socialMedia[i],
-        sleepHours: sleep[i],
-      ),
-    );
-
-    return GrafikData(
-      entries: entries,
-      kategori: const GrafikKategori(low: 5, medium: 8, high: 3),
-    );
-  }
-
-  static GrafikData _generateThreeMonths() {
-    const labels = ['Jan', 'Feb', 'Mar'];
-
-    final dependence = _smoothSeries(start: 35, end: 58, count: 3, noiseMax: 4);
-    final deviceHours = _smoothSeries(
-      start: 5.8,
-      end: 7.8,
-      count: 3,
-      noiseMax: 0.6,
-    );
-    final socialMedia = _smoothSeries(
-      start: 130,
-      end: 260,
-      count: 3,
-      noiseMax: 25,
-    );
-    final sleep = _smoothSeries(start: 7.5, end: 6.0, count: 3, noiseMax: 0.4);
-
-    final entries = List.generate(
-      3,
-      (i) => GrafikEntry(
-        label: labels[i],
-        dependenceScore: dependence[i],
-        deviceHours: deviceHours[i],
-        socialMediaMins: socialMedia[i],
-        sleepHours: sleep[i],
-      ),
-    );
-
-    return GrafikData(
-      entries: entries,
-      kategori: const GrafikKategori(low: 12, medium: 18, high: 6),
-    );
-  }
-
-  // ── Helper ─────────────────────────────────────────────────────────────────
-
-  /// Buat series angka yang mengalir smooth dari [start] ke [end],
-  /// ditambah noise acak ±[noiseMax] agar tidak kelihatan terlalu linear.
-  static List<double> _smoothSeries({
-    required double start,
-    required double end,
-    required int count,
-    required double noiseMax,
-  }) {
-    if (count == 1) return [start];
-
-    return List.generate(count, (i) {
-      final t = i / (count - 1); // 0.0 → 1.0
-      final base = start + (end - start) * t;
-      final noise = (_rng.nextDouble() - 0.5) * 2 * noiseMax;
-      return base + noise;
-    });
-  }
+  /// True jika semua entry tidak punya data (user belum pernah isi kuesioner)
+  bool get isEmpty => entries.every((e) => !e.hasData);
 }

@@ -8,7 +8,7 @@ class ApiEndpoints {
   // Contoh: 'http://192.168.1.x:8000/api'
   // Setelah deploy: 'https://nama-app.up.railway.app/api'
   static const String baseUrl = 'http://192.168.1.37:8000/api';
-
+ 
   // ── Auth (PUBLIC — tanpa token) ────────────────────────────────────────────
   static const String register = '/auth/register';
   static const String login = '/auth/login';
@@ -36,6 +36,7 @@ class ApiEndpoints {
   static const String analyticsInsight = '/analytics/insight';
   static const String analyticsComparison = '/analytics/comparison';
   static const String analyticsHistory = '/analytics/history';
+  static const String analyticsGrafik = '/analytics/grafik';
 
   // ── Laporan Perkembangan ───────────────────────────────────────────────────
   static const String laporan = '/laporan';

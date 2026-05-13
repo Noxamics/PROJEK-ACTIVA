@@ -101,6 +101,7 @@ Route::middleware('jwt.auth')->group(function () {
 
     Route::get('/laporan', [LaporanController::class, 'getLaporan']);
     Route::get('/export', [ExportController::class, 'export']);
+    Route::get('/analytics/grafik', [AnalyticsController::class, 'grafik']);
 
 });
 
@@ -117,3 +118,4 @@ Route::fallback(fn() => response()->json([
     'success' => false,
     'message' => 'Endpoint tidak ditemukan',
 ], 404));
+
