@@ -43,7 +43,6 @@ class DashboardController extends Controller
             'total_users'  => $totalUsers,
             'total_admins' => $totalAdmins,
             'avg_focus'    => $avgScore,
-            'avg_screen'   => 4.2,
             'high_risk'    => $highRisk,
         ];
 
@@ -200,10 +199,10 @@ class DashboardController extends Controller
         $dominantPct = round(max($rendah, $sedang, $tinggi) / $total * 100);
 
         $summaryInsights = [
-            ['icon' => '📊', 'type' => 'info',    'text' => "Mayoritas user berada di kategori {$dominantCategory} ({$dominantPct}%)"],
-            ['icon' => '📈', 'type' => 'up',      'text' => 'Rata-rata skor: ' . $avgScore],
-            ['icon' => '⚠️', 'type' => 'warning', 'text' => 'Penggunaan device berlebih berkorelasi dengan skor tinggi'],
-            ['icon' => '🔴', 'type' => 'danger',  'text' => "{$highRisk} user masuk kategori High Risk, perlu perhatian segera"],
+            ['type' => 'info',    'text' => "Mayoritas user berada di kategori {$dominantCategory} ({$dominantPct}%)"],
+            ['type' => 'up',      'text' => 'Rata-rata skor: ' . $avgScore],
+            ['type' => 'warning', 'text' => 'Penggunaan device berlebih berkorelasi dengan skor tinggi'],
+            ['type' => 'danger',  'text' => "{$highRisk} user masuk kategori High Risk, perlu perhatian segera"],
         ];
 
         // ── 7. Threshold ───────────────────────────────────────

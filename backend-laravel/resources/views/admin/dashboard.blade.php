@@ -22,6 +22,63 @@ resources/views/admin/dashboard.blade.php
         data-score-histogram='@json($scoreHistogram ?? ["labels" => [], "data" => []])'
         hidden>
     </div>
+    {{-- ══════════════════════════════════════════════════════════
+         HERO — KPI Stats Bar
+    ══════════════════════════════════════════════════════════ --}}
+    <div class="dash-hero mb-charts">
+        <div class="dash-hero-inner">
+            <div class="dash-hero-text">
+                <h2 class="dash-hero-title">Overview Analytics</h2>
+                <p class="dash-hero-sub">Ringkasan performa sistem dan insight ketergantungan digital</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-grid mb-charts">
+        {{-- Stat: Total Users --}}
+        <div class="stat-card">
+            <div class="stat-card-icon stat-card-icon--teal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="stat-card-body">
+                <div class="stat-card-value">{{ $stats['total_users'] ?? 0 }}</div>
+                <div class="stat-card-label">Total Pengguna</div>
+            </div>
+        </div>
+
+        {{-- Stat: Avg Score --}}
+        <div class="stat-card">
+            <div class="stat-card-icon stat-card-icon--navy">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="stat-card-body">
+                <div class="stat-card-value">{{ $stats['avg_focus'] ?? 0 }}</div>
+                <div class="stat-card-label">Rata-rata Skor</div>
+            </div>
+        </div>
+
+        {{-- Stat: High Risk --}}
+        <div class="stat-card">
+            <div class="stat-card-icon stat-card-icon--red">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="stat-card-body">
+                <div class="stat-card-value stat-card-value--red">{{ $stats['high_risk'] ?? 0 }}</div>
+                <div class="stat-card-label">High Risk</div>
+            </div>
+        </div>
+
+        {{-- Stat: Total Admin --}}
+        <div class="stat-card">
+            <div class="stat-card-icon stat-card-icon--amber">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="stat-card-body">
+                <div class="stat-card-value">{{ $stats['total_admins'] ?? 0 }}</div>
+                <div class="stat-card-label">Total Admin</div>
+            </div>
+        </div>
+    </div>
 
     {{-- ══════════════════════════════════════════════════════════
          ROW 1 — Chart 1: Score Trend (Line)  |  Chart 2: Donut

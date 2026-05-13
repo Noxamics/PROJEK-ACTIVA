@@ -159,13 +159,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     return Scaffold(
       backgroundColor: AppColors.bgDark,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildTopSection(isLoading),
-              _buildFormSection(isLoading: isLoading, errorMsg: errorMsg),
-            ],
-          ),
+        child: Column(
+          children: [
+            _buildTopSection(isLoading),
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: AppColors.bgLight,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                ),
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: _buildFormContent(isLoading: isLoading, errorMsg: errorMsg),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -227,17 +237,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
   // ── Form Section ───────────────────────────────────────────────────────────
 
-  Widget _buildFormSection({
+  Widget _buildFormContent({
     required bool isLoading,
     required String? errorMsg,
   }) {
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        color: AppColors.bgLight,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 28, 24, 40),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_colors.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/dashboard/screens/dashboard_screen.dart';
-import 'features/onboarding/screens/onboarding_screen.dart';
+import 'features/onboarding/screens/onboarding_screen.dart'; // ✅ tetap sama
 import 'core/services/notification_service.dart';
 
 void main() {
@@ -16,23 +16,22 @@ void main() {
     ),
   );
 
-  // Initialize Notifications
   NotificationService.init();
-
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
+  // ← ganti StatelessWidget
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       title: 'DigitalLife Analyzer',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: 'Poppins',
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.teal),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0EA982)),
         useMaterial3: true,
       ),
       home: const _AuthGate(),
@@ -40,7 +39,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// ── Auth Gate ──────────────────────────────────────────────────────────────────
 class _AuthGate extends ConsumerWidget {
   const _AuthGate();
 
@@ -50,19 +48,15 @@ class _AuthGate extends ConsumerWidget {
 
     switch (authState.status) {
       case AuthStatus.initial:
+      case AuthStatus.loading:
         return const _SplashScreen();
 
       case AuthStatus.authenticated:
         return const DashboardScreen();
 
-      // unauthenticated + error → tetap di login/onboarding
-      // TIDAK redirect ke mana-mana saat error
       case AuthStatus.unauthenticated:
       case AuthStatus.error:
-        return const OnboardingScreen();
-
-      case AuthStatus.loading:
-        return const _SplashScreen();
+        return const OnboardingScreen(); // ← pastikan nama class cocok
     }
   }
 }
