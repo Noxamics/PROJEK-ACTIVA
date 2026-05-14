@@ -71,6 +71,7 @@ Route::prefix('user')->group(function () {
     Route::post('/login', [WebAuth::class, 'login'])->name('user.login.post');
     Route::get('/register', [WebAuth::class, 'showRegister'])->name('user.register');
     Route::post('/register', [WebAuth::class, 'register'])->name('user.register.post');
+    Route::post('/register/google-verify', [WebAuth::class, 'verifyGoogleToken'])->name('user.register.google-verify');
     Route::post('/logout', [WebAuth::class, 'logout'])->name('user.logout');
 
     // Forgot Password Flow (public)
