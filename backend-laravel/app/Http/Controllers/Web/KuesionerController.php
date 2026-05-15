@@ -18,7 +18,7 @@ class KuesionerController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'device_type' => 'required|string',
+            'device_type' => 'nullable|string|in:Smartphone,Laptop,Both',
             'device_hours_per_day' => 'required|numeric',
             'phone_unlocks' => 'required|numeric',
             'notifications_per_day' => 'required|numeric',
@@ -37,7 +37,7 @@ class KuesionerController extends Controller
 
         $questionnaire = Questionnaire::create([
             'user_id' => (string) $user->_id,
-            'device_type' => $request->device_type,
+            'device_type' => $request->device_type ?? 'Smartphone',
             'device_hours_per_day' => (float) $request->device_hours_per_day,
             'phone_unlocks' => (int) $request->phone_unlocks,
             'notifications_per_day' => (int) $request->notifications_per_day,
