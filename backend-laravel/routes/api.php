@@ -8,6 +8,7 @@ use App\Http\Controllers\SurveyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\LaporanController;
 use App\Http\Controllers\Api\ExportController;
+use App\Http\Controllers\Api\AnnouncementController;
 
 /*
 |══════════════════════════════════════════════════════════════
@@ -68,6 +69,8 @@ Route::prefix('auth')->group(function () {
     Route::post('reset-password', [PasswordResetController::class, 'resetPassword']);
     Route::get('/surveys', [SurveyController::class, 'index']);
 });
+
+Route::get('announcements', [AnnouncementController::class, 'index']);
 
 // Admin Public Endpoints (OTP & Login)
 Route::post('admin/login', [AdminController::class, 'login']);
