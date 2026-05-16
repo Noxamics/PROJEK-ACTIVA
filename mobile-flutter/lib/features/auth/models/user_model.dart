@@ -35,9 +35,7 @@ class UserModel {
       name: json['name']?.toString() ?? 'User',
       email: json['email']?.toString() ?? '',
       gender: json['gender']?.toString() ?? 'Male',
-      dateOfBirth: (json['date_of_birth'] ?? json['tgl_lahir']) != null
-          ? DateTime.tryParse((json['date_of_birth'] ?? json['tgl_lahir']).toString())
-          : null,
+      dateOfBirth: _parseDateNullable(json['date_of_birth'] ?? json['tgl_lahir']),
       age: _parseInt(json['age']), // computed dari backend
       region: json['region']?.toString() ?? 'Asia',
       educationLevel: json['education_level']?.toString() ?? 'Bachelor',
@@ -59,6 +57,18 @@ class UserModel {
   static DateTime _parseDate(dynamic val) {
     if (val == null) return DateTime.now();
     return DateTime.tryParse(val.toString()) ?? DateTime.now();
+  }
+
+  static DateTime? _parseDateNullable(dynamic val) {
+    if (val == null) return null;
+    if (val is DateTime) return val;
+    if (val is Map && val.containsKey('\$date')) {
+      return DateTime.tryParse(val['\$date'].toString());
+    }
+    if (val is Map && val.containsKey('date')) {
+      return DateTime.tryParse(val['date'].toString());
+    }
+    return DateTime.tryParse(val.toString());
   }
 
   // ── To JSON ────────────────────────────────────────────────────────────────
