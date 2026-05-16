@@ -57,6 +57,7 @@ Route::middleware(['admin'])->prefix('admin')->group(function () {
 // User Web Routes (Blade — same flow as mobile Flutter)
 // ════════════════════════════════════════════════════
 use App\Http\Controllers\Web\AuthController as WebAuth;
+use App\Http\Controllers\Web\LandingController as WebLanding;
 use App\Http\Controllers\Web\DashboardController as WebDashboard;
 use App\Http\Controllers\Web\KuesionerController as WebKuesioner;
 use App\Http\Controllers\Web\HasilController as WebHasil;
@@ -66,6 +67,9 @@ use App\Http\Controllers\Web\LaporanController as WebLaporan;
 use App\Http\Controllers\Web\ProfilController as WebProfil;
 
 Route::prefix('user')->group(function () {
+    // Landing page (public)
+    Route::get('/landing', [WebLanding::class, 'index'])->name('user.landing');
+
     // Auth (public)
     Route::get('/login', [WebAuth::class, 'showLogin'])->name('user.login');
     Route::post('/login', [WebAuth::class, 'login'])->name('user.login.post');

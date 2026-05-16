@@ -11,7 +11,7 @@ class WebUser
     public function handle(Request $request, Closure $next)
     {
         if (!Auth::guard('web')->check()) {
-            return redirect('/user/login')->with('error', 'Silakan login terlebih dahulu');
+            return redirect('/user/landing')->with('error', 'Silakan login terlebih dahulu');
         }
         return $next($request);
     }
