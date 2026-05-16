@@ -63,6 +63,9 @@
             <p style="color:var(--text-secondary);text-align:center;margin-top:28px;font-size:.875rem;">
                 Belum punya akun? <a href="{{ url('/user/register') }}" style="color:var(--teal);font-weight:700;">Daftar sekarang</a>
             </p>
+            <p style="color:var(--text-secondary);text-align:center;margin-top:12px;font-size:.8125rem;">
+                <a href="{{ url('/user/landing') }}" style="color:var(--text-secondary);font-weight:600;transition:color .2s;" onmouseover="this.style.color='var(--teal)'" onmouseout="this.style.color='var(--text-secondary)'">← Kembali ke Beranda</a>
+            </p>
         </div>
     </div>
 
