@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../auth/screens/login_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../providers/announcement_provider.dart';
+import '../models/announcement_model.dart';
 
 // ─────────────────────────────────────────────────────────────
 //  DigitalLife Analyzer – Onboarding Screen (3 slides)
@@ -34,14 +37,14 @@ class _OnboardingData {
 // ─────────────────────────────────────────────────────────────
 //  OnboardingScreen
 // ─────────────────────────────────────────────────────────────
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageCtrl = PageController();
   int _currentPage = 0;
 
@@ -103,6 +106,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            // ── Announcements Section ─────────────────────────
+            _buildAnnouncements(),
+
             // ── Slide area ────────────────────────────────────
             Expanded(
               child: PageView.builder(
@@ -136,6 +142,83 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildAnnouncements() {
+    final announcementAsync = ref.watch(announcementProvider);
+
+    return announcementAsync.when(
+      data: (list) {
+        if (list.isEmpty) return const SizedBox.shrink();
+
+        return Container(
+          width: double.infinity,
+          margin: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.4),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _kTeal.withOpacity(0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.campaign_outlined, color: _kTeal, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'PENGUMUMAN TERBARU',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: _kTeal,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 45,
+                child: PageView.builder(
+                  itemCount: list.length,
+                  itemBuilder: (context, index) {
+                    final item = list[index];
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: _kNavy,
+                          ),
+                        ),
+                        Text(
+                          item.content,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            color: _kNavy.withOpacity(0.6),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }
