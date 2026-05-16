@@ -87,16 +87,35 @@ class _EditProfilScreenState extends ConsumerState<EditProfilScreen> {
   @override
   void initState() {
     super.initState();
-    final user = ref.read(currentUserProvider);
-    _nameController = TextEditingController(text: user?.name);
+    _nameController = TextEditingController();
+    
+    // Set default values from options
+    _selectedGender = _genderOptions.first;
+    _selectedEducation = _pendidikanOptions.first;
+    _selectedRegion = _regionOptions.first;
+    _selectedRole = _roleOptions.first;
+    _selectedIncome = _incomeOptions.first;
 
-    // Initial values normalization based on Indonesian labels
-    _selectedGender = _genderToIndo[user?.gender] ?? _genderOptions.first;
-    _selectedEducation = _eduToIndo[user?.educationLevel] ?? _pendidikanOptions.first;
-    _selectedRegion = _regionToIndo[user?.region] ?? _regionOptions.first;
-    _selectedRole = _roleToIndo[user?.dailyRole] ?? _roleOptions.first;
-    _selectedIncome = _incomeToIndo[user?.incomeLevel] ?? _incomeOptions.first;
-    _selectedDob = user?.dateOfBirth;
+    // Initial data load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeData();
+    });
+  }
+
+  void _initializeData() {
+    if (!mounted) return;
+    final user = ref.read(currentUserProvider);
+    if (user != null) {
+      setState(() {
+        _nameController.text = user.name;
+        _selectedGender = _genderToIndo[user.gender] ?? _selectedGender;
+        _selectedEducation = _eduToIndo[user.educationLevel] ?? _selectedEducation;
+        _selectedRegion = _regionToIndo[user.region] ?? _selectedRegion;
+        _selectedRole = _roleToIndo[user.dailyRole] ?? _selectedRole;
+        _selectedIncome = _incomeToIndo[user.incomeLevel] ?? _selectedIncome;
+        _selectedDob = user.dateOfBirth;
+      });
+    }
   }
 
   @override
