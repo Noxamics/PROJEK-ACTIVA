@@ -31,7 +31,7 @@ class LaporanController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Data belum cukup. Isi kuesioner lebih banyak.',
-                'count'   => $results->count(),
+                'count' => $results->count(),
             ], 422);
         }
 
@@ -44,8 +44,8 @@ class LaporanController extends Controller
         $thisScore = $thisWeek->avg(fn($r) => $r->ml_result['digital_dependence_score'] ?? 0);
         $lastScore = $lastWeek->avg(fn($r) => $r->ml_result['digital_dependence_score'] ?? 0);
 
-        $scoreDiff   = $thisScore - $lastScore;
-        $scorePct    = $lastScore > 0 ? round(($scoreDiff / $lastScore) * 100, 1) : 0;
+        $scoreDiff = $thisScore - $lastScore;
+        $scorePct = $lastScore > 0 ? round(($scoreDiff / $lastScore) * 100, 1) : 0;
         $scoreStatus = $scoreDiff > 2 ? 'memburuk' : ($scoreDiff < -2 ? 'membaik' : 'stabil');
 
         // ── 4. Ambil questionnaire data untuk insight lain ──────────────────
@@ -62,33 +62,35 @@ class LaporanController extends Controller
         // Screen time
         $thisDeviceHours = $avg('device_hours_per_day', $thisQuestionnaires);
         $lastDeviceHours = $avg('device_hours_per_day', $lastQuestionnaires);
-        $deviceDiff      = round($thisDeviceHours - $lastDeviceHours, 1);
+        $thisDeviceHours = round($thisDeviceHours, 1);
+        $lastDeviceHours = round($lastDeviceHours, 1);
+        $deviceDiff = round($thisDeviceHours - $lastDeviceHours, 1);
 
         // Social media
-        $thisSocial   = $avg('social_media_minutes', $thisQuestionnaires);
-        $lastSocial   = $avg('social_media_minutes', $lastQuestionnaires);
-        $socialPct    = $lastSocial > 0 ? round((($thisSocial - $lastSocial) / $lastSocial) * 100, 1) : 0;
+        $thisSocial = $avg('social_media_minutes', $thisQuestionnaires);
+        $lastSocial = $avg('social_media_minutes', $lastQuestionnaires);
+        $socialPct = $lastSocial > 0 ? round((($thisSocial - $lastSocial) / $lastSocial) * 100, 1) : 0;
 
         // Sleep
-        $thisSleepH   = $avg('sleep_hours', $thisQuestionnaires);
-        $lastSleepH   = $avg('sleep_hours', $lastQuestionnaires);
-        $thisSleepQ   = $avg('sleep_quality', $thisQuestionnaires);
-        $lastSleepQ   = $avg('sleep_quality', $lastQuestionnaires);
-        $sleepHDiff   = round($thisSleepH - $lastSleepH, 1);
-        $sleepQDiff   = round($thisSleepQ - $lastSleepQ, 1);
+        $thisSleepH = $avg('sleep_hours', $thisQuestionnaires);
+        $lastSleepH = $avg('sleep_hours', $lastQuestionnaires);
+        $thisSleepQ = $avg('sleep_quality', $thisQuestionnaires);
+        $lastSleepQ = $avg('sleep_quality', $lastQuestionnaires);
+        $sleepHDiff = round($thisSleepH - $lastSleepH, 1);
+        $sleepQDiff = round($thisSleepQ - $lastSleepQ, 1);
 
         // Stress
-        $thisStress   = $avg('stress_level', $thisQuestionnaires);
-        $lastStress   = $avg('stress_level', $lastQuestionnaires);
-        $stressPct    = $lastStress > 0 ? round((($thisStress - $lastStress) / $lastStress) * 100, 1) : 0;
+        $thisStress = $avg('stress_level', $thisQuestionnaires);
+        $lastStress = $avg('stress_level', $lastQuestionnaires);
+        $stressPct = $lastStress > 0 ? round((($thisStress - $lastStress) / $lastStress) * 100, 1) : 0;
 
         // ── 5. Bangun insight text ──────────────────────────────────────────
         $insights = [
             'digital_dependence' => $this->buildScoreInsight($scorePct, $scoreStatus),
-            'screen_time'        => $this->buildScreenTimeInsight($deviceDiff, $thisDeviceHours, $lastDeviceHours),
-            'social_media'       => $this->buildSocialInsight($socialPct),
-            'sleep'              => $this->buildSleepInsight($sleepHDiff, $thisSleepQ, $lastSleepQ),
-            'stress'             => $this->buildStressInsight($stressPct),
+            'screen_time' => $this->buildScreenTimeInsight($deviceDiff, $thisDeviceHours, $lastDeviceHours),
+            'social_media' => $this->buildSocialInsight($socialPct),
+            'sleep' => $this->buildSleepInsight($sleepHDiff, $thisSleepQ, $lastSleepQ),
+            'stress' => $this->buildStressInsight($stressPct),
         ];
 
         // ── 6. Penyebab: tag paling sering muncul dari 14 data ─────────────
@@ -125,19 +127,19 @@ class LaporanController extends Controller
 
         // ── 8. Waktu data terakhir & info next report ───────────────────────
         $latestCreatedAt = $results->first()->created_at;
-        $oldestInSet     = $results->last()->created_at;
+        $oldestInSet = $results->last()->created_at;
 
         return response()->json([
             'success' => true,
-            'data'    => [
-                'status'         => $scoreStatus,           // membaik | memburuk | stabil
-                'score_pct'      => $scorePct,              // % perubahan
-                'this_week_avg'  => round($thisScore, 1),
-                'last_week_avg'  => round($lastScore, 1),
-                'insights'       => $insights,
-                'causes'         => $causesDisplay,
+            'data' => [
+                'status' => $scoreStatus,           // membaik | memburuk | stabil
+                'score_pct' => $scorePct,              // % perubahan
+                'this_week_avg' => round($thisScore, 1),
+                'last_week_avg' => round($lastScore, 1),
+                'insights' => $insights,
+                'causes' => $causesDisplay,
                 'recommendation' => $rekomendasi,
-                'data_range'     => [
+                'data_range' => [
                     'newest' => $latestCreatedAt,
                     'oldest' => $oldestInSet,
                 ],
