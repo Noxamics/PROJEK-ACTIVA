@@ -88,7 +88,11 @@ class _LaporanPerkembanganScreenState
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline_rounded, color: AppColors.red, size: 56),
+              const Icon(
+                Icons.error_outline_rounded,
+                color: AppColors.red,
+                size: 56,
+              ),
               const SizedBox(height: 16),
               Text(
                 state.error!,
@@ -101,12 +105,18 @@ class _LaporanPerkembanganScreenState
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () => ref.read(laporanProvider.notifier).fetchLaporan(),
+                onPressed: () =>
+                    ref.read(laporanProvider.notifier).fetchLaporan(),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.teal,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                child: const Text('Coba lagi', style: TextStyle(color: Colors.white)),
+                child: const Text(
+                  'Coba lagi',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),
@@ -198,7 +208,11 @@ class _LaporanPerkembanganScreenState
               children: [
                 const Text(
                   'Trend 14 data terakhir: ',
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 Text(
                   statusText,
@@ -250,7 +264,10 @@ class _LaporanPerkembanganScreenState
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [color.withValues(alpha: 0.12), color.withValues(alpha: 0.05)],
+          colors: [
+            color.withValues(alpha: 0.12),
+            color.withValues(alpha: 0.05),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -446,7 +463,7 @@ class _LaporanPerkembanganScreenState
             child: const Text(
               'Rata-rata Digital Dependence Score',
               style: TextStyle(
-                color: AppColors.textMuted, 
+                color: AppColors.textMuted,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
@@ -516,6 +533,35 @@ class _LaporanPerkembanganScreenState
     );
   }
 
+  // ── Tag translation ────────────────────────────────────────────────────────
+
+  static const Map<String, String> _tagLabels = {
+    'screen_time_high': 'Waktu Layar Tinggi',
+    'notification_overload': 'Notifikasi Berlebihan',
+    'sleep_low': 'Tidur Kurang',
+    'sleep_bad_quality': 'Kualitas Tidur Buruk',
+    'anxiety_high': 'Kecemasan Tinggi',
+    'depression_high': 'Depresi Tinggi',
+    'stress_high': 'Stres Tinggi',
+    'happiness_low': 'Kebahagiaan Rendah',
+    'general': 'Umum',
+    'screen time high': 'Waktu Layar Tinggi',
+    'notification overload': 'Notifikasi Berlebihan',
+    'sleep low': 'Tidur Kurang',
+    'sleep bad quality': 'Kualitas Tidur Buruk',
+    'anxiety high': 'Kecemasan Tinggi',
+    'depression high': 'Depresi Tinggi',
+    'stress high': 'Stres Tinggi',
+    'happiness low': 'Kebahagiaan Rendah',
+  };
+
+  String _translateTag(String tag) {
+    final key = tag.trim().toLowerCase().replaceAll('_', ' ');
+    final result = _tagLabels[key] ?? tag;
+    debugPrint('[TAG] raw="\$tag" key="\$key" result="\$result"');
+    return result;
+  }
+
   // ── Tags / Penyebab Card ───────────────────────────────────────────────────
 
   Widget _buildTagsCard(
@@ -540,7 +586,10 @@ class _LaporanPerkembanganScreenState
       child: items.isEmpty
           ? const Text(
               'Belum ada data pemicu terdeteksi.',
-              style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
             )
           : Wrap(
               spacing: 10,
@@ -555,7 +604,9 @@ class _LaporanPerkembanganScreenState
                       decoration: BoxDecoration(
                         color: color.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: color.withValues(alpha: 0.15)),
+                        border: Border.all(
+                          color: color.withValues(alpha: 0.15),
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -563,7 +614,7 @@ class _LaporanPerkembanganScreenState
                           Icon(Icons.tag_rounded, color: color, size: 14),
                           const SizedBox(width: 6),
                           Text(
-                            tag,
+                            _translateTag(tag),
                             style: TextStyle(
                               color: color,
                               fontSize: 13,
@@ -607,7 +658,11 @@ class _LaporanPerkembanganScreenState
                   color: AppColors.teal.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.auto_awesome_rounded, color: AppColors.teal, size: 18),
+                child: const Icon(
+                  Icons.auto_awesome_rounded,
+                  color: AppColors.teal,
+                  size: 18,
+                ),
               ),
               const SizedBox(width: 12),
               const Text(
@@ -625,7 +680,10 @@ class _LaporanPerkembanganScreenState
           if (items.isEmpty)
             const Text(
               'Belum ada rekomendasi khusus saat ini.',
-              style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
             )
           else
             ...items.map(
