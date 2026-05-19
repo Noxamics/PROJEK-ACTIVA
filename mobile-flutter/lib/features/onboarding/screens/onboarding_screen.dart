@@ -1,34 +1,65 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../auth/screens/login_screen.dart';
 import '../providers/announcement_provider.dart';
 
 // ─────────────────────────────────────────────────────────────
-//  DigitalLife Analyzer – Onboarding Screen (3 slides)
-//  Requires: google_fonts
+//  Activa – Premium Onboarding Screen (4 slides)
+//  Mascot images: assets/images/maskot1..4.png
+//  Requires: google_fonts, flutter_riverpod
 // ─────────────────────────────────────────────────────────────
 
-// ── Colour tokens (inline — tidak perlu import app_colors) ───
-const _kNavy = Color(0xFF0B1133);
-const _kTeal = Color(0xFF0EA982);
-const _kGreen = Color(0xFF1BC06A);
-const _kBgWrap = Color(0xFFD6E4F0);
-const _kBgCard = Color(0xFFE8EEF8);
-const _kDotInactive = Color(0x260B1133); // 15 % navy
+// ── Colour tokens ─────────────────────────────────────────────
+const _kNavyDark = Color(0xFF0A1628);
+const _kTeal = Color(0xFF0D9488);
+const _kTealLight = Color(0xFF5EEAD4);
+const _kYellow = Color(0xFFFACC15);
+const _kPurple = Color(0xFF7C83FD);
+const _kStarWhite = Color(0xFFFFFFFF);
+
+// Consistent subtitle colour across all slides
+const _kSubtitle = Color(0xFF8BBFD4);
 
 // ─────────────────────────────────────────────────────────────
-//  Data model
+//  Slide data model
 // ─────────────────────────────────────────────────────────────
-class _OnboardingData {
-  const _OnboardingData({
-    required this.title,
-    required this.description,
-    required this.illustration,
+class _SlideData {
+  const _SlideData({
+    required this.tag,
+    required this.tagColor,
+    required this.tagBg,
+    required this.headline,
+    required this.subtitle,
+    required this.mascotAsset,
+    required this.backgroundBuilder,
+    required this.contentBg,
+    required this.headlineColor,
+    required this.subtitleColor,
+    required this.nextBtnColor,
+    required this.skipColor,
+    required this.dotActiveColor,
+    required this.dotInactiveColor,
+    this.isLastSlide = false,
   });
-  final String title;
-  final String description;
-  final Widget illustration;
+
+  final String tag;
+  final Color tagColor;
+  final Color tagBg;
+  final String headline;
+  final String subtitle;
+  final String mascotAsset;
+  final Widget Function(BuildContext) backgroundBuilder;
+  final Color contentBg;
+  final Color headlineColor;
+  final Color subtitleColor;
+  final Color nextBtnColor;
+  final Color skipColor;
+  final Color dotActiveColor;
+  final Color dotInactiveColor;
+  final bool isLastSlide;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -41,36 +72,113 @@ class OnboardingScreen extends ConsumerStatefulWidget {
   ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
+    with TickerProviderStateMixin {
   final PageController _pageCtrl = PageController();
   int _currentPage = 0;
 
-  final List<_OnboardingData> _slides = const [
-    _OnboardingData(
-      title: 'Analisis Kebiasaan\nDigitalmu',
-      description:
-          'Isi kuesioner singkat dan sistem AI kami akan menghitung Digital Dependence Score kamu secara akurat.',
-      illustration: _IllusAnalysis(),
+  late final AnimationController _particleCtrl;
+
+  // ── Slide definitions ─────────────────────────────────────
+  late final List<_SlideData> _slides = [
+    // SLIDE 1 — Digital Awareness
+    _SlideData(
+      tag: 'Digital Awareness',
+      tagColor: _kTealLight,
+      tagBg: const Color(0x260D9488),
+      headline: 'Kenali pola\ndigitalmu',
+      subtitle:
+          'Kebiasaan kecil setiap hari bisa\nmemengaruhi fokus dan tidurmu.',
+      mascotAsset: 'assets/images/maskot1.png',
+      backgroundBuilder: (_) => const _S1Background(),
+      contentBg: _kNavyDark,
+      headlineColor: _kStarWhite,
+      subtitleColor: _kSubtitle,
+      nextBtnColor: _kTeal,
+      skipColor: _kStarWhite,
+      dotActiveColor: _kTeal,
+      dotInactiveColor: const Color(0x40FFFFFF),
     ),
-    _OnboardingData(
-      title: 'Pantau Tren\nPerkembanganmu',
-      description:
-          'Lihat grafik tren ketergantungan digital kamu dari waktu ke waktu dan bandingkan dengan periode sebelumnya.',
-      illustration: _IllusTrend(),
+
+    // SLIDE 2 — Self Reflection
+    _SlideData(
+      tag: 'Self Reflection',
+      tagColor: _kTealLight,
+      tagBg: const Color(0x257C83FD),
+      headline: 'Tidak semua\nscreen time itu buruk',
+      subtitle:
+          'Activa membantu memahami\nkebiasaan digitalmu tanpa menghakimi.',
+      mascotAsset: 'assets/images/maskot2.png',
+      backgroundBuilder: (_) => const _S2Background(),
+      contentBg: _kNavyDark,
+      headlineColor: _kStarWhite,
+      subtitleColor: _kSubtitle,
+      nextBtnColor: _kTeal,
+      skipColor: _kStarWhite,
+      dotActiveColor: _kTeal,
+      dotInactiveColor: const Color(0x40FFFFFF),
     ),
-    _OnboardingData(
-      title: 'Dapatkan Insight\n& Rekomendasi AI',
-      description:
-          'Chatbot AI kami memberikan rekomendasi personal berdasarkan score dan kebiasaan digital kamu secara langsung.',
-      illustration: _IllusInsight(),
+
+    // SLIDE 3 — Digital Balance
+    _SlideData(
+      tag: 'Digital Balance',
+      tagColor: _kTealLight,
+      tagBg: const Color(0x200D9488),
+      headline: 'Kadang kita\nhanya perlu jeda',
+      subtitle: 'Screen time, tidur, dan media sosial\nbisa lebih seimbang.',
+      mascotAsset: 'assets/images/maskot3.png',
+      backgroundBuilder: (_) => const _S3Background(),
+      contentBg: const Color(0xFF0A1628),
+      headlineColor: _kStarWhite,
+      subtitleColor: _kSubtitle,
+      nextBtnColor: _kTeal,
+      skipColor: _kStarWhite,
+      dotActiveColor: _kTeal,
+      dotInactiveColor: const Color(0x40FFFFFF),
+    ),
+
+    // SLIDE 4 — Start Journey
+    _SlideData(
+      tag: 'Mulai Sekarang',
+      tagColor: _kYellow,
+      tagBg: const Color(0x26FACC15),
+      headline: 'Mulai perjalanan\ndigital wellness kamu',
+      subtitle:
+          'Pantau perkembangan dan pahami\npola digitalmu bersama Activa.',
+      mascotAsset: 'assets/images/maskot4.png',
+      backgroundBuilder: (_) => const _S4Background(),
+      contentBg: const Color(0xFF0A1628),
+      headlineColor: _kStarWhite,
+      subtitleColor: _kSubtitle,
+      nextBtnColor: _kTeal,
+      skipColor: const Color(0x66FFFFFF),
+      dotActiveColor: _kTeal,
+      dotInactiveColor: const Color(0x40FFFFFF),
+      isLastSlide: true,
     ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _particleCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _pageCtrl.dispose();
+    _particleCtrl.dispose();
+    super.dispose();
+  }
 
   void _nextPage() {
     if (_currentPage < _slides.length - 1) {
       _pageCtrl.nextPage(
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeInOut,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOutCubic,
       );
     } else {
       _navigateOut();
@@ -82,58 +190,36 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void _navigateOut() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (_) => const LoginScreen(),
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => const LoginScreen(),
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
+        transitionDuration: const Duration(milliseconds: 350),
       ),
     );
-  }
-
-  bool get _isLastPage => _currentPage == _slides.length - 1;
-
-  @override
-  void dispose() {
-    _pageCtrl.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _kBgWrap,
+      backgroundColor: Colors.black,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            // ── Announcements Section ─────────────────────────
-            _buildAnnouncements(),
-
-            // ── Slide area ────────────────────────────────────
-            Expanded(
-              child: PageView.builder(
-                controller: _pageCtrl,
-                itemCount: _slides.length,
-                onPageChanged: (i) => setState(() => _currentPage = i),
-                itemBuilder: (_, i) => _OnboardingCard(data: _slides[i]),
-              ),
-            ),
-
-            // ── Bottom controls ───────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Dot indicator
-                  _DotRow(total: _slides.length, active: _currentPage),
-                  const SizedBox(height: 20),
-
-                  // Buttons
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 250),
-                    child: _isLastPage
-                        ? _StartButton(key: const ValueKey('start'), onTap: _navigateOut)
-                        : _NavRow(key: const ValueKey('nav'), onSkip: _skip, onNext: _nextPage),
-                  ),
-                ],
+            PageView.builder(
+              controller: _pageCtrl,
+              itemCount: _slides.length,
+              onPageChanged: (i) => setState(() => _currentPage = i),
+              itemBuilder: (ctx, i) => _OnboardingPage(
+                data: _slides[i],
+                slideIndex: i,
+                currentIndex: _currentPage,
+                totalSlides: _slides.length,
+                onNext: _nextPage,
+                onSkip: _skip,
+                announcementWidget: i == 0
+                    ? _AnnouncementBanner(ref: ref)
+                    : null,
               ),
             ),
           ],
@@ -141,144 +227,166 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       ),
     );
   }
+}
 
-  Widget _buildAnnouncements() {
-    final announcementAsync = ref.watch(announcementProvider);
+// ─────────────────────────────────────────────────────────────
+//  Single onboarding page
+// ─────────────────────────────────────────────────────────────
+class _OnboardingPage extends StatelessWidget {
+  const _OnboardingPage({
+    required this.data,
+    required this.slideIndex,
+    required this.currentIndex,
+    required this.totalSlides,
+    required this.onNext,
+    required this.onSkip,
+    this.announcementWidget,
+  });
 
-    return announcementAsync.when(
-      data: (list) {
-        if (list.isEmpty) return const SizedBox.shrink();
+  final _SlideData data;
+  final int slideIndex;
+  final int currentIndex;
+  final int totalSlides;
+  final VoidCallback onNext;
+  final VoidCallback onSkip;
+  final Widget? announcementWidget;
 
-        return Container(
-          width: double.infinity,
-          margin: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.4),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: _kTeal.withOpacity(0.3)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.campaign_outlined, color: _kTeal, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'PENGUMUMAN TERBARU',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      color: _kTeal,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                ],
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        data.backgroundBuilder(context),
+        Column(
+          children: [
+            _TopBar(skipColor: data.skipColor, onSkip: onSkip),
+            if (announcementWidget != null) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: announcementWidget!,
               ),
               const SizedBox(height: 8),
-              SizedBox(
-                height: 45,
-                child: PageView.builder(
-                  itemCount: list.length,
-                  itemBuilder: (context, index) {
-                    final item = list[index];
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: _kNavy,
-                          ),
-                        ),
-                        Text(
-                          item.content,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11,
-                            color: _kNavy.withOpacity(0.6),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
             ],
-          ),
-        );
-      },
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+            Expanded(
+              child: _MascotZone(
+                asset: data.mascotAsset,
+                slideIndex: slideIndex,
+              ),
+            ),
+            _ContentPanel(
+              data: data,
+              currentIndex: currentIndex,
+              totalSlides: totalSlides,
+              onNext: onNext,
+              onSkip: onSkip,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
 
 // ─────────────────────────────────────────────────────────────
-//  Single onboarding card (fills the PageView slot)
+//  Top bar — logo always uses original SVG colours (no filter)
 // ─────────────────────────────────────────────────────────────
-class _OnboardingCard extends StatelessWidget {
-  const _OnboardingCard({required this.data});
-  final _OnboardingData data;
+class _TopBar extends StatelessWidget {
+  const _TopBar({required this.skipColor, required this.onSkip});
+
+  final Color skipColor;
+  final VoidCallback onSkip;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: _kBgCard,
-          borderRadius: BorderRadius.circular(32),
-        ),
-        padding: const EdgeInsets.fromLTRB(24, 32, 24, 28),
-        child: Column(
-          children: [
-            // Illustration box
-            Container(
-              width: double.infinity,
-              height: 220,
-              decoration: BoxDecoration(
-                color: _kNavy,
-                borderRadius: BorderRadius.circular(22),
-              ),
-              child: data.illustration,
-            ),
-
-            const SizedBox(height: 28),
-
-            // Title
-            Text(
-              data.title,
-              textAlign: TextAlign.center,
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Logo — no colorFilter so the original SVG colours are preserved
+          SvgPicture.asset('assets/logo/NewLogoPutih_fixed.svg', height: 32),
+          GestureDetector(
+            onTap: onSkip,
+            child: Text(
+              'Lewati',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: _kNavy,
-                height: 1.28,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: skipColor.withOpacity(0.6),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
-            const SizedBox(height: 12),
+// ─────────────────────────────────────────────────────────────
+//  Mascot zone with subtle float animation
+// ─────────────────────────────────────────────────────────────
+class _MascotZone extends StatefulWidget {
+  const _MascotZone({required this.asset, required this.slideIndex});
+  final String asset;
+  final int slideIndex;
 
-            // Description
-            Text(
-              data.description,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w400,
-                color: _kNavy.withOpacity(0.55),
-                height: 1.6,
+  @override
+  State<_MascotZone> createState() => _MascotZoneState();
+}
+
+class _MascotZoneState extends State<_MascotZone>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _float;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2800),
+    )..repeat(reverse: true);
+    _float = Tween<double>(
+      begin: -8,
+      end: 8,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _float,
+      builder: (_, child) =>
+          Transform.translate(offset: Offset(0, _float.value), child: child),
+      child: Center(
+        child: Container(
+          width: 320,
+          height: 320,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: _kTeal.withOpacity(0.25),
+                blurRadius: 60,
+                spreadRadius: 10,
               ),
+            ],
+          ),
+          child: Image.asset(
+            widget.asset,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => const Icon(
+              Icons.image_not_supported_outlined,
+              color: Colors.white24,
+              size: 80,
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -286,29 +394,227 @@ class _OnboardingCard extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  Dot row indicator
+//  Content wave panel
 // ─────────────────────────────────────────────────────────────
-class _DotRow extends StatelessWidget {
-  const _DotRow({required this.total, required this.active});
-  final int total;
-  final int active;
+class _ContentPanel extends StatelessWidget {
+  const _ContentPanel({
+    required this.data,
+    required this.currentIndex,
+    required this.totalSlides,
+    required this.onNext,
+    required this.onSkip,
+  });
+
+  final _SlideData data;
+  final int currentIndex;
+  final int totalSlides;
+  final VoidCallback onNext;
+  final VoidCallback onSkip;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: data.contentBg,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(36),
+          topRight: Radius.circular(36),
+        ),
+        border: Border(
+          top: BorderSide(color: _kTeal.withOpacity(0.15), width: 1),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(28, 28, 28, 0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _TagChip(label: data.tag, color: data.tagColor, bg: data.tagBg),
+          const SizedBox(height: 12),
+          Text(
+            data.headline,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+              color: data.headlineColor,
+              height: 1.18,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            data.subtitle,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: data.subtitleColor,
+              height: 1.65,
+            ),
+          ),
+          const SizedBox(height: 18),
+          if (!data.isLastSlide)
+            _NavRow(
+              currentIndex: currentIndex,
+              totalSlides: totalSlides,
+              dotActiveColor: data.dotActiveColor,
+              dotInactiveColor: data.dotInactiveColor,
+              nextBtnColor: data.nextBtnColor,
+              onNext: onNext,
+            )
+          else
+            _LastSlideNav(
+              currentIndex: currentIndex,
+              totalSlides: totalSlides,
+              dotActiveColor: data.dotActiveColor,
+              dotInactiveColor: data.dotInactiveColor,
+              onStart: onNext,
+            ),
+          SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Tag chip
+// ─────────────────────────────────────────────────────────────
+class _TagChip extends StatelessWidget {
+  const _TagChip({required this.label, required this.color, required this.bg});
+  final String label;
+  final Color color;
+  final Color bg;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: color,
+          letterSpacing: 0.1,
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Nav row
+// ─────────────────────────────────────────────────────────────
+class _NavRow extends StatelessWidget {
+  const _NavRow({
+    required this.currentIndex,
+    required this.totalSlides,
+    required this.dotActiveColor,
+    required this.dotInactiveColor,
+    required this.nextBtnColor,
+    required this.onNext,
+  });
+
+  final int currentIndex;
+  final int totalSlides;
+  final Color dotActiveColor;
+  final Color dotInactiveColor;
+  final Color nextBtnColor;
+  final VoidCallback onNext;
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _DotIndicator(
+          total: totalSlides,
+          active: currentIndex,
+          activeColor: dotActiveColor,
+          inactiveColor: dotInactiveColor,
+        ),
+        _CircleNextButton(color: nextBtnColor, onTap: onNext),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Last slide nav
+// ─────────────────────────────────────────────────────────────
+class _LastSlideNav extends StatelessWidget {
+  const _LastSlideNav({
+    required this.currentIndex,
+    required this.totalSlides,
+    required this.dotActiveColor,
+    required this.dotInactiveColor,
+    required this.onStart,
+  });
+
+  final int currentIndex;
+  final int totalSlides;
+  final Color dotActiveColor;
+  final Color dotInactiveColor;
+  final VoidCallback onStart;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _DotIndicator(
+              total: totalSlides,
+              active: currentIndex,
+              activeColor: dotActiveColor,
+              inactiveColor: dotInactiveColor,
+            ),
+            const SizedBox(),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _StartButton(onTap: onStart),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Dot indicator
+// ─────────────────────────────────────────────────────────────
+class _DotIndicator extends StatelessWidget {
+  const _DotIndicator({
+    required this.total,
+    required this.active,
+    required this.activeColor,
+    required this.inactiveColor,
+  });
+
+  final int total;
+  final int active;
+  final Color activeColor;
+  final Color inactiveColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
       children: List.generate(total, (i) {
         final isActive = i == active;
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 3.5),
+          padding: const EdgeInsets.only(right: 6),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
-            width: isActive ? 22 : 8,
+            width: isActive ? 24 : 8,
             height: 8,
             decoration: BoxDecoration(
+              color: isActive ? activeColor : inactiveColor,
               borderRadius: BorderRadius.circular(4),
-              color: isActive ? _kTeal : _kDotInactive,
             ),
           ),
         );
@@ -318,87 +624,18 @@ class _DotRow extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  Navigation row (Lewati + Lanjut)
+//  Circular next button
 // ─────────────────────────────────────────────────────────────
-class _NavRow extends StatelessWidget {
-  const _NavRow({super.key, required this.onSkip, required this.onNext});
-  final VoidCallback onSkip;
-  final VoidCallback onNext;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Skip
-        TextButton(
-          onPressed: onSkip,
-          style: TextButton.styleFrom(
-            foregroundColor: _kNavy.withOpacity(0.4),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          ),
-          child: Text(
-            'LEWATI',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ),
-
-        // Next
-        _PillButton(
-          label: 'LANJUT',
-          color: _kNavy,
-          onTap: onNext,
-        ),
-      ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-//  Start button (last slide, full width)
-// ─────────────────────────────────────────────────────────────
-class _StartButton extends StatelessWidget {
-  const _StartButton({super.key, required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: _PillButton(
-        label: 'MULAI SEKARANG',
-        color: _kTeal,
-        onTap: onTap,
-        fullWidth: true,
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-//  Reusable pill button
-// ─────────────────────────────────────────────────────────────
-class _PillButton extends StatefulWidget {
-  const _PillButton({
-    required this.label,
-    required this.color,
-    required this.onTap,
-    this.fullWidth = false,
-  });
-  final String label;
+class _CircleNextButton extends StatefulWidget {
+  const _CircleNextButton({required this.color, required this.onTap});
   final Color color;
   final VoidCallback onTap;
-  final bool fullWidth;
 
   @override
-  State<_PillButton> createState() => _PillButtonState();
+  State<_CircleNextButton> createState() => _CircleNextButtonState();
 }
 
-class _PillButtonState extends State<_PillButton>
+class _CircleNextButtonState extends State<_CircleNextButton>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
   late final Animation<double> _scale;
@@ -409,11 +646,12 @@ class _PillButtonState extends State<_PillButton>
     _ctrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 90),
-      reverseDuration: const Duration(milliseconds: 180),
+      reverseDuration: const Duration(milliseconds: 160),
     );
-    _scale = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 0.92,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -434,23 +672,694 @@ class _PillButtonState extends State<_PillButton>
         },
         onTapCancel: () => _ctrl.reverse(),
         child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: widget.fullWidth ? 0 : 22,
-            vertical: 13,
-          ),
-          width: widget.fullWidth ? double.infinity : null,
+          width: 54,
+          height: 54,
           decoration: BoxDecoration(
             color: widget.color,
-            borderRadius: BorderRadius.circular(14),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: widget.color.withOpacity(0.4),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-          child: Center(
-            child: Text(
-              widget.label,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-                letterSpacing: 0.4,
+          child: const Icon(
+            Icons.arrow_forward_rounded,
+            color: Colors.white,
+            size: 22,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Start (CTA) button — full width
+// ─────────────────────────────────────────────────────────────
+class _StartButton extends StatefulWidget {
+  const _StartButton({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  State<_StartButton> createState() => _StartButtonState();
+}
+
+class _StartButtonState extends State<_StartButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 90),
+      reverseDuration: const Duration(milliseconds: 160),
+    );
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 0.97,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: _scale,
+      child: GestureDetector(
+        onTapDown: (_) => _ctrl.forward(),
+        onTapUp: (_) async {
+          await _ctrl.reverse();
+          widget.onTap();
+        },
+        onTapCancel: () => _ctrl.reverse(),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF0D9488), Color(0xFF0F766E)],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: _kTeal.withOpacity(0.4),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Mulai Sekarang',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  letterSpacing: 0.1,
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.east_rounded, color: Colors.white, size: 18),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Announcement banner (slide 1 only)
+// ─────────────────────────────────────────────────────────────
+class _AnnouncementBanner extends StatelessWidget {
+  const _AnnouncementBanner({required this.ref});
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
+    final async = ref.watch(announcementProvider);
+    return async.when(
+      data: (list) {
+        if (list.isEmpty) return const SizedBox.shrink();
+        return Container(
+          margin: const EdgeInsets.only(top: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _kTeal.withOpacity(0.3), width: 1),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.campaign_outlined, color: _kTeal, size: 16),
+                  const SizedBox(width: 6),
+                  Text(
+                    'PENGUMUMAN TERBARU',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      color: _kTeal,
+                      letterSpacing: 0.9,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 42,
+                child: PageView.builder(
+                  itemCount: list.length,
+                  itemBuilder: (_, i) {
+                    final item = list[i];
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          item.content,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            color: Colors.white60,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
+// ═════════════════════════════════════════════════════════════
+//  BACKGROUNDS
+// ═════════════════════════════════════════════════════════════
+
+// ── S1: Navy/Teal with floating particles ─────────────────────
+class _S1Background extends StatelessWidget {
+  const _S1Background();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF0D2040), Color(0xFF1E3A5F), Color(0xFF0F4A4A)],
+            ),
+          ),
+        ),
+        const _FloatingOrbs(
+          orbs: [
+            _OrbData(
+              left: 0.08,
+              top: 0.12,
+              size: 80,
+              color: Color(0x200D9488),
+              delay: 0,
+            ),
+            _OrbData(
+              left: 0.72,
+              top: 0.05,
+              size: 50,
+              color: Color(0x207C83FD),
+              delay: 800,
+            ),
+            _OrbData(
+              left: 0.55,
+              top: 0.35,
+              size: 30,
+              color: Color(0x30FACC15),
+              delay: 400,
+            ),
+            _OrbData(
+              left: 0.82,
+              top: 0.28,
+              size: 14,
+              color: Color(0x805EEAD4),
+              delay: 1200,
+            ),
+            _OrbData(
+              left: 0.12,
+              top: 0.50,
+              size: 10,
+              color: Color(0x80FFFFFF),
+              delay: 600,
+            ),
+            _OrbData(
+              left: 0.45,
+              top: 0.08,
+              size: 6,
+              color: Color(0x805EEAD4),
+              delay: 200,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ── S2: Navy + purple accent ──────────────────────────────────
+class _S2Background extends StatelessWidget {
+  const _S2Background();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF0D1A35), Color(0xFF1A2A55), Color(0xFF0E1A40)],
+            ),
+          ),
+        ),
+        // Purple glow accent top-right
+        Positioned(
+          right: -40,
+          top: -20,
+          child: Container(
+            width: 200,
+            height: 200,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color(0x207C83FD),
+            ),
+          ),
+        ),
+        // Teal glow blob bottom-left
+        Positioned(
+          left: -30,
+          bottom: 100,
+          child: Container(
+            width: 140,
+            height: 140,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _kTeal.withOpacity(0.10),
+            ),
+          ),
+        ),
+        const _FloatingOrbs(
+          orbs: [
+            _OrbData(
+              left: 0.72,
+              top: 0.06,
+              size: 8,
+              color: Color(0x707C83FD),
+              delay: 0,
+            ),
+            _OrbData(
+              left: 0.15,
+              top: 0.18,
+              size: 5,
+              color: Color(0x505EEAD4),
+              delay: 500,
+            ),
+            _OrbData(
+              left: 0.55,
+              top: 0.10,
+              size: 6,
+              color: Color(0x500D9488),
+              delay: 250,
+            ),
+            _OrbData(
+              left: 0.88,
+              top: 0.28,
+              size: 10,
+              color: Color(0x307C83FD),
+              delay: 900,
+            ),
+            _OrbData(
+              left: 0.30,
+              top: 0.40,
+              size: 4,
+              color: Color(0x60FFFFFF),
+              delay: 700,
+            ),
+            _OrbData(
+              left: 0.82,
+              top: 0.08,
+              size: 14,
+              color: Color(0x405EEAD4),
+              delay: 1200,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ── S3: Deep night with twinkling stars ───────────────────────
+class _S3Background extends StatelessWidget {
+  const _S3Background();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF060E1F), Color(0xFF0D1B3E), Color(0xFF091A30)],
+            ),
+          ),
+        ),
+        const _StarField(),
+        Positioned(
+          right: 40,
+          top: 80,
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withOpacity(0.06),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.12),
+                width: 1,
+              ),
+            ),
+            child: const Center(
+              child: Text('🌙', style: TextStyle(fontSize: 22)),
+            ),
+          ),
+        ),
+        const _FloatingOrbs(
+          orbs: [
+            _OrbData(
+              left: -0.08,
+              top: 0.22,
+              size: 120,
+              color: Color(0x100D9488),
+              delay: 0,
+            ),
+            _OrbData(
+              left: 0.75,
+              top: 0.12,
+              size: 80,
+              color: Color(0x107C83FD),
+              delay: 700,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ── S4: Deep premium dark ─────────────────────────────────────
+class _S4Background extends StatelessWidget {
+  const _S4Background();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF0A1628), Color(0xFF1E3A5F), Color(0xFF0D3333)],
+            ),
+          ),
+        ),
+        const _HoloCards(),
+        const _FloatingOrbs(
+          orbs: [
+            _OrbData(
+              left: 0.45,
+              top: 0.07,
+              size: 8,
+              color: Color(0x80FACC15),
+              delay: 300,
+            ),
+            _OrbData(
+              left: 0.86,
+              top: 0.42,
+              size: 6,
+              color: Color(0x805EEAD4),
+              delay: 1100,
+            ),
+            _OrbData(
+              left: 0.14,
+              top: 0.50,
+              size: 5,
+              color: Color(0x80FFFFFF),
+              delay: 700,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Holographic floating stat cards (S4)
+//
+//  Layout changes:
+//  • "Screen Time" → bottom area, center-right  (left: 0.45, top: 0.55)
+//  • "Sleep Score" → top-right                  (left: 0.58, top: 0.12)
+//  • "Focus"       → top-left                   (left: 0.04, top: 0.22)
+// ─────────────────────────────────────────────────────────────
+class _HoloCards extends StatelessWidget {
+  const _HoloCards();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Screen Time — repositioned to bottom center-right
+        _HoloCard(
+          label: 'Screen Time',
+          value: '4h 12m',
+          valueColor: _kTealLight,
+          left: 0.45,
+          top: 0.55,
+          delay: 0,
+        ),
+        // Sleep Score — stays top-right
+        _HoloCard(
+          label: 'Sleep Score',
+          value: '82%',
+          valueColor: _kYellow,
+          left: 0.60,
+          top: 0.12,
+          delay: 600,
+        ),
+        // Focus — moved slightly to top-left to balance layout
+        _HoloCard(
+          label: 'Focus',
+          value: '↑ 12%',
+          valueColor: const Color(0xFFA5B4FC),
+          left: 0.04,
+          top: 0.22,
+          delay: 300,
+        ),
+      ],
+    );
+  }
+}
+
+class _HoloCard extends StatefulWidget {
+  const _HoloCard({
+    required this.label,
+    required this.value,
+    required this.valueColor,
+    required this.left,
+    required this.top,
+    required this.delay,
+  });
+  final String label;
+  final String value;
+  final Color valueColor;
+  final double left;
+  final double top;
+  final int delay;
+
+  @override
+  State<_HoloCard> createState() => _HoloCardState();
+}
+
+class _HoloCardState extends State<_HoloCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _float;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 2600 + widget.delay),
+    )..repeat(reverse: true);
+    _float = Tween<double>(
+      begin: -5,
+      end: 5,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    return Positioned(
+      left: size.width * widget.left,
+      top: size.height * widget.top,
+      child: AnimatedBuilder(
+        animation: _float,
+        builder: (_, child) =>
+            Transform.translate(offset: Offset(0, _float.value), child: child),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: _kTeal.withOpacity(0.10),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: _kTeal.withOpacity(0.28), width: 1),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                widget.label,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 9,
+                  color: Colors.white54,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                widget.value,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: widget.valueColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Floating orbs (animated particles)
+// ─────────────────────────────────────────────────────────────
+class _OrbData {
+  const _OrbData({
+    required this.left,
+    required this.top,
+    required this.size,
+    required this.color,
+    required this.delay,
+  });
+  final double left;
+  final double top;
+  final double size;
+  final Color color;
+  final int delay;
+}
+
+class _FloatingOrbs extends StatelessWidget {
+  const _FloatingOrbs({required this.orbs});
+  final List<_OrbData> orbs;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: orbs.map((o) => _SingleOrb(data: o)).toList(),
+    );
+  }
+}
+
+class _SingleOrb extends StatefulWidget {
+  const _SingleOrb({required this.data});
+  final _OrbData data;
+
+  @override
+  State<_SingleOrb> createState() => _SingleOrbState();
+}
+
+class _SingleOrbState extends State<_SingleOrb>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 3200 + widget.data.delay),
+    )..repeat(reverse: true);
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    return Positioned(
+      left: size.width * widget.data.left,
+      top: size.height * widget.data.top,
+      child: AnimatedBuilder(
+        animation: _anim,
+        builder: (_, __) => Transform.translate(
+          offset: Offset(0, -10 * _anim.value),
+          child: Opacity(
+            opacity: 0.5 + 0.5 * _anim.value,
+            child: Container(
+              width: widget.data.size,
+              height: widget.data.size,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: widget.data.color,
               ),
             ),
           ),
@@ -461,367 +1370,90 @@ class _PillButtonState extends State<_PillButton>
 }
 
 // ─────────────────────────────────────────────────────────────
-//  Illustration 1 – Analisis Kebiasaan Digital
+//  Star field (S3 night mode)
 // ─────────────────────────────────────────────────────────────
-class _IllusAnalysis extends StatelessWidget {
-  const _IllusAnalysis();
+class _StarField extends StatelessWidget {
+  const _StarField();
+
+  static const _stars = [
+    (l: 0.12, t: 0.06, s: 2.0, d: 0),
+    (l: 0.68, t: 0.11, s: 3.0, d: 400),
+    (l: 0.38, t: 0.18, s: 2.0, d: 800),
+    (l: 0.84, t: 0.24, s: 4.0, d: 200),
+    (l: 0.22, t: 0.30, s: 2.0, d: 1200),
+    (l: 0.54, t: 0.08, s: 3.0, d: 600),
+    (l: 0.90, t: 0.40, s: 2.0, d: 1800),
+    (l: 0.06, t: 0.38, s: 2.0, d: 900),
+    (l: 0.77, t: 0.35, s: 3.0, d: 100),
+    (l: 0.30, t: 0.45, s: 2.0, d: 1500),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _AnalysisPainter(),
+    return Stack(
+      fit: StackFit.expand,
+      children: _stars
+          .map((s) => _TwinkleStar(left: s.l, top: s.t, size: s.s, delay: s.d))
+          .toList(),
     );
   }
 }
 
-class _AnalysisPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final cx = size.width / 2;
-    final cy = size.height / 2;
-
-    // ── Avatar circle (top) ──────────────────────────────────
-    final circleBg = Paint()..color = _kTeal.withOpacity(0.15);
-    canvas.drawCircle(Offset(cx, cy - 44), 28, circleBg);
-    final circleFg = Paint()..color = _kTeal.withOpacity(0.55);
-    canvas.drawCircle(Offset(cx, cy - 44), 18, circleFg);
-
-    // ── Profile card (bottom) ────────────────────────────────
-    final cardRect = RRect.fromRectAndRadius(
-      Rect.fromCenter(center: Offset(cx, cy + 26), width: 160, height: 68),
-      const Radius.circular(12),
-    );
-    final cardPaint = Paint()
-      ..color = Colors.white.withOpacity(0.08)
-      ..style = PaintingStyle.fill;
-    canvas.drawRRect(cardRect, cardPaint);
-    canvas.drawRRect(
-      cardRect,
-      Paint()
-        ..color = _kTeal.withOpacity(0.4)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1,
-    );
-
-    // Badge row inside card
-    final badgeRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(cx - 76, cy + 6, 44, 10),
-      const Radius.circular(5),
-    );
-    canvas.drawRRect(badgeRect, Paint()..color = _kTeal.withOpacity(0.7));
-
-    // Text lines
-    _drawLine(canvas, Offset(cx - 76, cy + 22), 72, Colors.white.withOpacity(0.25), 7);
-    _drawLine(canvas, Offset(cx - 76, cy + 34), 52, Colors.white.withOpacity(0.15), 7);
-
-    // Mini score card (right side)
-    final scoreRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(cx + 10, cy + 6, 46, 46),
-      const Radius.circular(8),
-    );
-    canvas.drawRRect(
-      scoreRect,
-      Paint()..color = _kGreen.withOpacity(0.2),
-    );
-    canvas.drawRRect(
-      scoreRect,
-      Paint()
-        ..color = _kGreen.withOpacity(0.4)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 0.8,
-    );
-
-    // Score text "92"
-    final tp = TextPainter(
-      text: TextSpan(
-        text: '92',
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-          color: _kGreen,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    tp.paint(canvas, Offset(cx + 10 + (46 - tp.width) / 2, cy + 6 + (46 - tp.height) / 2));
-
-    // AI badge (top-right of avatar)
-    final aiBadge = Paint()
-      ..color = _kTeal.withOpacity(0.3)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(cx + 38, cy - 62), 12, aiBadge);
-    canvas.drawCircle(
-      Offset(cx + 38, cy - 62),
-      12,
-      Paint()
-        ..color = _kTeal
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1,
-    );
-    final aiTp = TextPainter(
-      text: TextSpan(
-        text: 'AI',
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 8,
-          fontWeight: FontWeight.w700,
-          color: _kTeal,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    aiTp.paint(canvas, Offset(cx + 38 - aiTp.width / 2, cy - 62 - aiTp.height / 2));
-  }
-
-  void _drawLine(Canvas canvas, Offset start, double width, Color color, double height) {
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(start.dx, start.dy, width, height),
-        const Radius.circular(3.5),
-      ),
-      Paint()..color = color,
-    );
-  }
+class _TwinkleStar extends StatefulWidget {
+  const _TwinkleStar({
+    required this.left,
+    required this.top,
+    required this.size,
+    required this.delay,
+  });
+  final double left;
+  final double top;
+  final double size;
+  final int delay;
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  State<_TwinkleStar> createState() => _TwinkleStarState();
 }
 
-// ─────────────────────────────────────────────────────────────
-//  Illustration 2 – Pantau Tren
-// ─────────────────────────────────────────────────────────────
-class _IllusTrend extends StatelessWidget {
-  const _IllusTrend();
+class _TwinkleStarState extends State<_TwinkleStar>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1800 + widget.delay),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(painter: _TrendPainter());
-  }
-}
-
-class _TrendPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final cx = size.width / 2;
-    final cy = size.height / 2;
-
-    // Chart frame
-    final frame = RRect.fromRectAndRadius(
-      Rect.fromCenter(center: Offset(cx, cy + 10), width: size.width * 0.78, height: 90),
-      const Radius.circular(10),
-    );
-    canvas.drawRRect(
-      frame,
-      Paint()..color = Colors.white.withOpacity(0.06),
-    );
-    canvas.drawRRect(
-      frame,
-      Paint()
-        ..color = _kTeal.withOpacity(0.3)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1,
-    );
-
-    // Bar chart
-    final barW = 16.0;
-    final barGap = 18.0;
-    final baseY = cy + 50.0;
-    final barData = [
-      (height: 40.0, color: Colors.white.withOpacity(0.18)),
-      (height: 30.0, color: _kTeal.withOpacity(0.5)),
-      (height: 50.0, color: Colors.white.withOpacity(0.25)),
-      (height: 68.0, color: _kTeal),
-    ];
-    double bx = cx - (barData.length * (barW + barGap) - barGap) / 2;
-    for (final d in barData) {
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromLTWH(bx, baseY - d.height, barW, d.height),
-          const Radius.circular(4),
-        ),
-        Paint()..color = d.color,
-      );
-      bx += barW + barGap;
-    }
-
-    // Line overlay
-    final points = [
-      Offset(cx - 60, baseY - 30),
-      Offset(cx - 26, baseY - 22),
-      Offset(cx + 8, baseY - 40),
-      Offset(cx + 42, baseY - 68),
-    ];
-    final linePaint = Paint()
-      ..color = _kGreen
-      ..strokeWidth = 2.2
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round
-      ..style = PaintingStyle.stroke;
-    final path = Path()..moveTo(points[0].dx, points[0].dy);
-    for (int i = 1; i < points.length; i++) {
-      path.lineTo(points[i].dx, points[i].dy);
-    }
-    canvas.drawPath(path, linePaint);
-    canvas.drawCircle(points.last, 5, Paint()..color = _kGreen);
-
-    // Badge chip (top)
-    final chipRect = RRect.fromRectAndRadius(
-      Rect.fromCenter(center: Offset(cx, cy - 46), width: 140, height: 22),
-      const Radius.circular(11),
-    );
-    canvas.drawRRect(chipRect, Paint()..color = _kTeal.withOpacity(0.15));
-    canvas.drawRRect(
-      chipRect,
-      Paint()
-        ..color = _kTeal.withOpacity(0.3)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 0.8,
-    );
-
-    final chipTp = TextPainter(
-      text: TextSpan(
-        text: 'Score menurun 8% ↓',
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: _kTeal,
+    final scrSize = MediaQuery.of(context).size;
+    return Positioned(
+      left: scrSize.width * widget.left,
+      top: scrSize.height * widget.top,
+      child: AnimatedBuilder(
+        animation: _ctrl,
+        builder: (_, __) => Opacity(
+          opacity: 0.2 + 0.8 * _ctrl.value,
+          child: Container(
+            width: widget.size * (0.8 + 0.4 * _ctrl.value),
+            height: widget.size * (0.8 + 0.4 * _ctrl.value),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+            ),
+          ),
         ),
       ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    chipTp.paint(canvas, Offset(cx - chipTp.width / 2, cy - 46 - chipTp.height / 2));
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-// ─────────────────────────────────────────────────────────────
-//  Illustration 3 – Insight & Rekomendasi AI
-// ─────────────────────────────────────────────────────────────
-class _IllusInsight extends StatelessWidget {
-  const _IllusInsight();
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(painter: _InsightPainter());
-  }
-}
-
-class _InsightPainter extends CustomPainter {
-  void _drawLine(Canvas canvas, Offset start, double width, Color color, double height) {
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(start.dx, start.dy, width, height),
-        const Radius.circular(3.5),
-      ),
-      Paint()..color = color,
     );
   }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final cx = size.width / 2;
-    final cy = size.height / 2;
-
-    // Main card
-    final cardRect = RRect.fromRectAndRadius(
-      Rect.fromCenter(center: Offset(cx, cy), width: size.width * 0.8, height: 110),
-      const Radius.circular(14),
-    );
-    canvas.drawRRect(cardRect, Paint()..color = Colors.white.withOpacity(0.06));
-    canvas.drawRRect(
-      cardRect,
-      Paint()
-        ..color = _kTeal.withOpacity(0.3)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1,
-    );
-
-    // Text lines (left side)
-    _drawLine(canvas, Offset(cx - size.width * 0.37, cy - 28), 80, Colors.white.withOpacity(0.2), 8);
-    _drawLine(canvas, Offset(cx - size.width * 0.37, cy - 16), 56, Colors.white.withOpacity(0.12), 6);
-    _drawLine(canvas, Offset(cx - size.width * 0.37, cy - 7), 64, Colors.white.withOpacity(0.12), 6);
-
-    // Checkbox (right side)
-    final boxRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(cx + size.width * 0.1, cy - 36, 38, 38),
-      const Radius.circular(8),
-    );
-    canvas.drawRRect(boxRect, Paint()..color = _kTeal.withOpacity(0.25));
-    canvas.drawRRect(
-      boxRect,
-      Paint()
-        ..color = _kTeal.withOpacity(0.5)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 0.8,
-    );
-
-    // Checkmark
-    final checkPaint = Paint()
-      ..color = _kTeal
-      ..strokeWidth = 2.2
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round
-      ..style = PaintingStyle.stroke;
-    final bx = cx + size.width * 0.1;
-    final by = cy - 36;
-    final checkPath = Path()
-      ..moveTo(bx + 8, by + 20)
-      ..lineTo(bx + 14, by + 26)
-      ..lineTo(bx + 28, by + 14);
-    canvas.drawPath(checkPath, checkPaint);
-
-    // CTA bar (bottom of card)
-    final ctaRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(
-        cx - size.width * 0.37,
-        cy + 14,
-        size.width * 0.74,
-        24,
-      ),
-      const Radius.circular(8),
-    );
-    canvas.drawRRect(ctaRect, Paint()..color = _kTeal.withOpacity(0.85));
-
-    final ctaTp = TextPainter(
-      text: TextSpan(
-        text: 'Lihat Rekomendasi AI',
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          color: Colors.white,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    ctaTp.paint(canvas, Offset(cx - ctaTp.width / 2, cy + 14 + (24 - ctaTp.height) / 2));
-
-    // Notification badge (top-right)
-    canvas.drawCircle(
-      Offset(cx + size.width * 0.32, cy - 52),
-      14,
-      Paint()..color = _kGreen,
-    );
-    final badgeTp = TextPainter(
-      text: TextSpan(
-        text: '3',
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: Colors.white,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    badgeTp.paint(
-      canvas,
-      Offset(
-        cx + size.width * 0.32 - badgeTp.width / 2,
-        cy - 52 - badgeTp.height / 2,
-      ),
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

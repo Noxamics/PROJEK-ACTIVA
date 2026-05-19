@@ -38,35 +38,36 @@ class AnalyticsController extends Controller
             ->get();
 
         $avgDepCurrent = $last7->avg(fn($r) => $r->ml_result['digital_dependence_score'] ?? 0) ?? 0;
-        $avgDepPrev    = $prev7->avg(fn($r) => $r->ml_result['digital_dependence_score'] ?? 0) ?? 0;
+        $avgDepPrev = $prev7->avg(fn($r) => $r->ml_result['digital_dependence_score'] ?? 0) ?? 0;
 
         $depChange = $avgDepPrev > 0
             ? round((($avgDepCurrent - $avgDepPrev) / $avgDepPrev) * 100, 1)
             : 0;
 
         AnalyticsLog::create([
-            'user_id'                      => $userId,
-            'avg_dependence_7_days'        => round($avgDepCurrent, 2),
+            'user_id' => $userId,
+            'avg_dependence_7_days' => round($avgDepCurrent, 2),
             'dependence_change_percentage' => $depChange,
-            'created_at'                   => now(),
+            'created_at' => now(),
         ]);
 
         return response()->json([
             'success' => true,
-            'data'    => [
-                'period'                       => '7 hari terakhir',
-                'avg_dependence_score'         => round($avgDepCurrent, 2),
+            'data' => [
+                'period' => '7 hari terakhir',
+                'avg_dependence_score' => round($avgDepCurrent, 2),
                 'dependence_change_percentage' => $depChange,
-                'dependence_change_label'      => $this->changeLabel($depChange),
-                'high_risk_days'               => $last7->filter(fn($r) =>
+                'dependence_change_label' => $this->changeLabel($depChange),
+                'high_risk_days' => $last7->filter(
+                    fn($r) =>
                     ($r->ml_result['category'] ?? '') === 'tinggi'
                 )->count(),
-                'total_surveys_week'           => $last7->count(),
-                'daily_trend'                  => $last7->map(fn($r) => [
-                    'date'             => Carbon::parse($r->created_at)->format('Y-m-d'),
+                'total_surveys_week' => $last7->count(),
+                'daily_trend' => $last7->map(fn($r) => [
+                    'date' => Carbon::parse($r->created_at)->format('Y-m-d'),
                     'dependence_score' => $r->ml_result['digital_dependence_score'] ?? 0,
-                    'category'         => $r->ml_result['category'] ?? 'rendah',
-                    'confidence'       => $r->ml_result['confidence'] ?? 0,
+                    'category' => $r->ml_result['category'] ?? 'rendah',
+                    'confidence' => $r->ml_result['confidence'] ?? 0,
                 ]),
             ],
         ]);
@@ -88,17 +89,18 @@ class AnalyticsController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => [
+            'data' => [
                 'my_scores' => $myLatest ? [
                     'dependence_score' => $myLatest->ml_result['digital_dependence_score'] ?? 0,
-                    'category'         => $myLatest->ml_result['category'] ?? 'rendah',
-                    'confidence'       => $myLatest->ml_result['confidence'] ?? 0,
+                    'category' => $myLatest->ml_result['category'] ?? 'rendah',
+                    'confidence' => $myLatest->ml_result['confidence'] ?? 0,
                 ] : null,
                 'global_avg' => [
                     'dependence_score' => round(
-                        $global->avg(fn($r) => $r->ml_result['digital_dependence_score'] ?? 0), 2
+                        $global->avg(fn($r) => $r->ml_result['digital_dependence_score'] ?? 0),
+                        2
                     ),
-                    'sample_size'      => $global->count(),
+                    'sample_size' => $global->count(),
                 ],
             ],
         ]);
@@ -119,14 +121,14 @@ class AnalyticsController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => [
-                'days'    => $days,
+            'data' => [
+                'days' => $days,
                 'records' => $results->map(fn($r) => [
-                    'date'             => Carbon::parse($r->created_at)->format('Y-m-d'),
+                    'date' => Carbon::parse($r->created_at)->format('Y-m-d'),
                     'dependence_score' => $r->ml_result['digital_dependence_score'] ?? 0,
-                    'category'         => $r->ml_result['category'] ?? 'rendah',
-                    'confidence'       => $r->ml_result['confidence'] ?? 0,
-                    'week_group'       => $r->week_group,
+                    'category' => $r->ml_result['category'] ?? 'rendah',
+                    'confidence' => $r->ml_result['confidence'] ?? 0,
+                    'week_group' => $r->week_group,
                 ]),
             ],
         ]);
@@ -344,6 +346,7 @@ class AnalyticsController extends Controller
 
     private function changeLabel(float $pct): string
     {
+        // Untuk dependensi, naik = buruk, turun = baik (kebalikan dari focus)
         if ($pct > 10)  return 'Meningkat signifikan (perlu perhatian)';
         if ($pct > 0)   return 'Sedikit meningkat';
         if ($pct == 0)  return 'Tidak berubah';

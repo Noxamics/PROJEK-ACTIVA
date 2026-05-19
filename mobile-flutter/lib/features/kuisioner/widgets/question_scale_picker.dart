@@ -1,3 +1,5 @@
+//lib/features/kuisioner/widgets/question_scale_picker.dart
+
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 
@@ -34,24 +36,34 @@ class QuestionScalePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.bgWhite,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
+    return Column(
+      children: [_buildLabels(), const SizedBox(height: 12), _buildScaleRow()],
+    );
+  }
+
+  Widget _buildLabels() {
+    if (lowLabel == null && highLabel == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildScaleRow(), 
-          const SizedBox(height: 16), 
-          _buildLabels()
+          Text(
+            lowLabel ?? '',
+            style: TextStyle(
+              color: invertColor ? AppColors.green : AppColors.red,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          Text(
+            highLabel ?? '',
+            style: TextStyle(
+              color: invertColor ? AppColors.red : AppColors.green,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ),
     );
@@ -66,37 +78,37 @@ class QuestionScalePicker extends StatelessWidget {
       final isSelected = number == selectedInt;
       final color = _colorForValue(number);
 
-      return Padding(
-        padding: EdgeInsets.only(right: i < total - 1 ? 6 : 0),
+      return Expanded(
         child: GestureDetector(
           onTap: () => onChanged(number),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 250),
             curve: Curves.easeOutBack,
-            width: _boxWidth(total),
-            height: _boxHeight(total),
+            margin: EdgeInsets.only(right: i < total - 1 ? 4 : 0),
+            height: 48,
             decoration: BoxDecoration(
-              color: isSelected ? color : color.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(14),
+              color: isSelected ? color : color.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isSelected ? color : color.withValues(alpha: 0.15),
-                width: isSelected ? 2.5 : 1,
+                color: isSelected ? color : color.withValues(alpha: 0.3),
+                width: isSelected ? 2.5 : 1.5,
               ),
-              boxShadow: [
-                if (isSelected)
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-              ],
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: color.withValues(alpha: 0.4),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : null,
             ),
             child: Center(
               child: Text(
                 '$number',
                 style: TextStyle(
                   color: isSelected ? Colors.white : color,
-                  fontSize: _fontSize(total),
+                  fontSize: 15,
                   fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
                 ),
               ),
@@ -106,63 +118,7 @@ class QuestionScalePicker extends StatelessWidget {
       );
     });
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: children
-      ),
-    );
-  }
-
-  Widget _buildLabels() {
-    if (lowLabel == null && highLabel == null) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(
-              lowLabel ?? '',
-              style: TextStyle(
-                color: AppColors.textMuted.withValues(alpha: 0.7),
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              highLabel ?? '',
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                color: AppColors.textMuted.withValues(alpha: 0.7),
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  double _boxWidth(int total) {
-    if (total <= 5) return 58;
-    if (total <= 10) return 42;
-    return 34;
-  }
-
-  double _boxHeight(int total) {
-    if (total <= 10) return 50;
-    return 44;
-  }
-
-  double _fontSize(int total) {
-    if (total <= 10) return 16;
-    return 13;
+    return Row(children: children);
   }
 
   // ── Warna berdasarkan posisi & mode ───────────────────────────────────────
@@ -177,12 +133,14 @@ class QuestionScalePicker extends StatelessWidget {
     final isHigh = position >= highEnd;
 
     if (invertColor) {
-      if (isHigh) return AppColors.red;
+      // Untuk stress/anxiety: rendah = hijau, tinggi = merah
       if (isLow) return AppColors.green;
+      if (isHigh) return AppColors.red;
       return AppColors.amber;
     } else {
-      if (isHigh) return AppColors.green;
+      // Untuk happiness: rendah = merah, tinggi = hijau
       if (isLow) return AppColors.red;
+      if (isHigh) return AppColors.green;
       return AppColors.amber;
     }
   }
