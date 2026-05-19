@@ -8,7 +8,6 @@ import '../widgets/perkembangan_card.dart';
 import '../models/analisis_data.dart';
 import '../../grafik/screens/grafik_screen.dart';
 import '../../profil/screens/profil_screen.dart';
-import '../../kuisioner/screens/kuesioner_screen.dart';
 import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
 
 class HistoriScreen extends ConsumerWidget {

@@ -305,6 +305,11 @@ class _GenericBarChartState extends State<GenericBarChart> {
 
   @override
   Widget build(BuildContext context) {
+    // Validasi _selectedIndex: pastikan tidak out of bounds
+    if (_selectedIndex != null && _selectedIndex! >= widget.values.length) {
+      _selectedIndex = null;
+    }
+
     final displayIndex =
         _selectedIndex ??
         (widget.values.isNotEmpty ? widget.values.length - 1 : null);
@@ -346,25 +351,40 @@ class _GenericBarChartState extends State<GenericBarChart> {
                                 // Active bar
                                 FractionallySizedBox(
                                   heightFactor: hFactor,
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 400),
-                                    curve: Curves.easeOutBack,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [widget.color, widget.color.withValues(alpha: 0.8)],
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                      boxShadow: [
-                                        if (isSelected)
-                                          BoxShadow(
-                                            color: widget.color.withValues(alpha: 0.3),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 4),
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      // Shadow container (non-animated, only shown when selected)
+                                      if (isSelected)
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(8),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: widget.color.withValues(alpha: 0.3),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 4),
+                                              ),
+                                            ],
                                           ),
-                                      ],
-                                    ),
+                                        ),
+                                      // Animated gradient bar
+                                      AnimatedContainer(
+                                        duration: const Duration(milliseconds: 400),
+                                        curve: Curves.easeOutBack,
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              widget.color,
+                                              widget.color.withValues(alpha: 0.8),
+                                            ],
+                                            begin: Alignment.topCenter,
+                                            end: Alignment.bottomCenter,
+                                          ),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 if (isSelected)

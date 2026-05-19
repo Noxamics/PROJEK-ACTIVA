@@ -6,7 +6,6 @@ import '../../../core/theme/app_colors.dart';
 import '../providers/questionnaire_provider.dart';
 import '../widgets/question_option_card.dart';
 import '../widgets/question_slider.dart';
-import '../widgets/question_scale_picker.dart';
 import '../../hasil_prediksi/screens/hasil_prediksi_screen.dart';
 import '../../hasil_prediksi/providers/result_provider.dart';
 

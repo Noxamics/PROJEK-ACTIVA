@@ -186,14 +186,14 @@ class AuthService {
       final response = await _client.put(
         ApiEndpoints.updateProfile,
         data: {
-          if (name != null) 'name': name,
-          if (gender != null) 'gender': gender,
+          'name': ?name,
+          'gender': ?gender,
           if (dateOfBirth != null)
             'date_of_birth': dateOfBirth.toIso8601String().split('T').first,
-          if (region != null) 'region': region,
-          if (educationLevel != null) 'education_level': educationLevel,
-          if (dailyRole != null) 'daily_role': dailyRole,
-          if (incomeLevel != null) 'income_level': incomeLevel,
+          'region': ?region,
+          'education_level': ?educationLevel,
+          'daily_role': ?dailyRole,
+          'income_level': ?incomeLevel,
         },
       );
 

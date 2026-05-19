@@ -29,8 +29,8 @@ class QuestionnaireState {
     this.status = QuestionnaireStatus.initial,
     required this.form,
     this.currentPage = 0,
-    this.errorMessage = null,
-    this.result = null,
+    this.errorMessage,
+    this.result,
     this.mlFailed = false,
   });
 
