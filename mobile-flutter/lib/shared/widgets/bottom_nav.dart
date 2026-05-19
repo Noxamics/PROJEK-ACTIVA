@@ -13,27 +13,21 @@ class BottomNav extends StatelessWidget {
     super.key,
     required this.currentIndex,
     required this.onTap,
-    this.navTheme = NavTheme.dark,
+    this.navTheme = NavTheme.light,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = navTheme == NavTheme.dark;
 
-    final bgColor = isDark ? AppColors.bgCard : AppColors.bgWhite;
+    final bgColor = isDark ? AppColors.bgCard : Colors.white;
     final borderColor = isDark ? AppColors.cardBorder : AppColors.lightBorder;
-    
-    // Warna sesuai image reference (Slate palette)
-    final activeColor = isDark ? Colors.white : AppColors.textDark;
-    final inactiveColor = isDark
-        ? AppColors.textSecondary
-        : AppColors.textSecondary;
 
     return Container(
       decoration: BoxDecoration(
         color: bgColor,
         border: Border(
-          top: BorderSide(color: borderColor.withValues(alpha: 0.5)),
+          top: BorderSide(color: borderColor.withValues(alpha: 0.3)),
         ),
         boxShadow: [
           if (!isDark)
@@ -47,7 +41,7 @@ class BottomNav extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(4, 10, 4, 8),
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(
@@ -57,8 +51,7 @@ class BottomNav extends StatelessWidget {
                 activeIcon: _navItems[i].activeIcon,
                 inactiveIcon: _navItems[i].inactiveIcon,
                 label: _navItems[i].label,
-                activeColor: activeColor,
-                inactiveColor: inactiveColor,
+                isDark: isDark,
               ),
             ),
           ),
@@ -72,30 +65,67 @@ class BottomNav extends StatelessWidget {
     required IconData activeIcon,
     required IconData inactiveIcon,
     required String label,
-    required Color activeColor,
-    required Color inactiveColor,
+    required bool isDark,
   }) {
     final isActive = index == currentIndex;
+
+    // Warna background icon aktif: navy/teal
+    final activeIconBgColor = isDark
+        ? AppColors.teal
+        : const Color(0xFF1E2A4A); // Navy
+
+    // Warna icon aktif: putih
+    final activeIconColor = Colors.white;
+
+    // Warna label aktif: navy untuk light, putih untuk dark
+    final activeLabelColor = isDark
+        ? AppColors.bgWhite
+        : const Color(0xFF1E2A4A);
+
+    // Warna item tidak aktif
+    final inactiveColor = isDark
+        ? AppColors.textSecondary
+        : AppColors.textSecondary;
 
     return GestureDetector(
       onTap: () => onTap(index),
       behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 68,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive
+              ? (isDark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : const Color(0xFF1E2A4A).withValues(alpha: 0.1))
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              isActive ? activeIcon : inactiveIcon,
-              color: isActive ? activeColor : inactiveColor,
-              size: 24,
+            // Icon container dengan background jika aktif
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: isActive ? activeIconBgColor : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                isActive ? activeIcon : inactiveIcon,
+                color: isActive ? activeIconColor : inactiveColor,
+                size: 20,
+              ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
+            // Label
             Text(
               label,
               style: TextStyle(
-                color: isActive ? activeColor : inactiveColor,
-                fontSize: 11,
+                color: isActive ? activeLabelColor : inactiveColor,
+                fontSize: 10,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                 letterSpacing: -0.2,
               ),
@@ -118,7 +148,7 @@ class _NavItem {
 const _navItems = [
   _NavItem(Icons.home_rounded, Icons.home_outlined, 'Beranda'),
   _NavItem(Icons.assignment_rounded, Icons.assignment_outlined, 'Kuesioner'),
-  _NavItem(Icons.description_rounded, Icons.description_outlined, 'Laporan'),
-  _NavItem(Icons.show_chart_rounded, Icons.show_chart_rounded, 'Grafik'),
+  _NavItem(Icons.article_rounded, Icons.article_outlined, 'Laporan'),
+  _NavItem(Icons.bar_chart_rounded, Icons.bar_chart_outlined, 'Grafik'),
   _NavItem(Icons.person_rounded, Icons.person_outline_rounded, 'Profil'),
 ];

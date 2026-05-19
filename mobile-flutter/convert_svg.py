@@ -38,7 +38,7 @@ def convert_svg_classes_to_inline(input_path, output_path):
     with open(output_path, 'w') as f:
         f.write(result)
 # Jalankan:
-convert_svg_classes_to_inline('assets/images/NewLogoBiru.svg',   'assets/logo/NewLogoBiru_fixed.svg')
-convert_svg_classes_to_inline('assets/images/NewLogoEmblem.svg', 'assets/logo/NewLogoEmblem_fixed.svg')
-convert_svg_classes_to_inline('assets/images/NewLogoEmblem.svg', 'assets/logo/NewLogoEmblem2_fixed.svg')
-convert_svg_classes_to_inline('assets/images/NewLogoPutih.svg',  'assets/logo/NewLogoPutih_fixed.svg')
+# convert_svg_classes_to_inline('assets/images/NewLogoBiru.svg',   'assets/logo/NewLogoBiru_fixed.svg')
+# convert_svg_classes_to_inline('assets/images/NewLogoEmblem.svg', 'assets/logo/NewLogoEmblem_fixed.svg')
+convert_svg_classes_to_inline('assets/images/NewLogoEmblem2.svg', 'assets/logo/NewLogoEmblem2_fixed.svg')
+# convert_svg_classes_to_inline('assets/images/NewLogoPutih.svg',  'assets/logo/NewLogoPutih_fixed.svg')

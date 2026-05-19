@@ -1,3 +1,5 @@
+//lib/features/kuisioner/widgets/question_option_card.dart
+
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 
@@ -25,24 +27,24 @@ class QuestionOptionCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOutCubic,
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isSelected 
-              ? AppColors.teal.withValues(alpha: 0.05) 
+          color: isSelected
+              ? AppColors.teal.withValues(alpha: 0.08)
               : AppColors.bgWhite,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected ? AppColors.teal : AppColors.lightBorder,
             width: isSelected ? 2 : 1.2,
           ),
           boxShadow: [
             BoxShadow(
-              color: isSelected 
-                  ? AppColors.teal.withValues(alpha: 0.1) 
+              color: isSelected
+                  ? AppColors.teal.withValues(alpha: 0.15)
                   : Colors.black.withValues(alpha: 0.02),
-              blurRadius: isSelected ? 12 : 8,
-              offset: const Offset(0, 4),
+              blurRadius: isSelected ? 10 : 6,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
@@ -53,20 +55,20 @@ class QuestionOptionCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: isSelected 
-                      ? AppColors.teal.withValues(alpha: 0.1) 
+                  color: isSelected
+                      ? AppColors.teal.withValues(alpha: 0.15)
                       : AppColors.bgLight,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   icon,
                   color: isSelected ? AppColors.teal : AppColors.textMuted,
-                  size: 20,
+                  size: 18,
                 ),
               ),
               const SizedBox(width: 14),
             ],
-            
+
             // Label & Subtitle
             Expanded(
               child: Column(
@@ -76,9 +78,11 @@ class QuestionOptionCard extends StatelessWidget {
                     label,
                     style: TextStyle(
                       color: isSelected ? AppColors.teal : AppColors.textDark,
-                      fontSize: 16,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                      letterSpacing: -0.3,
+                      fontSize: 14,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w600,
+                      letterSpacing: -0.2,
                     ),
                   ),
                   if (subtitle != null) ...[
@@ -86,23 +90,23 @@ class QuestionOptionCard extends StatelessWidget {
                     Text(
                       subtitle!,
                       style: TextStyle(
-                        color: isSelected 
-                            ? AppColors.teal.withValues(alpha: 0.7) 
+                        color: isSelected
+                            ? AppColors.teal.withValues(alpha: 0.7)
                             : AppColors.textMuted,
-                        fontSize: 12,
-                        height: 1.4,
+                        fontSize: 11,
+                        height: 1.3,
                       ),
                     ),
                   ],
                 ],
               ),
             ),
-            
+
             // Selection indicator
             AnimatedContainer(
               duration: const Duration(milliseconds: 250),
-              width: 24,
-              height: 24,
+              width: 22,
+              height: 22,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isSelected ? AppColors.teal : Colors.transparent,
@@ -110,9 +114,22 @@ class QuestionOptionCard extends StatelessWidget {
                   color: isSelected ? AppColors.teal : AppColors.textDisabled,
                   width: 2,
                 ),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: AppColors.teal.withValues(alpha: 0.3),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
               ),
               child: isSelected
-                  ? const Icon(Icons.check_rounded, size: 16, color: Colors.white)
+                  ? const Icon(
+                      Icons.check_rounded,
+                      size: 14,
+                      color: Colors.white,
+                    )
                   : null,
             ),
           ],

@@ -80,7 +80,7 @@ class QuestionnaireModel {
     return QuestionnaireModel(
       id: json['_id'] ?? json['id'],
       userId: json['user_id'],
-      deviceType: json['device_type'] ?? 'Laptop',
+      deviceType: json['device_type'] ?? 'Android',
       deviceHoursPerDay: _toDouble(json['device_hours_per_day']),
       phoneUnlocksPerDay: _toInt(json['phone_unlocks']),
       notificationsPerDay: _toInt(json['notifications_per_day']),
@@ -118,20 +118,21 @@ class QuestionnaireModel {
       deviceType: kIsWeb
           ? 'Web'
           : defaultTargetPlatform == TargetPlatform.android
-              ? 'Android'
-              : 'iPhone',
+          ? 'Android'
+          : 'iPhone',
       deviceHoursPerDay: 0.0,
       phoneUnlocksPerDay: 0,
       notificationsPerDay: 0,
-      socialMediaMinutes: -1, // Agar tidak bentrok dengan pilihan "Tidak Pakai" (0)
+      socialMediaMinutes:
+          -1, // Agar tidak bentrok dengan pilihan "Tidak Pakai" (0)
       studyMinutes: 0,
       physicalActivityDays: 0,
       sleepHours: 7.0, // Default tengah untuk slider
       sleepQuality: 0.0,
       anxietyScore: -1.0,
       depressionScore: -1.0,
-      stressLevel: -1.0, 
-      happinessScore: -1.0, 
+      stressLevel: -1.0,
+      happinessScore: -1.0,
     );
   }
 

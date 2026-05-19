@@ -1,16 +1,19 @@
+//lib/features/kuisioner/widgets/question_slider.dart
+
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 
-/// Widget slider untuk pertanyaan numerik.
-/// Dipakai untuk: jam pakai HP, menit sosmed, jam tidur, dll.
+/// Widget slider untuk pertanyaan numerik dengan tampilan premium.
+/// Menampilkan nilai besar di tengah dengan label kualitas.
 class QuestionSlider extends StatelessWidget {
   final double value;
   final double min;
   final double max;
   final int divisions;
-  final String unit; // satuan: "jam", "menit", "kali", "hari"
+  final String unit;
   final String? minLabel;
   final String? maxLabel;
+  final String? qualityLabel;
   final Color activeColor;
   final ValueChanged<double> onChanged;
 
@@ -24,23 +27,21 @@ class QuestionSlider extends StatelessWidget {
     required this.onChanged,
     this.minLabel,
     this.maxLabel,
+    this.qualityLabel,
     this.activeColor = AppColors.teal,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.bgWhite,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: AppColors.bgLight,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: activeColor.withValues(alpha: 0.15),
+          width: 1.5,
+        ),
       ),
       child: Column(
         children: [
@@ -63,24 +64,48 @@ class QuestionSlider extends StatelessWidget {
 
     return Column(
       children: [
+        // Large value
         Text(
           displayVal,
           style: TextStyle(
             color: activeColor,
-            fontSize: 44,
+            fontSize: 56,
             fontWeight: FontWeight.w900,
-            letterSpacing: -1,
+            letterSpacing: -2,
+            height: 1,
           ),
         ),
+        const SizedBox(height: 4),
+        // Unit label
         Text(
           unit.toUpperCase(),
           style: TextStyle(
-            color: activeColor.withValues(alpha: 0.5),
-            fontSize: 12,
+            color: activeColor.withValues(alpha: 0.6),
+            fontSize: 14,
             fontWeight: FontWeight.w800,
-            letterSpacing: 1.5,
+            letterSpacing: 2,
           ),
         ),
+        // Quality label
+        if (qualityLabel != null) ...[
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              color: activeColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              qualityLabel!,
+              style: TextStyle(
+                color: activeColor,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1,
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -91,21 +116,33 @@ class QuestionSlider extends StatelessWidget {
     return SliderTheme(
       data: SliderTheme.of(context).copyWith(
         activeTrackColor: activeColor,
-        inactiveTrackColor: activeColor.withValues(alpha: 0.1),
+        inactiveTrackColor: activeColor.withValues(alpha: 0.15),
         thumbColor: Colors.white,
         overlayColor: activeColor.withValues(alpha: 0.1),
         thumbShape: _CustomThumbShape(color: activeColor),
-        trackHeight: 8,
+        trackHeight: 10,
         trackShape: const RoundedRectSliderTrackShape(),
         activeTickMarkColor: Colors.transparent,
         inactiveTickMarkColor: Colors.transparent,
       ),
-      child: Slider(
-        value: value,
-        min: min,
-        max: max,
-        divisions: divisions,
-        onChanged: onChanged,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: activeColor.withValues(alpha: 0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Slider(
+          value: value,
+          min: min,
+          max: max,
+          divisions: divisions,
+          onChanged: onChanged,
+        ),
       ),
     );
   }
@@ -115,14 +152,14 @@ class QuestionSlider extends StatelessWidget {
   Widget _buildLabels() {
     if (minLabel == null && maxLabel == null) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             minLabel ?? '',
             style: TextStyle(
-              color: AppColors.textMuted.withValues(alpha: 0.6),
+              color: AppColors.textMuted.withValues(alpha: 0.7),
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -130,7 +167,7 @@ class QuestionSlider extends StatelessWidget {
           Text(
             maxLabel ?? '',
             style: TextStyle(
-              color: AppColors.textMuted.withValues(alpha: 0.6),
+              color: AppColors.textMuted.withValues(alpha: 0.7),
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -141,12 +178,14 @@ class QuestionSlider extends StatelessWidget {
   }
 }
 
+// ── Custom Thumb Shape ───────────────────────────────────────────────────────
+
 class _CustomThumbShape extends SliderComponentShape {
   final Color color;
   const _CustomThumbShape({required this.color});
 
   @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete) => const Size(28, 28);
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) => const Size(32, 32);
 
   @override
   void paint(
@@ -165,19 +204,25 @@ class _CustomThumbShape extends SliderComponentShape {
   }) {
     final Canvas canvas = context.canvas;
 
-    final paint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
+    // Outer shadow
+    canvas.drawCircle(
+      center + const Offset(0, 2),
+      16,
+      Paint()
+        ..color = Colors.black.withValues(alpha: 0.15)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+    );
 
-    // Shadow
-    canvas.drawCircle(center, 14, Paint()
-      ..color = Colors.black.withValues(alpha: 0.1)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4));
+    // White outer circle
+    canvas.drawCircle(
+      center,
+      16,
+      Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.fill,
+    );
 
-    // Outer circle (white)
-    canvas.drawCircle(center, 14, paint);
-
-    // Inner circle (colored)
+    // Colored inner circle
     canvas.drawCircle(center, 8, Paint()..color = color);
   }
 }

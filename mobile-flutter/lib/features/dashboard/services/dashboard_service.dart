@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
 import '../models/analytics_model.dart';
+import '../widgets/focus_bar_chart.dart';
 
 final dashboardServiceProvider = Provider<DashboardService>((ref) {
   final client = ref.watch(apiClientProvider);
@@ -15,7 +16,6 @@ class DashboardService {
   DashboardService(this._client);
 
   // ── Get Analytics ──────────────────────────────────────────────────────────
-  /// GET /api/analytics/insight
   Future<AnalyticsModel> getAnalytics() async {
     try {
       final response = await _client.get(ApiEndpoints.analyticsInsight);
@@ -26,10 +26,35 @@ class DashboardService {
     }
   }
 
+  // ── Get Chart Data ─────────────────────────────────────────────────────────
+  Future<List<ChartData>> getWeeklyProgressData() async {
+    try {
+      final response = await _client.get('/api/weekly-progress');
+      final data = response.data as Map<String, dynamic>;
+      final items = data['data'] as List<dynamic>;
+      return items
+          .map((e) => ChartData(e['day'] as String, e['value'] as int))
+          .toList();
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   // ── Mock ───────────────────────────────────────────────────────────────────
   Future<AnalyticsModel> getMockAnalytics() async {
     await Future.delayed(const Duration(milliseconds: 600));
     return AnalyticsModel.mock();
+  }
+
+  Future<List<ChartData>> getMockWeeklyProgress() async {
+    await Future.delayed(const Duration(milliseconds: 400));
+    return [
+      ChartData('Senin', 65),
+      ChartData('Selasa', 72),
+      ChartData('Rabu', 58),
+      ChartData('Kamis', 70),
+      ChartData('Jumat', 55),
+    ];
   }
 
   String _handleError(DioException e) {
