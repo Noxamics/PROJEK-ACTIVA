@@ -21,16 +21,18 @@ class User extends Authenticatable implements JWTSubject
         'name', 'email', 'password',
         'gender', 'tgl_lahir', 'age', 'region', 'education_level',
         'daily_role', 'income_level',
+        'fp_otp', 'fp_otp_expires_at',   // Forgot-password OTP (same pattern as Admin)
     ];
 
     protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
-        'tgl_lahir'  => 'datetime',
-        'age'        => 'integer',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'last_login' => 'datetime',
+        'tgl_lahir'          => 'datetime',
+        'age'                => 'integer',
+        'created_at'         => 'datetime',
+        'updated_at'         => 'datetime',
+        'last_login'         => 'datetime',
+        'fp_otp_expires_at'  => 'datetime',
     ];
 
     // Kita tidak perlu lagi accessor getAgeAttribute jika sudah disimpan di DB,

@@ -43,8 +43,8 @@ class AnnouncementController extends Controller
             'content'    => $request->input('content'),
             'type'       => $request->input('type'),
             'author'     => auth()->user()->name ?? 'Admin',
-            'created_at' => now(),
-            'updated_at' => now(),
+            'created_at' => new \MongoDB\BSON\UTCDateTime(now()),
+            'updated_at' => new \MongoDB\BSON\UTCDateTime(now()),
         ]);
 
         return redirect()->route('admin.announcements')->with('success', 'Pengumuman berhasil dibuat.');

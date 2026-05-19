@@ -60,10 +60,10 @@ class DashboardScreen extends ConsumerWidget {
                           _buildLoadingShimmer()
                         else ...[
                           _buildScoreCards(ref),
+                          const SizedBox(height: 16),
+                          _buildQuickActions(context, ref),
                           const SizedBox(height: 24),
                           _buildInsightCard(context, analytics, laporanState.data, historiCount),
-                          const SizedBox(height: 24),
-                          _buildQuickInfo(),
                         ],
                       ],
                     ),
@@ -535,32 +535,115 @@ class DashboardScreen extends ConsumerWidget {
 
 
 
-  Widget _buildQuickInfo() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.teal.withValues(alpha: 0.1), AppColors.teal.withValues(alpha: 0.02)],
+  Widget _buildQuickActions(BuildContext context, WidgetRef ref) {
+    final streak = ref.watch(streakProvider);
+
+    return Column(
+      children: [
+        // Streak Card
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: AppColors.teal.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.teal.withValues(alpha: 0.1)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.teal.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  streak.count > 0 ? Icons.local_fire_department_rounded : Icons.calendar_today_rounded,
+                  color: AppColors.teal,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      streak.count > 0 ? '${streak.count} Hari Streak' : 'Mulai Kebiasaan',
+                      style: const TextStyle(
+                        color: AppColors.textDark,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      streak.message,
+                      style: TextStyle(
+                        color: AppColors.textMuted.withValues(alpha: 0.8),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.teal.withValues(alpha: 0.1)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.tips_and_updates_rounded, color: AppColors.teal, size: 24),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              'Tips: Coba kurangi penggunaan gadget 1 jam sebelum tidur untuk kualitas istirahat lebih baik.',
-              style: TextStyle(
-                color: AppColors.textDark.withValues(alpha: 0.8),
-                fontSize: 13,
-                height: 1.5,
-                fontWeight: FontWeight.w500,
+        const SizedBox(height: 16),
+        // Action Buttons Row
+        Row(
+          children: [
+            Expanded(
+              child: _buildActionButton(
+                label: 'Isi Kuesioner',
+                icon: Icons.assignment_rounded,
+                color: AppColors.bgDark,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const KuesionerScreen()),
+                ),
               ),
             ),
+            // Bisa tambah tombol lain di sini jika perlu
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: color,
+      borderRadius: BorderRadius.circular(16),
+      elevation: 2,
+      shadowColor: color.withValues(alpha: 0.3),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: Colors.white, size: 18),
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
