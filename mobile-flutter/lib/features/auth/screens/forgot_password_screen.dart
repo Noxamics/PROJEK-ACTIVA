@@ -158,27 +158,20 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
 
           // ── Main layout ───────────────────────────────────────────────────
           SafeArea(
+            bottom: false,
             child: Column(
               children: [
-                // Hero section (fixed height)
+                // Hero section
                 SizedBox(
-                  height: screenH * 0.38,
+                  height: screenH * 0.35,
                   child: _buildHeroSection(),
                 ),
-                // Form card — overlaps hero slightly
+
+                // Form card
                 Expanded(
-                  child: Transform.translate(
-                    offset: const Offset(0, -28),
-                    child: SlideTransition(
-                      position: _cardSlide,
-                      child: FadeTransition(
-                        opacity: _cardFade,
-                        child: _buildFormCard(
-                          isLoading: isLoading,
-                          errorMsg: errorMsg,
-                        ),
-                      ),
-                    ),
+                  child: _buildFormCard(
+                    isLoading: isLoading,
+                    errorMsg: errorMsg,
                   ),
                 ),
               ],
@@ -191,10 +184,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
 
   // ── Hero Section ───────────────────────────────────────────────────────────
 
- Widget _buildHeroSection() {
-  return FadeTransition(
-    opacity: _heroFade,
-    child: Stack(
+  Widget _buildHeroSection() {
+    return Stack(
       fit: StackFit.expand,
       children: [
         // ── Gradient background (identik register) ─────────────────────
@@ -235,21 +226,21 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
           left: 0,
           right: 0,
           child: ClipPath(
-            clipper: _BottomWaveClipper(),
+            clipper: _AuthWaveClipper(),
             child: Container(height: 40, color: _kIceWhite),
           ),
         ),
 
         // ── Content ────────────────────────────────────────────────────
         Padding(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Left: back button + text
               Expanded(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Back button glass
@@ -340,9 +331,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
           ),
         ),
       ],
-    ),
-  );
-}
+    );
+  }
 
   // ── Form Card ──────────────────────────────────────────────────────────────
 
@@ -352,16 +342,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen>
   }) {
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: _kIceWhite,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        boxShadow: [
-          BoxShadow(
-            color: _kDarkNavy.withValues(alpha: 0.28),
-            blurRadius: 32,
-            offset: const Offset(0, -8),
-          ),
-        ],
       ),
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -817,18 +799,21 @@ class _OrbWidget extends StatelessWidget {
 }
 
 // ── Wave clipper (U terbalik) ─────────────────────────────────────────────────
-class _BottomWaveClipper extends CustomClipper<Path> {
+class _AuthWaveClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size s) {
     final p = Path();
-    p.moveTo(0, s.height * 0.5);
-    p.quadraticBezierTo(s.width * 0.5, 0, s.width, s.height * 0.5);
+    p.moveTo(0, s.height);
+    p.lineTo(0, s.height * 0.5);
+    p.quadraticBezierTo(
+      s.width * 0.5, 0,
+      s.width, s.height * 0.5,
+    );
     p.lineTo(s.width, s.height);
-    p.lineTo(0, s.height);
     p.close();
     return p;
   }
 
   @override
-  bool shouldReclip(_) => false;
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }
