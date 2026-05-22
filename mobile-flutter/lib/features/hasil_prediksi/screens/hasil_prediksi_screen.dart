@@ -1,11 +1,19 @@
 // lib/features/hasil_prediksi/screens/hasil_prediksi_screen.dart
 //
-// Layout (REFACTORED):
-//   - Satu section besar dengan background gradient gelap (hero + rekomendasi menyatu)
-//   - Bottom radius hanya di paling bawah section utama
-//   - Card rekomendasi: glassmorphism, semi-transparan, border tipis
-//   - White section hanya dimulai setelah seluruh section gelap selesai
-//   - Mascot tetap dekat score, layout lebih compact & immersive
+// Layout (REFACTORED v3):
+//   - Gradient background: biru gelap (atas) → putih (bawah)
+//   - Urutan konten di dalam dark section:
+//       1. Top Bar
+//       2. Score Orb + Mascot
+//       3. Status Text
+//       4. Divider
+//       5. Factor Pills
+//       6. Activity Wave
+//       7. Divider
+//       8. Analisis AI (dipindah ke ATAS rekomendasi)
+//       9. Rekomendasi AI (glassmorphism cards)
+//      10. CTA Buttons
+//      11. History Button
 
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -24,24 +32,20 @@ import '../../profil/screens/profil_screen.dart';
 
 const _white = Color(0xFFFFFFFF);
 
-// Dark section (hero + rekomendasi menyatu)
+// Dark section (bagian atas)
 const _darkTop = Color(0xFF081320);
 const _darkMid = Color(0xFF0B1D33);
-const _darkCard = Color(0xFF0F2040); // glassmorphism card base
+const _darkCard = Color(0xFF0F2040);
 
-// Light section palette (setelah section gelap)
+// Light bg untuk Scaffold
 const _lightBg = Color(0xFFF7F9FC);
-const _lightCard = Color(0xFFFFFFFF);
-const _lightBorder = Color(0xFFE8EDF5);
-const _darkText = Color(0xFF1A2340);
-const _mutedText = Color(0xFFAAB4C8);
 
 // ─── Per-Category Theme ───────────────────────────────────────────────────────
 
 class _CategoryTheme {
   final Color accent;
   final Color accentDim;
-  final Color bgBlend; // warna aksen untuk di-blend di bawah gradient gelap
+  final Color bgBlend;
   final Color glow;
   final String statusLabel;
   final String subtitle;
@@ -156,7 +160,6 @@ class _RingPainter extends CustomPainter {
     const sw = 7.0;
     const start = -math.pi / 2;
 
-    // Decorative dot ring
     for (var i = 0; i < 40; i++) {
       final a = i / 40 * math.pi * 2 - math.pi / 2;
       canvas.drawCircle(
@@ -166,7 +169,6 @@ class _RingPainter extends CustomPainter {
       );
     }
 
-    // Track
     canvas.drawCircle(
       c,
       r,
@@ -180,7 +182,6 @@ class _RingPainter extends CustomPainter {
 
     final sweep = math.pi * 2 * progress;
 
-    // Outer glow
     canvas.drawArc(
       Rect.fromCircle(center: c, radius: r),
       start,
@@ -194,7 +195,6 @@ class _RingPainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
     );
 
-    // Main arc
     canvas.drawArc(
       Rect.fromCircle(center: c, radius: r),
       start,
@@ -211,7 +211,6 @@ class _RingPainter extends CustomPainter {
         ..strokeCap = StrokeCap.round,
     );
 
-    // Tip dot
     final tipAngle = start + sweep;
     final tip = Offset(
       c.dx + r * math.cos(tipAngle),
@@ -286,7 +285,7 @@ class _StarPainter extends CustomPainter {
   bool shouldRepaint(_StarPainter old) => old.color != color;
 }
 
-// ─── Mascot Image Widget ──────────────────────────────────────────────────────
+// ─── Mascot Widgets ───────────────────────────────────────────────────────────
 
 class _MascotImage extends StatelessWidget {
   final String asset;
@@ -314,8 +313,104 @@ class _MiniMascot extends StatelessWidget {
       Image.asset(asset, width: size, height: size, fit: BoxFit.contain);
 }
 
+// ─── Shared: Accent Divider ───────────────────────────────────────────────────
+
+class _AccentDivider extends StatelessWidget {
+  final Color accent;
+  const _AccentDivider({required this.accent});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  accent.withValues(alpha: .25),
+                  accent.withValues(alpha: .40),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 12),
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: accent.withValues(alpha: .60),
+          ),
+        ),
+        Expanded(
+          child: Container(
+            height: 1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  accent.withValues(alpha: .40),
+                  accent.withValues(alpha: .25),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Shared: Dark Section Header ──────────────────────────────────────────────
+
+class _DarkSectionHeader extends StatelessWidget {
+  final String title;
+  final _CategoryTheme theme;
+  final Widget? trailing;
+  const _DarkSectionHeader({
+    required this.title,
+    required this.theme,
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 3.5,
+          height: 18,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(2),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [theme.accent, theme.accent.withValues(alpha: .25)],
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          title,
+          style: TextStyle(
+            color: _white,
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            letterSpacing: .2,
+          ),
+        ),
+        if (trailing != null) ...[const Spacer(), trailing!],
+      ],
+    );
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
-// UNIFIED DARK SECTION  (Hero + Rekomendasi AI dalam satu container)
+// UNIFIED DARK SECTION  (gradient biru → putih)
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _UnifiedDarkSection extends StatefulWidget {
@@ -342,7 +437,7 @@ class _UnifiedDarkSectionState extends State<_UnifiedDarkSection>
     super.initState();
     final rng = math.Random(42);
     _particles = List.generate(
-      32,
+      40,
       (_) => _FP(
         rng.nextDouble(),
         rng.nextDouble(),
@@ -424,24 +519,29 @@ class _UnifiedDarkSectionState extends State<_UnifiedDarkSection>
             child: Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                // Satu gradient gelap mengalir dari top ke bottom section
+                // ── GRADIENT BIRU GELAP (atas) → PUTIH (bawah) ──────────
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    _darkTop,
-                    _darkMid,
-                    Color.lerp(_darkMid, theme.bgBlend, 0.55)!,
-                    Color.lerp(theme.bgBlend, theme.accent, 0.06)!,
+                    _darkTop,                                        // biru gelap
+                    _darkMid,                                        // biru sedang
+                    Color.lerp(_darkMid, theme.bgBlend, 0.40)!,     // biru+blend
+                    const Color(0xFF0D3255),                         // biru medium
+                    const Color(0xFF1A5A8A),                         // biru terang
+                    const Color(0xFF5B9EC9),                         // biru muda
+                    const Color(0xFFB8D9EF),                         // biru sangat muda
+                    const Color(0xFFE8F4FB),                         // almost white
+                    const Color(0xFFFFFFFF),                         // putih murni
                   ],
-                  stops: const [0.0, 0.3, 0.75, 1.0],
+                  stops: const [0.0, 0.12, 0.25, 0.38, 0.52, 0.66, 0.80, 0.91, 1.0],
                 ),
                 borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(40),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: theme.glow.withValues(alpha: .16 * _glowA.value),
+                    color: theme.glow.withValues(alpha: .12 * _glowA.value),
                     blurRadius: 40,
                     spreadRadius: 2,
                     offset: const Offset(0, 14),
@@ -451,7 +551,7 @@ class _UnifiedDarkSectionState extends State<_UnifiedDarkSection>
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  // ── Ambient blur orbs ──────────────────────────────────
+                  // ── Ambient blur orbs (hanya di area atas/gelap) ──────
                   Positioned(
                     top: -60,
                     right: -60,
@@ -470,11 +570,11 @@ class _UnifiedDarkSectionState extends State<_UnifiedDarkSection>
                     ),
                   ),
                   Positioned(
-                    bottom: 80,
+                    top: 80,
                     left: -40,
                     child: Container(
-                      width: 180,
-                      height: 180,
+                      width: 200,
+                      height: 200,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
@@ -487,11 +587,15 @@ class _UnifiedDarkSectionState extends State<_UnifiedDarkSection>
                     ),
                   ),
 
-                  // ── Floating particles (seluruh container) ────────────
-                  Positioned.fill(
+                  // ── Floating particles (hanya area atas ~50%) ─────────
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: 500,
                     child: ClipRRect(
                       borderRadius: const BorderRadius.vertical(
-                        bottom: Radius.circular(40),
+                        top: Radius.circular(0),
                       ),
                       child: CustomPaint(
                         painter: _ParticlePainter(
@@ -505,16 +609,16 @@ class _UnifiedDarkSectionState extends State<_UnifiedDarkSection>
 
                   // ── Content ────────────────────────────────────────────
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 52, 20, 32),
+                    padding: const EdgeInsets.fromLTRB(20, 52, 20, 36),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // ── TOP BAR ────────────────────────────────────
+                        // ── 1. TOP BAR ─────────────────────────────────
                         _TopBar(theme: theme),
 
                         const SizedBox(height: 28),
 
-                        // ── SCORE ORB (compact, mascot lebih dekat) ────
+                        // ── 2. SCORE ORB ───────────────────────────────
                         _ScoreRow(
                           displayScore: displayScore,
                           category: _capitalize(data.category),
@@ -526,7 +630,7 @@ class _UnifiedDarkSectionState extends State<_UnifiedDarkSection>
 
                         const SizedBox(height: 16),
 
-                        // ── STATUS TEXT (compact) ───────────────────────
+                        // ── 3. STATUS TEXT ─────────────────────────────
                         Text(
                           'Digital Balance: ${theme.statusLabel}',
                           textAlign: TextAlign.center,
@@ -556,19 +660,43 @@ class _UnifiedDarkSectionState extends State<_UnifiedDarkSection>
                           ),
                         ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
 
-                        // ── DIVIDER (tipis, menyatu) ────────────────────
+                        // ── 4. DIVIDER ─────────────────────────────────
                         _AccentDivider(accent: theme.accent),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
 
-                        // ── REKOMENDASI HEADER (menyatu dalam dark bg) ──
-                        _RekoHeader(theme: theme),
-
+                        // ── 5. FACTOR PILLS ────────────────────────────
+                        _DarkSectionHeader(
+                          title: 'Faktor Risiko',
+                          theme: theme,
+                        ),
                         const SizedBox(height: 14),
+                        _DarkFactorPills(theme: theme),
 
-                        // ── REKOMENDASI CARDS (glassmorphism) ──────────
+                        const SizedBox(height: 24),
+
+                        // ── 7. DIVIDER ─────────────────────────────────
+                        _AccentDivider(accent: theme.accent),
+
+                        const SizedBox(height: 24),
+
+                        // ── 8. ANALISIS AI (dipindah ke ATAS rekomendasi) ─
+                        if (data.pembukaan.isNotEmpty) ...[
+                          _AiAnalysisHeader(theme: theme),
+                          const SizedBox(height: 14),
+                          _DarkAiCard(
+                            data: data,
+                            theme: theme,
+                            glow: _glowA.value,
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+
+                        // ── 9. REKOMENDASI AI ──────────────────────────
+                        _RekoHeader(theme: theme),
+                        const SizedBox(height: 14),
                         ...data.rekomendasi.asMap().entries.map(
                           (e) => Padding(
                             padding: const EdgeInsets.only(bottom: 10),
@@ -581,15 +709,20 @@ class _UnifiedDarkSectionState extends State<_UnifiedDarkSection>
                           ),
                         ),
 
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 24),
 
-                        // ── AI ANALYSIS (inline dark card) ─────────────
-                        if (data.pembukaan.isNotEmpty)
-                          _DarkAiCard(
-                            data: data,
-                            theme: theme,
-                            glow: _glowA.value,
-                          ),
+                        // ── 10. DIVIDER ────────────────────────────────
+                        _AccentDividerLight(accent: theme.accent),
+
+                        const SizedBox(height: 24),
+
+                        // ── 11. CTA BUTTONS ────────────────────────────
+                        _DarkCtaButtons(theme: theme, glow: _glowA.value),
+
+                        const SizedBox(height: 12),
+
+                        // ── 12. HISTORY BUTTON ─────────────────────────
+                        _DarkHistoriButton(theme: theme),
                       ],
                     ),
                   ),
@@ -644,7 +777,7 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-// ─── Score Row (mascot flanking orb, lebih compact) ─────────────────────────
+// ─── Score Row ────────────────────────────────────────────────────────────────
 
 class _ScoreRow extends StatelessWidget {
   final int displayScore;
@@ -669,7 +802,6 @@ class _ScoreRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Kiri: mascot float + sparkle vertikal
         SizedBox(
           width: 64,
           child: Column(
@@ -681,10 +813,7 @@ class _ScoreRow extends StatelessWidget {
             ],
           ),
         ),
-
         const SizedBox(width: 12),
-
-        // Center: Score Orb
         _ScoreOrb(
           score: displayScore,
           category: category,
@@ -692,10 +821,7 @@ class _ScoreRow extends StatelessWidget {
           theme: theme,
           glow: glow,
         ),
-
         const SizedBox(width: 12),
-
-        // Kanan: sparkle cluster
         SizedBox(
           width: 64,
           child: Column(
@@ -725,50 +851,53 @@ class _ScoreRow extends StatelessWidget {
   }
 }
 
-// ─── Accent Divider ───────────────────────────────────────────────────────────
+// ─── AI Analysis Header ───────────────────────────────────────────────────────
 
-class _AccentDivider extends StatelessWidget {
-  final Color accent;
-  const _AccentDivider({required this.accent});
+class _AiAnalysisHeader extends StatelessWidget {
+  final _CategoryTheme theme;
+  const _AiAnalysisHeader({required this.theme});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(
-          child: Container(
-            height: 1,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  accent.withValues(alpha: .25),
-                  accent.withValues(alpha: .40),
-                ],
-              ),
+        Container(
+          width: 3.5,
+          height: 18,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(2),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [theme.accent, theme.accent.withValues(alpha: .25)],
             ),
           ),
         ),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 12),
-          width: 6,
-          height: 6,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: accent.withValues(alpha: .60),
+        const SizedBox(width: 10),
+        Text(
+          'Analisis AI',
+          style: TextStyle(
+            color: _white,
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            letterSpacing: .2,
           ),
         ),
-        Expanded(
-          child: Container(
-            height: 1,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  accent.withValues(alpha: .40),
-                  accent.withValues(alpha: .25),
-                  Colors.transparent,
-                ],
-              ),
+        const Spacer(),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: theme.accent.withValues(alpha: .10),
+            border: Border.all(color: theme.accent.withValues(alpha: .20)),
+          ),
+          child: Text(
+            'Powered by AI',
+            style: TextStyle(
+              color: theme.accent,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              letterSpacing: .4,
             ),
           ),
         ),
@@ -777,7 +906,7 @@ class _AccentDivider extends StatelessWidget {
   }
 }
 
-// ─── Rekomendasi Header (dark) ────────────────────────────────────────────────
+// ─── Rekomendasi Header ───────────────────────────────────────────────────────
 
 class _RekoHeader extends StatelessWidget {
   final _CategoryTheme theme;
@@ -802,7 +931,7 @@ class _RekoHeader extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           'Rekomendasi AI',
-          style: TextStyle(
+          style: const TextStyle(
             color: _white,
             fontSize: 15,
             fontWeight: FontWeight.w800,
@@ -814,13 +943,13 @@ class _RekoHeader extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: theme.accent.withValues(alpha: .10),
-            border: Border.all(color: theme.accent.withValues(alpha: .20)),
+            color: theme.accent.withValues(alpha: .15),
+            border: Border.all(color: theme.accent.withValues(alpha: .30)),
           ),
           child: Text(
             'AI Powered',
             style: TextStyle(
-              color: theme.accent,
+              color: theme.accentDim,
               fontSize: 10,
               fontWeight: FontWeight.w600,
               letterSpacing: .4,
@@ -867,23 +996,27 @@ class _GlassRecommendationCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
-        // Glassmorphism: semi transparan dengan tint accent
-        color: _darkCard.withValues(alpha: .75),
+        // Card di area terang: pakai putih dengan border accent
+        color: _white.withValues(alpha: .85),
         border: Border.all(
-          color: theme.accent.withValues(alpha: .14),
+          color: theme.accent.withValues(alpha: .25),
           width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: theme.glow.withValues(alpha: .06 * glow),
+            color: theme.glow.withValues(alpha: .08 * glow),
             blurRadius: 12,
             offset: const Offset(0, 3),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: .06),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Stack(
         children: [
-          // Left glow accent strip (tipis)
           Positioned(
             left: 0,
             top: 12,
@@ -896,8 +1029,8 @@ class _GlassRecommendationCard extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    theme.accent.withValues(alpha: .80),
-                    theme.accent.withValues(alpha: .20),
+                    theme.accent.withValues(alpha: .90),
+                    theme.accent.withValues(alpha: .25),
                   ],
                 ),
                 boxShadow: [
@@ -909,24 +1042,22 @@ class _GlassRecommendationCard extends StatelessWidget {
               ),
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Icon container (kecil, compact)
                 Container(
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    color: theme.accent.withValues(alpha: .10),
+                    color: theme.accent.withValues(alpha: .12),
                     border: Border.all(
-                      color: theme.accent.withValues(alpha: .18),
+                      color: theme.accent.withValues(alpha: .22),
                     ),
                   ),
-                  child: Icon(icon, color: theme.accent, size: 20),
+                  child: Icon(icon, color: theme.accentDim, size: 20),
                 ),
                 const SizedBox(width: 13),
                 Expanded(
@@ -937,7 +1068,7 @@ class _GlassRecommendationCard extends StatelessWidget {
                       Text(
                         title,
                         style: TextStyle(
-                          color: theme.accent,
+                          color: theme.accentDim,
                           fontSize: 12.5,
                           fontWeight: FontWeight.w700,
                           letterSpacing: .2,
@@ -946,8 +1077,8 @@ class _GlassRecommendationCard extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(
                         item.isi,
-                        style: TextStyle(
-                          color: _white.withValues(alpha: .62),
+                        style: const TextStyle(
+                          color: Color(0xFF2C3E50),
                           fontSize: 12.5,
                           height: 1.55,
                         ),
@@ -964,7 +1095,7 @@ class _GlassRecommendationCard extends StatelessWidget {
   }
 }
 
-// ─── AI Analysis Card (Dark) ──────────────────────────────────────────────────
+// ─── AI Analysis Card ─────────────────────────────────────────────────────────
 
 class _DarkAiCard extends StatelessWidget {
   final MlResultModel data;
@@ -980,16 +1111,15 @@ class _DarkAiCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(top: 6),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
         color: _darkCard.withValues(alpha: .70),
-        border: Border.all(color: theme.accent.withValues(alpha: .12)),
+        border: Border.all(color: theme.accent.withValues(alpha: .18)),
         boxShadow: [
           BoxShadow(
-            color: theme.glow.withValues(alpha: .05 * glow),
-            blurRadius: 12,
-            offset: const Offset(0, 3),
+            color: theme.glow.withValues(alpha: .10 * glow),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -1020,7 +1150,7 @@ class _DarkAiCard extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Analisis AI',
                       style: TextStyle(
                         color: _white,
@@ -1056,6 +1186,298 @@ class _DarkAiCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Accent Divider (versi terang untuk area putih) ───────────────────────────
+
+class _AccentDividerLight extends StatelessWidget {
+  final Color accent;
+  const _AccentDividerLight({required this.accent});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  accent.withValues(alpha: .20),
+                  accent.withValues(alpha: .35),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 12),
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: accent.withValues(alpha: .50),
+          ),
+        ),
+        Expanded(
+          child: Container(
+            height: 1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  accent.withValues(alpha: .35),
+                  accent.withValues(alpha: .20),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Dark Factor Pills ────────────────────────────────────────────────────────
+
+class _DarkFactorPills extends StatelessWidget {
+  final _CategoryTheme theme;
+  const _DarkFactorPills({required this.theme});
+
+  static const _pills = [
+    (Icons.smartphone_rounded, 'Screen Time'),
+    (Icons.nightlight_round, 'Malam Hari'),
+    (Icons.bed_rounded, 'Kurang Tidur'),
+    (Icons.notifications_rounded, 'Notifikasi'),
+    (Icons.sports_esports_rounded, 'Gaming'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 44,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.zero,
+        itemCount: _pills.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        itemBuilder: (_, i) {
+          final (icon, label) = _pills[i];
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              color: _darkCard.withValues(alpha: .80),
+              border: Border.all(
+                color: theme.accent.withValues(alpha: .22),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: theme.glow.withValues(alpha: .06),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: theme.accent, size: 15),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: _white.withValues(alpha: .80),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+
+
+// ─── CTA Buttons (area putih — warna disesuaikan) ────────────────────────────
+
+class _DarkCtaButtons extends StatelessWidget {
+  final _CategoryTheme theme;
+  final double glow;
+  const _DarkCtaButtons({required this.theme, required this.glow});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Primary CTA
+        Container(
+          width: double.infinity,
+          height: 54,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            gradient: LinearGradient(
+              colors: [theme.accent, theme.accentDim.withValues(alpha: .80)],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: theme.glow.withValues(alpha: .30 * glow),
+                blurRadius: 20,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(18),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const LaporanPerkembanganScreen(),
+                ),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Lihat Perkembangan',
+                    style: TextStyle(
+                      color: Color(0xFF0A1628),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: .3,
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    color: Color(0xFF0A1628),
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        // Secondary CTA
+        Container(
+          width: double.infinity,
+          height: 50,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            color: _white,
+            border: Border.all(
+              color: theme.accent.withValues(alpha: .50),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: theme.glow.withValues(alpha: .10 * glow),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: .05),
+                blurRadius: 6,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(18),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const KuesionerScreen()),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.refresh_rounded, color: theme.accentDim, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Ulangi Analisis',
+                    style: TextStyle(
+                      color: theme.accentDim,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: .2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── History Button (area putih) ──────────────────────────────────────────────
+
+class _DarkHistoriButton extends StatelessWidget {
+  final _CategoryTheme theme;
+  const _DarkHistoriButton({required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 54,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: const Color(0xFFF0F4F8),
+        border: Border.all(
+          color: const Color(0xFFCDD8E3),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: .06),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const HistoriScreen()),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.history_rounded, color: theme.accentDim, size: 22),
+              const SizedBox(width: 10),
+              const Text(
+                'Lihat Riwayat Analisis',
+                style: TextStyle(
+                  color: Color(0xFF2C3E50),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: .3,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1112,7 +1534,6 @@ class _ScoreOrb extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Outer ambient glow
           Container(
             width: orbSize,
             height: orbSize,
@@ -1127,8 +1548,6 @@ class _ScoreOrb extends StatelessWidget {
               ],
             ),
           ),
-
-          // Progress ring
           CustomPaint(
             size: const Size(orbSize, orbSize),
             painter: _RingPainter(
@@ -1137,8 +1556,6 @@ class _ScoreOrb extends StatelessWidget {
               glow: glow,
             ),
           ),
-
-          // Inner glass orb
           Container(
             width: innerSize,
             height: innerSize,
@@ -1162,7 +1579,6 @@ class _ScoreOrb extends StatelessWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Highlight
                 Positioned(
                   top: 8,
                   left: 12,
@@ -1223,379 +1639,6 @@ class _ScoreOrb extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ═════════════════════════════════════════════════════════════════════════════
-// WHITE SECTION — setelah seluruh section gelap (hanya aktivitas & CTA)
-// ═════════════════════════════════════════════════════════════════════════════
-
-class _SectionHeader extends StatelessWidget {
-  final String title;
-  final Color accent;
-  const _SectionHeader({required this.title, required this.accent});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 4,
-          height: 20,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(2),
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [accent, accent.withValues(alpha: .30)],
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          title,
-          style: const TextStyle(
-            color: _darkText,
-            fontSize: 16,
-            fontWeight: FontWeight.w800,
-            letterSpacing: .2,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ─── Factor Pills (white section) ────────────────────────────────────────────
-
-class _FactorPills extends StatelessWidget {
-  final _CategoryTheme theme;
-  const _FactorPills({required this.theme});
-
-  static const _pills = [
-    (Icons.smartphone_rounded, 'Screen Time'),
-    (Icons.nightlight_round, 'Malam Hari'),
-    (Icons.bed_rounded, 'Kurang Tidur'),
-    (Icons.notifications_rounded, 'Notifikasi'),
-    (Icons.sports_esports_rounded, 'Gaming'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 44,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: _pills.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
-        itemBuilder: (_, i) {
-          final (icon, label) = _pills[i];
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              color: _lightCard,
-              border: Border.all(color: _lightBorder, width: 1.2),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: .04),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, color: theme.accent, size: 15),
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: _darkText,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-// ─── Activity Wave (white) ────────────────────────────────────────────────────
-
-class _ActivityWave extends StatelessWidget {
-  final _CategoryTheme theme;
-  const _ActivityWave({required this.theme});
-
-  static const _days = ['S', 'M', 'T', 'R', 'K', 'J', 'S'];
-  static const _values = [35.0, 65.0, 45.0, 80.0, 55.0, 40.0, 25.0];
-
-  @override
-  Widget build(BuildContext context) {
-    const maxV = 80.0, barH = 70.0;
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: _lightCard,
-        border: Border.all(color: _lightBorder, width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: .05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Aktivitas Mingguan',
-                style: TextStyle(
-                  color: _darkText,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: theme.accent,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: theme.accent.withValues(alpha: .30),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: List.generate(_days.length, (i) {
-              final h = (_values[i] / maxV) * barH;
-              final isMax = _values[i] == maxV;
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 28,
-                    height: h,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          theme.accent,
-                          theme.accent.withValues(alpha: .25),
-                        ],
-                      ),
-                      boxShadow: isMax
-                          ? [
-                              BoxShadow(
-                                color: theme.glow.withValues(alpha: .28),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ]
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    _days[i],
-                    style: const TextStyle(
-                      color: _mutedText,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              );
-            }),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── CTA Buttons (white) ──────────────────────────────────────────────────────
-
-class _CtaButtons extends StatelessWidget {
-  final _CategoryTheme theme;
-  const _CtaButtons({required this.theme});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: double.infinity,
-          height: 54,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            gradient: LinearGradient(
-              colors: [theme.accent, theme.accentDim.withValues(alpha: .80)],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: theme.glow.withValues(alpha: .28),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(18),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const LaporanPerkembanganScreen(),
-                ),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Lihat Perkembangan',
-                    style: TextStyle(
-                      color: Color(0xFF0A1628),
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: .3,
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  Icon(
-                    Icons.arrow_forward_rounded,
-                    color: Color(0xFF0A1628),
-                    size: 20,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Container(
-          width: double.infinity,
-          height: 50,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            color: _lightCard,
-            border: Border.all(
-              color: theme.accent.withValues(alpha: .38),
-              width: 1.5,
-            ),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(18),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const KuesionerScreen()),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.refresh_rounded, color: theme.accent, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Ulangi Analisis',
-                    style: TextStyle(
-                      color: theme.accent,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: .2,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ─── History Button (white) ───────────────────────────────────────────────────
-
-class _HistoriButton extends StatelessWidget {
-  final _CategoryTheme theme;
-  const _HistoriButton({required this.theme});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: 54,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        color: _lightCard,
-        border: Border.all(color: _lightBorder),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: .04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const HistoriScreen()),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.history_rounded, color: theme.accent, size: 22),
-              const SizedBox(width: 10),
-              Text(
-                'Lihat Riwayat Analisis',
-                style: const TextStyle(
-                  color: _darkText,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: .3,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -1717,7 +1760,7 @@ class _AnalysisErrorView extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Main Screen  (LOGIKA TIDAK BERUBAH)
+// Main Screen
 // ─────────────────────────────────────────────────────────────────────────────
 
 class HasilPrediksiScreen extends ConsumerStatefulWidget {
@@ -1827,7 +1870,7 @@ class _HasilPrediksiScreenState extends ConsumerState<HasilPrediksiScreen> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Result Content — satu dark section besar, lalu white section di bawahnya
+// Result Content
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ResultContent extends StatelessWidget {
@@ -1836,57 +1879,12 @@ class _ResultContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = _themeFor(data.category);
-
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── 1. UNIFIED DARK SECTION (hero + rekomendasi menyatu) ──────
           _UnifiedDarkSection(data: data),
-
-          // ── 2. WHITE SECTION — dimulai setelah section gelap selesai ──
-          const SizedBox(height: 24),
-
-          // 2a. Factor Pills
-          _FactorPills(theme: theme),
-
-          const SizedBox(height: 24),
-
-          // 2b. Activity Wave header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: _SectionHeader(
-              title: 'Aktivitas Mingguan',
-              accent: theme.accent,
-            ),
-          ),
-          const SizedBox(height: 14),
-
-          // 2c. Activity Wave
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: _ActivityWave(theme: theme),
-          ),
-
-          const SizedBox(height: 24),
-
-          // 2d. CTA Buttons
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: _CtaButtons(theme: theme),
-          ),
-
-          const SizedBox(height: 14),
-
-          // 2e. History button
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: _HistoriButton(theme: theme),
-          ),
-
-          const SizedBox(height: 40),
+          const SizedBox(height: 16),
         ],
       ),
     );
