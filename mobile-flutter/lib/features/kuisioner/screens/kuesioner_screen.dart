@@ -779,7 +779,19 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
           ),
         ],
       ),
-      child: const Center(child: Text('🤖', style: TextStyle(fontSize: 32))),
+      child: ClipOval(
+child: ClipOval(
+  child: Transform.scale(
+    scale: 0.8, // sesuaikan nilai ini, 1.0 = ukuran normal
+    child: Image.asset(
+      'Assets/images/maskot.png',
+      width: 72,
+      height: 72,
+      fit: BoxFit.cover,
+    ),
+  ),
+),
+),
     );
   }
 
