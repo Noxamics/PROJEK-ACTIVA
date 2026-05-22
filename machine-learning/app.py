@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 import pickle
 import numpy as np
 import pandas as pd
-import requests
 import os
 from scipy.spatial.distance import mahalanobis
 
@@ -34,29 +33,22 @@ ORD_CATEGORIES = {col: list(cats) for col, cats in zip(ORD_COLS, ord_enc.categor
 
 # ============================================================
 # CONFIDENCE SETUP
-# Setelah StandardScaler, distribusi fitur ≈ mean=0, std=1
-# Sehingga: mean vektor = [0, 0, ...], cov = identity matrix
 # ============================================================
 SCORE_MIN = 0.0
 SCORE_MAX = 100.0
 
 _feature_mean    = np.zeros(len(feature_names))
-_feature_cov_inv = np.eye(len(feature_names))  # inverse of identity = identity
+_feature_cov_inv = np.eye(len(feature_names))
 
 
 # ============================================================
 # CONFIDENCE FUNCTIONS
 # ============================================================
 def confidence_by_score(score: float) -> dict:
-    """
-    Confidence berbasis posisi score dalam range 0–100.
-    Score mendekati ekstrem (0 atau 100) → confidence turun.
-    Range output: 60–100%.
-    """
     score_clipped  = float(np.clip(score, SCORE_MIN, SCORE_MAX))
-    midpoint       = (SCORE_MIN + SCORE_MAX) / 2  # 50.0
-    distance_ratio = abs(score_clipped - midpoint) / midpoint  # 0.0–1.0
-    confidence     = 1.0 - (distance_ratio * 0.4)  # turun maks 40%
+    midpoint       = (SCORE_MIN + SCORE_MAX) / 2
+    distance_ratio = abs(score_clipped - midpoint) / midpoint
+    confidence     = 1.0 - (distance_ratio * 0.4)
     confidence_pct = round(float(np.clip(confidence, 0.6, 1.0)) * 100, 2)
 
     if score_clipped <= 25:
@@ -72,10 +64,6 @@ def confidence_by_score(score: float) -> dict:
 
 
 def confidence_by_distance(X_scaled: np.ndarray) -> dict:
-    """
-    Confidence berbasis Mahalanobis distance dari distribusi training.
-    Input jauh dari distribusi → confidence turun.
-    """
     dist           = mahalanobis(X_scaled[0], _feature_mean, _feature_cov_inv)
     confidence     = 1.0 / (1.0 + (dist / 3.0))
     confidence_pct = round(float(np.clip(confidence, 0.0, 1.0)) * 100, 2)
@@ -97,9 +85,6 @@ def confidence_by_distance(X_scaled: np.ndarray) -> dict:
 
 
 def get_combined_confidence(score: float, X_scaled: np.ndarray) -> dict:
-    """
-    Gabungkan kedua pendekatan dengan bobot 50:50.
-    """
     conf_score = confidence_by_score(score)
     conf_dist  = confidence_by_distance(X_scaled)
 
@@ -134,12 +119,7 @@ def normalize_input(value: str, valid_categories: list) -> str:
 # HELPER — preprocessing + prediksi
 # ============================================================
 def preprocess_and_predict(raw_input: dict):
-    """
-    Returns tuple: (score: float, X_scaled: np.ndarray)
-    X_scaled dibutuhkan untuk menghitung Mahalanobis distance.
-    """
     df = pd.DataFrame([raw_input])
-    print("=== KOLOM DF ===", df.columns.tolist())
 
     # 1. Normalisasi string kategorikal
     for col in OHE_COLS:
@@ -177,30 +157,26 @@ def preprocess_and_predict(raw_input: dict):
     # 7. Pastikan semua kolom ada & urutkan
     for col in feature_names:
         if col not in df.columns:
-            print(f"KOLOM HILANG, set 0: {col}")
             df[col] = 0
     df = df[feature_names]
 
     # 8. StandardScaler
     df[num_scale_cols] = scaler.transform(df[num_scale_cols])
 
-    # 9. Simpan X_scaled untuk confidence, lalu predict
-    X_scaled = df[feature_names].values
-
+    X_scaled  = df[feature_names].values
     raw_score = float(model.predict(df)[0])
     score     = round(float(np.clip(raw_score, 0.0, 100.0)), 2)
     return score, X_scaled
 
 
 def get_category(score: float) -> str:
-    score = float(np.clip(score, 0.0, 100.0))  # safety net
+    score = float(np.clip(score, 0.0, 100.0))
     if score < 33.47:
         return 'rendah'
     elif score < 61.34:
         return 'sedang'
     else:
         return 'tinggi'
-
 
 
 # ============================================================
@@ -238,11 +214,16 @@ def apply_rules(raw_data: dict) -> list:
 
     return penyebab
 
+
 # ============================================================
 # ROUTES
 # ============================================================
 @app.route('/predict', methods=['POST'])
 def predict():
+    """
+    Hanya mengembalikan hasil ML + confidence + penyebab.
+    AI analysis (Gemini/OpenAI) ditangani oleh Laravel.
+    """
     try:
         data = request.get_json()
         print("=== DATA MASUK ===", data)
@@ -309,38 +290,14 @@ def predict():
         penyebab = apply_rules(data)
         print("PENYEBAB:", penyebab)
 
-        # ── Kirim ke Node.js AI ──
-        node_payload = {
-            "score"    : score,
-            "category" : get_category(score),
-            "penyebab" : penyebab,   # hasil SHAP + RULE
-            "data"     : data        # raw input untuk konteks AI
-        }
-
-        NODE_URL = os.getenv("NODE_CHATBOT_URL", "http://localhost:3000")
-
-        try:
-            ai_resp   = requests.post(f"{NODE_URL}/chatbot", json=node_payload, timeout=30)
-            ai_result = ai_resp.json()
-        except Exception as e:
-            ai_result = {"error": f"Node.js tidak merespons: {str(e)}"}
-
-        # ── Susun ai_analysis dari hasil Node.js ──
-        ai_data = ai_result.get("ai", {})
-        ai_analysis = {
-            "penyebab"     : ai_data.get("penyebab", penyebab),
-            "pembukaan"    : ai_data.get("pembukaan", ""),
-            "rekomendasi"  : ai_data.get("rekomendasi", []),
-            "generated_at" : __import__("datetime").datetime.utcnow().isoformat() + "Z",
-        }
-
-        # ── Return ke Laravel → Flutter ──
+        # ── Return ke Laravel (tanpa AI, tanpa Node.js) ──
         return jsonify({
             "digital_dependence_score" : score,
             "category"                 : get_category(score),
             "confidence"               : confidence,
             "high_risk_flag"           : 1 if score >= 70 else 0,
-            "ai_analysis"              : ai_analysis,
+            "penyebab"                 : penyebab,   # Laravel akan pakai ini untuk AI
+            "raw_input"                : data,        # Laravel butuh ini untuk prompt AI
             "status"                   : "ok",
         })
 

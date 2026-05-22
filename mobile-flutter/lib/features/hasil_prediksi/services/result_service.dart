@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
-import '../models/confidence_model.dart'; // ✅ import baru
+import '../models/confidence_model.dart';
 import '../models/ml_result_model.dart';
 
 final resultServiceProvider = Provider<ResultService>((ref) {
@@ -27,8 +27,6 @@ class ResultService {
       if (data == null) {
         throw 'Belum ada hasil prediksi. Isi kuesioner terlebih dahulu.';
       }
-      // Response Laravel: { questionnaire: {...}, ml_result: {...} }
-      // MlResultModel.fromJson sudah handle nested ml_result + ai_analysis
       final mlJson = data['ml_result'] as Map<String, dynamic>?;
       if (mlJson == null) {
         throw 'Belum ada hasil prediksi. Isi kuesioner terlebih dahulu.';
@@ -63,23 +61,27 @@ class ResultService {
       questionnaireId: 'mock_q1',
       digitalDependenceScore: 60,
       category: 'sedang',
-      confidence: ConfidenceModel.fromJson(0.82), // ✅ fix
+      confidence: ConfidenceModel.fromJson(0.82),
       penyebab: ['screen_time_tinggi', 'tidur_kurang'],
       rekomendasi: [
         const RecommendationItem(
           tag: 'social_media',
-          isi: 'Kurangi penggunaan media sosial 30 menit per hari',
+          isi: 'Kurangi penggunaan media sosial 30 menit per hari.',
         ),
         const RecommendationItem(
           tag: 'sleep',
-          isi: 'Tidur minimal 7 jam setiap malam',
+          isi:
+              'Coba kurangi screen time 30 menit sebelum tidur agar pikiran lebih rileks.',
         ),
         const RecommendationItem(
           tag: 'exercise',
-          isi: 'Lakukan olahraga ringan 3x seminggu',
+          isi:
+              'Lakukan olahraga ringan 15 menit setiap pagi untuk keseimbangan energi.',
         ),
       ],
-      pembukaan: '',
+      pembukaan:
+          'Activa mendeteksi pola digital yang cukup intens pada malam hari. '
+          'Beberapa kebiasaan digital mulai memengaruhi keseimbangan harianmu.',
       highRiskFlag: 0,
       summary:
           'Ketergantungan digital kamu pada level sedang. '
@@ -99,12 +101,12 @@ class ResultService {
         questionnaireId: 'q8',
         digitalDependenceScore: 60,
         category: 'sedang',
-        confidence: ConfidenceModel.fromJson(0.82), // ✅ fix
+        confidence: ConfidenceModel.fromJson(0.82),
         penyebab: ['screen_time_tinggi'],
         rekomendasi: [
           const RecommendationItem(
             tag: 'social_media',
-            isi: 'Kurangi social media 30 menit per hari',
+            isi: 'Kurangi social media 30 menit per hari.',
           ),
         ],
         pembukaan: '',
@@ -120,10 +122,10 @@ class ResultService {
         questionnaireId: 'q7',
         digitalDependenceScore: 55,
         category: 'sedang',
-        confidence: ConfidenceModel.fromJson(0.78), // ✅ fix
+        confidence: ConfidenceModel.fromJson(0.78),
         penyebab: ['tidur_kurang'],
         rekomendasi: [
-          const RecommendationItem(tag: 'sleep', isi: 'Tingkatkan jam tidur'),
+          const RecommendationItem(tag: 'sleep', isi: 'Tingkatkan jam tidur.'),
         ],
         pembukaan: '',
         highRiskFlag: 0,
@@ -138,12 +140,12 @@ class ResultService {
         questionnaireId: 'q6',
         digitalDependenceScore: 58,
         category: 'sedang',
-        confidence: ConfidenceModel.fromJson(0.80), // ✅ fix
+        confidence: ConfidenceModel.fromJson(0.80),
         penyebab: ['kurang_olahraga'],
         rekomendasi: [
           const RecommendationItem(
             tag: 'exercise',
-            isi: 'Olahraga 3x seminggu',
+            isi: 'Olahraga 3x seminggu.',
           ),
         ],
         pembukaan: '',
@@ -159,7 +161,7 @@ class ResultService {
         questionnaireId: 'q5',
         digitalDependenceScore: 35,
         category: 'rendah',
-        confidence: ConfidenceModel.fromJson(0.85), // ✅ fix
+        confidence: ConfidenceModel.fromJson(0.85),
         penyebab: [],
         rekomendasi: [
           const RecommendationItem(
