@@ -784,7 +784,7 @@ child: ClipOval(
   child: Transform.scale(
     scale: 0.8, // sesuaikan nilai ini, 1.0 = ukuran normal
     child: Image.asset(
-      'Assets/images/maskot.png',
+      'assets/images/Maskot.png',
       width: 72,
       height: 72,
       fit: BoxFit.cover,

@@ -92,7 +92,7 @@ class MlService
         return [
             'questionnaire_id' => (string) $questionnaire->_id,
             'gender' => $user->gender ?? 'Male',
-            'date_of_birth' => $user->date_of_birth?->format('Y-m-d'),
+            'date_of_birth' => ($user->date_of_birth ?? $user->tgl_lahir) ? \Carbon\Carbon::parse(($user->date_of_birth ?? $user->tgl_lahir))->format('Y-m-d') : null,
             'age' => $user->age ?? 20,
             'region' => $user->region ?? 'Asia',
             'education_level' => $user->education_level ?? 'High School',
