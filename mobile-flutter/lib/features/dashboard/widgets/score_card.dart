@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 import '../../../core/theme/app_colors.dart';
 
 class DependencyScoreCard extends StatelessWidget {
@@ -110,10 +109,7 @@ class DependencyScoreCard extends StatelessWidget {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(
-                          bottom: 8,
-                          left: 4,
-                        ),
+                        padding: const EdgeInsets.only(bottom: 8, left: 4),
                         child: Text(
                           '/ $maxScore',
                           style: TextStyle(
@@ -152,7 +148,7 @@ class DependencyScoreCard extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Mascot Image
             Positioned(
               right: -10,

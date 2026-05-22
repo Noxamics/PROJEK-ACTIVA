@@ -15,14 +15,32 @@ import '../../histori/providers/histori_provider.dart';
 import '../../kuisioner/screens/kuesioner_screen.dart';
 import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
 import '../../laporan_perkembangan/providers/laporan_provider.dart';
-import '../models/analytics_model.dart';
-import '../../laporan_perkembangan/models/laporan_model.dart';
 import '../../grafik/screens/grafik_screen.dart';
-import '../../grafik/providers/grafik_provider.dart';
 import '../../profil/screens/profil_screen.dart';
 
 // Warna background konten (putih/light) — dipakai oleh wave clipper
 const Color _kIce = AppColors.bgLight;
+
+// ══════════════════════════════════════════════════════════════════════════════
+// WAVE CLIPPER — Unified, dipakai di semua layar
+// Melengkung ke atas di bagian bawah header
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _WaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final p = Path();
+    p.moveTo(0, size.height * 0.5);
+    p.quadraticBezierTo(size.width * 0.5, 0, size.width, size.height * 0.5);
+    p.lineTo(size.width, size.height);
+    p.lineTo(0, size.height);
+    p.close();
+    return p;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -33,8 +51,6 @@ class DashboardScreen extends ConsumerStatefulWidget {
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   int _currentNavIndex = 0;
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -50,14 +66,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     final laporanState = ref.watch(laporanProvider);
 
-    // Rata-rata statistik mingguan (7 data terbaru)
-    final weeklyStats   = ref.watch(weeklyStatsProvider);
+    final weeklyStats = ref.watch(weeklyStatsProvider);
     final hasWeeklyData = ref.watch(hasWeeklyDataProvider);
-
-    // Distribusi kategori dependensi keseluruhan
     final dependencyDistribution = ref.watch(dependencyDistributionProvider);
 
-    // Auto-fetch laporan jika data cukup
     if (historiCount >= 14 &&
         laporanState.data == null &&
         !laporanState.isLoading &&
@@ -73,15 +85,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         child: Column(
           children: [
             // ── Hero Header dengan wave putih di bawah ──────────────────
-            _HeroHeader(
-              user: user,
-              greeting: _getGreeting(),
-            ),
+            _HeroHeader(user: user, greeting: _getGreeting()),
 
             // ── Main Content ─────────────────────────────────────────────
             Expanded(
               child: Container(
-                color: AppColors.bgLight, // lanjutan warna wave
+                color: AppColors.bgLight,
                 child: RefreshIndicator(
                   color: AppColors.teal,
                   onRefresh: () =>
@@ -92,29 +101,37 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Loading state
                         if (dashState.isLoading && analytics == null)
                           _buildLoadingShimmer()
                         else ...[
-                          // 1. Dependency Score Card
                           Stack(
                             children: [
                               ImageFiltered(
                                 imageFilter: !hasHistory
                                     ? ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0)
-                                    : ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
+                                    : ImageFilter.blur(
+                                        sigmaX: 0.0,
+                                        sigmaY: 0.0,
+                                      ),
                                 child: DependencyScoreCard(
                                   score: latestResult?.dependenceInt ?? 0,
-                                  insight: latestResult?.summary ?? 'Silakan isi kuesioner untuk melihat insight kamu.',
+                                  insight:
+                                      latestResult?.summary ??
+                                      'Silakan isi kuesioner untuk melihat insight kamu.',
                                 ),
                               ),
                               if (!hasHistory)
                                 Positioned.fill(
                                   child: Center(
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 8,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: Colors.black.withValues(alpha: 0.6),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.6,
+                                        ),
                                         borderRadius: BorderRadius.circular(20),
                                       ),
                                       child: const Text(
@@ -131,7 +148,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ),
                           const SizedBox(height: 16),
 
-                          // 2. Quick Stats – rata-rata 7 data terbaru
                           QuickStatsGrid(
                             screenTime: weeklyStats.screenTime,
                             sleepDuration: weeklyStats.sleepHours,
@@ -140,22 +156,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ),
                           const SizedBox(height: 16),
 
-                          // 3. Streak Card
                           StreakCard(
                             streakDays: ref.watch(streakProvider).count,
                             subtitle: 'Kebiasaan sehatmu mulai terbentuk.',
                           ),
                           const SizedBox(height: 16),
 
-                          // 4. CTA Button - Isi Kuesioner
                           _buildCTAButton(context),
                           const SizedBox(height: 16),
 
-                          // 5. Weekly Insight Card
                           _buildWeeklyInsightCard(context),
                           const SizedBox(height: 16),
 
-                          // 6. Progress Performance Chart (Donut / Kategori Dependensi)
                           if (dependencyDistribution.total > 0)
                             DependencyDonutChart(
                               countLow: dependencyDistribution.low,
@@ -167,28 +179,37 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             const SizedBox(),
                           const SizedBox(height: 16),
 
-                          // 7. Habit Tracker
                           HabitTracker(
                             habits: [
                               HabitItem(
-                                id: '1', 
-                                label: 'Tidur melebihi 7 jam', 
-                                completed: latestResult != null && latestResult.sleepHours >= 7,
+                                id: '1',
+                                label: 'Tidur melebihi 7 jam',
+                                completed:
+                                    latestResult != null &&
+                                    latestResult.sleepHours >= 7,
                               ),
                               HabitItem(
-                                id: '2', 
-                                label: 'Screen time < 6 jam', 
-                                completed: latestResult != null && latestResult.screenTime > 0 && latestResult.screenTime < 6,
+                                id: '2',
+                                label: 'Screen time < 6 jam',
+                                completed:
+                                    latestResult != null &&
+                                    latestResult.screenTime > 0 &&
+                                    latestResult.screenTime < 6,
                               ),
                               HabitItem(
-                                id: '3', 
-                                label: 'Tingkat Ketergantungan Rendah', 
-                                completed: latestResult != null && latestResult.digitalDependenceScore < 50,
+                                id: '3',
+                                label: 'Tingkat Ketergantungan Rendah',
+                                completed:
+                                    latestResult != null &&
+                                    latestResult.digitalDependenceScore < 50,
                               ),
                               HabitItem(
-                                id: '4', 
-                                label: 'Kualitas Tidur Terjaga', 
-                                completed: latestResult != null && latestResult.sleepHours >= 6 && latestResult.sleepHours <= 9,
+                                id: '4',
+                                label: 'Kualitas Tidur Terjaga',
+                                completed:
+                                    latestResult != null &&
+                                    latestResult.sleepHours >= 6 &&
+                                    latestResult.sleepHours <= 9,
                               ),
                             ],
                           ),
@@ -220,8 +241,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     if (hour < 18) return 'Selamat sore';
     return 'Selamat malam';
   }
-
-  // ── CTA Button ─────────────────────────────────────────────────────────────
 
   Widget _buildCTAButton(BuildContext context) {
     return Container(
@@ -264,25 +283,26 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  // ── Weekly Insight Card (data dari laporanProvider) ───────────────────────
-
   Widget _buildWeeklyInsightCard(BuildContext context) {
     final laporanState = ref.watch(laporanProvider);
     final data = laporanState.data;
 
-    // Susun teks insight dari data real, atau fallback jika belum ada
     String insightText;
     if (data != null) {
       final absPct = data.scorePct.abs().toStringAsFixed(1);
       if (data.status == 'membaik') {
-        insightText = 'Ketergantungan digital kamu membaik $absPct% dibanding periode sebelumnya.';
+        insightText =
+            'Ketergantungan digital kamu membaik $absPct% dibanding periode sebelumnya.';
       } else if (data.status == 'memburuk') {
-        insightText = 'Ketergantungan digital kamu meningkat $absPct% dibanding periode sebelumnya.';
+        insightText =
+            'Ketergantungan digital kamu meningkat $absPct% dibanding periode sebelumnya.';
       } else {
-        insightText = 'Ketergantungan digital kamu relatif stabil dibanding periode sebelumnya.';
+        insightText =
+            'Ketergantungan digital kamu relatif stabil dibanding periode sebelumnya.';
       }
     } else {
-      insightText = 'Isi kuesioner minimal 14 kali untuk melihat insight mingguan.';
+      insightText =
+          'Isi kuesioner minimal 14 kali untuk melihat insight mingguan.';
     }
 
     return WeeklyInsightCard(
@@ -291,10 +311,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  // ── Bottom Sheet — Insight Detail ──────────────────────────────────────────
-
   void _showInsightDetail(BuildContext context, dynamic data) {
-    // Susun isi detail dari data laporan real
     final List<Map<String, dynamic>> detailItems;
     if (data != null) {
       detailItems = [
@@ -349,7 +366,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ),
           child: Column(
             children: [
-              // Handle bar
               Padding(
                 padding: const EdgeInsets.only(top: 12, bottom: 8),
                 child: Center(
@@ -363,7 +379,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ),
                 ),
               ),
-              // Judul
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
                 child: Row(
@@ -393,7 +408,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Konten scrollable
               Expanded(
                 child: ListView(
                   controller: scrollController,
@@ -437,7 +451,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: (item['color'] as Color).withValues(alpha: 0.1),
+                                  color: (item['color'] as Color).withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Icon(
@@ -481,14 +497,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ],
                 ),
               ),
-              // Tombol — mengarahkan ke halaman Laporan
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.pop(ctx); // tutup bottom sheet dulu
+                      Navigator.pop(ctx);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -519,8 +534,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       ),
     );
   }
-
-  // ── Loading Shimmer ────────────────────────────────────────────────────────
 
   Widget _buildLoadingShimmer() {
     return Column(
@@ -553,8 +566,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       ),
     );
   }
-
-  // ── Navigation ─────────────────────────────────────────────────────────────
 
   void _onNavTap(BuildContext context, int index) {
     if (index == _currentNavIndex) return;
@@ -594,6 +605,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
 // ═══════════════════════════════════════════════════════════════════════════
 // _HeroHeader — Header gelap dengan wave putih melengkung di bagian bawah
+// Menggunakan _WaveClipper yang sama dengan semua layar lainnya
 // ═══════════════════════════════════════════════════════════════════════════
 
 class _HeroHeader extends StatelessWidget {
@@ -618,13 +630,15 @@ class _HeroHeader extends StatelessWidget {
       children: [
         // ── Background gelap beserta konten header ─────────────────────
         Container(
-          // Extra bottom padding agar konten tidak tertimpa wave
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 52),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 72),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [AppColors.bgDark, AppColors.bgDark.withValues(alpha: 0.95)],
+              colors: [
+                AppColors.bgDark,
+                AppColors.bgDark.withValues(alpha: 0.95),
+              ],
             ),
           ),
           child: Row(
@@ -669,9 +683,9 @@ class _HeroHeader extends StatelessWidget {
                     Text(
                       '$greeting,',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withValues(alpha: 0.55),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -679,8 +693,9 @@ class _HeroHeader extends StatelessWidget {
                       userName,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -689,75 +704,29 @@ class _HeroHeader extends StatelessWidget {
                     Text(
                       'Digital wellness progress',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: Colors.white.withValues(alpha: 0.55),
                         fontSize: 12,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ],
                 ),
               ),
-              // Bell notifikasi dihapus
             ],
           ),
         ),
 
-        // ── Wave putih melengkung ke atas (bentuk U terbalik) di bawah header ──
-        // ClipPath memotong Container putih mengikuti kurva quadraticBezier,
-        // sehingga transisi dari header gelap ke konten putih terlihat smooth.
+        // ── Wave putih melengkung ke atas — unified _WaveClipper ───────
         Positioned(
           left: 0,
           right: 0,
-          bottom: 0,
+          bottom: -1,
           child: ClipPath(
-            clipper: _BottomWaveClipper(),
-            child: Container(height: 40, color: _kIce),
+            clipper: _WaveClipper(),
+            child: Container(height: 60, color: _kIce),
           ),
         ),
       ],
     );
   }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// _BottomWaveClipper — Membuat path lengkung seperti huruf U
-//
-// Cara kerja:
-//   - Mulai dari pojok kiri bawah (0, height)
-//   - Naik ke pojok kiri atas (0, height * 0.5)
-//   - quadraticBezierTo: control point di tengah atas (width*0.5, 0)
-//     menuju pojok kanan (width, height*0.5)
-//     → inilah yang menciptakan lekukan U menghadap ke atas
-//   - Turun kembali ke pojok kanan bawah (width, height)
-//   - Tutup path
-// ═══════════════════════════════════════════════════════════════════════════
-
-class _BottomWaveClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size s) {
-    final p = Path();
-
-    // Mulai dari kiri bawah
-    p.moveTo(0, s.height);
-
-    // Naik ke kiri atas
-    p.lineTo(0, s.height * 0.5);
-
-    // Kurva quadratic: control point di puncak tengah → menuju kanan tengah
-    // control point (s.width * 0.5, 0) menarik kurva ke atas → bentuk U
-    p.quadraticBezierTo(
-      s.width * 0.5, // control x — titik tarikan kurva (tengah)
-      0,             // control y — puncak lengkungan (atas)
-      s.width,       // end x — ujung kanan
-      s.height * 0.5, // end y — kembali ke tengah kanan
-    );
-
-    // Turun ke kanan bawah lalu tutup
-    p.lineTo(s.width, s.height);
-    p.close();
-
-    return p;
-  }
-
-  @override
-  bool shouldReclip(_BottomWaveClipper oldClipper) => false;
 }

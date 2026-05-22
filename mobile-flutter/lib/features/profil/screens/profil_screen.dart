@@ -1,3 +1,10 @@
+// screens/profil_screen.dart
+//
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  ACTIVA — Premium Futuristic AI Wellness Profile                ║
+// ║  Rebuilt from scratch: immersive, animated, glassmorphism       ║
+// ╚══════════════════════════════════════════════════════════════════╝
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -10,18 +17,33 @@ import 'package:dio/dio.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
 import '../../../core/storage/local_storage.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/bottom_nav.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../auth/screens/login_screen.dart';
-
-import '../widgets/setting_item.dart';
-import '../widgets/setting_item_toggle.dart';
 import '../../grafik/screens/grafik_screen.dart';
 import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
 import '../../kuisioner/screens/kuesioner_screen.dart';
 import '../providers/notification_provider.dart';
+import '../widgets/futuristic_avatar.dart';
+import '../widgets/ai_wellness_card.dart';
+import '../widgets/glassmorphism_chip.dart';
+import '../widgets/premium_setting_item.dart';
+import '../widgets/premium_setting_toggle.dart';
+import '../widgets/floating_particles.dart';
 import 'edit_profil_screen.dart';
+
+// ── Constants ──────────────────────────────────────────────────────────────────
+
+class _PC {
+  static const navy900 = Color(0xFF050D1A);
+  static const navy800 = Color(0xFF091528);
+  static const teal = Color(0xFF00E5C8);
+  static const blue = Color(0xFF4B9FFF);
+  static const rose = Color(0xFFFF6B8A);
+  static const glassBorder = Color(0x25FFFFFF);
+}
+
+// ── Main Screen ────────────────────────────────────────────────────────────────
 
 class ProfilScreen extends ConsumerStatefulWidget {
   const ProfilScreen({super.key});
@@ -30,46 +52,95 @@ class ProfilScreen extends ConsumerStatefulWidget {
   ConsumerState<ProfilScreen> createState() => _ProfilScreenState();
 }
 
-class _ProfilScreenState extends ConsumerState<ProfilScreen> {
+class _ProfilScreenState extends ConsumerState<ProfilScreen>
+    with TickerProviderStateMixin {
+  late final AnimationController _heroCtrl;
+  late final AnimationController _pulseCtrl;
+  late final AnimationController _cardCtrl;
 
-  // ── Navigation ─────────────────────────────────────────────────────────────
+  late final Animation<double> _heroFade;
+  late final Animation<Offset> _heroSlide;
+  late final Animation<double> _pulse;
+  late final Animation<double> _cardFade;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Hero entrance
+    _heroCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    _heroFade = CurvedAnimation(parent: _heroCtrl, curve: Curves.easeOut);
+    _heroSlide = Tween<Offset>(
+      begin: const Offset(0, 0.08),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _heroCtrl, curve: Curves.easeOutCubic));
+
+    // Avatar pulse glow
+    _pulseCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    )..repeat(reverse: true);
+    _pulse = CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut);
+
+    // Card stagger
+    _cardCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+    _cardFade = CurvedAnimation(parent: _cardCtrl, curve: Curves.easeOut);
+
+    // Trigger animations
+    _heroCtrl.forward();
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) _cardCtrl.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _heroCtrl.dispose();
+    _pulseCtrl.dispose();
+    _cardCtrl.dispose();
+    super.dispose();
+  }
+
+  // ── Navigation ───────────────────────────────────────────────────────────────
 
   void _onNavTap(int index) {
-    if (index == 4) return; // Sudah di profil
-
+    if (index == 4) return;
     switch (index) {
       case 0:
-        Navigator.popUntil(context, (route) => route.isFirst);
+        Navigator.popUntil(context, (r) => r.isFirst);
         break;
       case 1:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const KuesionerScreen()),
+          MaterialPageRoute(builder: (_) => const KuesionerScreen()),
         );
         break;
       case 2:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (context) => const LaporanPerkembanganScreen(),
-          ),
+          MaterialPageRoute(builder: (_) => const LaporanPerkembanganScreen()),
         );
         break;
       case 3:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const GrafikScreen()),
+          MaterialPageRoute(builder: (_) => const GrafikScreen()),
         );
         break;
     }
   }
 
-  // ── Logout ─────────────────────────────────────────────────────────────────
+  // ── Logout ───────────────────────────────────────────────────────────────────
 
   Future<void> _onLogout() async {
-    Navigator.pop(context); // tutup dialog
+    Navigator.pop(context);
 
-    // Tampilkan loading overlay selama proses logout
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -80,32 +151,32 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
           child: Container(
             padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
-              color: AppColors.bgWhite,
-              borderRadius: BorderRadius.circular(18),
+              color: _PC.navy800,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: _PC.glassBorder),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 20,
-                  offset: const Offset(0, 4),
+                  color: _PC.teal.withValues(alpha: 0.15),
+                  blurRadius: 30,
                 ),
               ],
             ),
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(
                   width: 32,
                   height: 32,
                   child: CircularProgressIndicator(
-                    color: AppColors.teal,
-                    strokeWidth: 3,
+                    color: _PC.teal,
+                    strokeWidth: 2.5,
                   ),
                 ),
-                SizedBox(height: 16),
-                Text(
+                const SizedBox(height: 16),
+                const Text(
                   'Sedang keluar...',
                   style: TextStyle(
-                    color: AppColors.textDark,
+                    color: Colors.white,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     decoration: TextDecoration.none,
@@ -120,31 +191,21 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
 
     HapticFeedback.lightImpact();
     await ref.read(authProvider.notifier).logout();
-
-    // Beri sedikit delay agar loading terasa natural
     await Future.delayed(const Duration(milliseconds: 400));
 
     if (mounted) {
-      // Navigasi ke LoginScreen & hapus seluruh stack
       Navigator.pushAndRemoveUntil(
         context,
         PageRouteBuilder(
-          pageBuilder: (_, animation, _) => const LoginScreen(),
-          transitionsBuilder: (_, animation, _, child) {
-            return FadeTransition(
-              opacity: CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeInOut,
-              ),
-              child: child,
-            );
-          },
+          pageBuilder: (_, a, __) => const LoginScreen(),
+          transitionsBuilder: (_, a, __, child) => FadeTransition(
+            opacity: CurvedAnimation(parent: a, curve: Curves.easeInOut),
+            child: child,
+          ),
           transitionDuration: const Duration(milliseconds: 400),
         ),
-        (route) => false,
+        (r) => false,
       );
-
-      // Snackbar konfirmasi
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Row(
@@ -161,10 +222,10 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
               ),
             ],
           ),
-          backgroundColor: AppColors.teal,
+          backgroundColor: _PC.teal,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
           ),
           margin: const EdgeInsets.fromLTRB(16, 0, 16, 20),
           duration: const Duration(seconds: 3),
@@ -173,186 +234,112 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
     }
   }
 
-  // ── Build ──────────────────────────────────────────────────────────────────
+  // ── Build ────────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    // Ambil data user dari provider
     final user = ref.watch(currentUserProvider);
+    final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: AppColors.bgDark,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildProfileHeader(user),
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: AppColors.bgLight,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(32),
-                  ),
-                ),
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 32, 20, 32),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildPengaturanSection(),
-                        const SizedBox(height: 32),
-                        _buildKeluarButton(),
-                        const SizedBox(height: 20),
-                        Center(
-                          child: Text(
-                            'DigitalLife Analyzer v1.0.0',
-                            style: TextStyle(
-                              color: AppColors.textMuted.withValues(alpha: 0.4),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                      ],
+      backgroundColor: _PC.navy900,
+      extendBody: true,
+      body: Stack(
+        children: [
+          // ── Layered background
+          _BackgroundLayer(size: size),
+
+          // ── Floating particles
+          FloatingParticles(count: 18, color: _PC.teal),
+
+          // ── Main scrollable content
+          SafeArea(
+            bottom: false,
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: FadeTransition(
+                    opacity: _heroFade,
+                    child: SlideTransition(
+                      position: _heroSlide,
+                      child: _HeroSection(user: user, pulseAnim: _pulse),
                     ),
                   ),
                 ),
-              ),
+                SliverToBoxAdapter(
+                  child: FadeTransition(
+                    opacity: _cardFade,
+                    child: _buildBottomSheet(user),
+                  ),
+                ),
+              ],
             ),
-            BottomNav(
-              currentIndex: 4,
-              navTheme: NavTheme.light,
-              onTap: _onNavTap,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
+      bottomNavigationBar: BottomNav(currentIndex: 4, onTap: _onNavTap),
     );
   }
 
-  // ── Profile Header ─────────────────────────────────────────────────────────
+  // ── Bottom "rising" glass sheet ──────────────────────────────────────────────
 
-  Widget _buildProfileHeader(user) {
-    final name = user?.name ?? 'Pengguna';
-    final email = user?.email ?? 'pengguna@email.com';
-    final initials = user?.initials ?? '?';
-    final age = user?.age.toString() ?? '-';
-    
-    final eduToIndo = {
-      'High School': 'SMA/SMK/Sederajat',
-      'Bachelor': 'Sarjana',
-      'Master': 'Magister',
-      'PhD': 'Doktor',
-    };
-    final eduRaw = user?.educationLevel;
-    final edu = (eduRaw != null) ? (eduToIndo[eduRaw] ?? eduRaw) : '-';
+  Widget _buildBottomSheet(user) {
+    final notifEnabled = ref.watch(notificationProvider);
 
-    final region = user?.region ?? '-';
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      decoration: const BoxDecoration(
+        color: Color(0xFFF4F7FB),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+      ),
       child: Column(
         children: [
-          _buildAvatar(initials),
-          const SizedBox(height: 20),
-          Text(
-            name,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
+          // pill handle
+          Container(
+            margin: const EdgeInsets.only(top: 14, bottom: 10),
+            width: 36,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            email,
-            style: TextStyle(
-              color: AppColors.textSecondary.withValues(alpha: 0.8),
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 24),
-          _buildTags(age: age, edu: edu, region: region),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildAvatar(String initials) {
-    return Container(
-      width: 88,
-      height: 88,
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: AppColors.teal.withValues(alpha: 0.2), width: 2),
-      ),
-      child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppColors.teal, Color(0xFF2DD4BF)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          shape: BoxShape.circle,
-        ),
-        child: Center(
-          child: Text(
-            initials,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // AI Wellness Card
+                AiWellnessCard(),
+                const SizedBox(height: 28),
 
-  Widget _buildTags({
-    required String age,
-    required String edu,
-    required String region,
-  }) {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      alignment: WrapAlignment.center,
-      children: [
-        _buildTag(Icons.cake_outlined, '$age thn'),
-        _buildTag(Icons.school_outlined, edu),
-        _buildTag(Icons.location_on_outlined, region),
-      ],
-    );
-  }
+                // Section label
+                _sectionLabel('PENGATURAN AKUN'),
+                const SizedBox(height: 14),
 
-  Widget _buildTag(IconData icon, String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: Colors.white70, size: 14),
-          const SizedBox(width: 6),
-          Text(
-            text,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+                // Settings card
+                _buildSettingsCard(notifEnabled),
+                const SizedBox(height: 28),
+
+                // Logout
+                _LogoutButton(onTap: _showKeluarDialog),
+                const SizedBox(height: 20),
+
+                Center(
+                  child: Text(
+                    'Activa — Digital Wellness v1.0.0',
+                    style: TextStyle(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 90), // bottom nav clearance
+              ],
             ),
           ),
         ],
@@ -360,173 +347,99 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
     );
   }
 
-  // ── Pengaturan Section ─────────────────────────────────────────────────────
-
-  Widget _buildPengaturanSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4),
-          child: Text(
-            'PENGATURAN',
-            style: TextStyle(
-              color: AppColors.textMuted.withValues(alpha: 0.6),
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.5,
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.bgWhite,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              SettingItem(
-                icon: Icons.person_outline_rounded,
-                iconBg: AppColors.teal.withValues(alpha: 0.08),
-                iconColor: AppColors.teal,
-                title: 'Data Diri',
-                subtitle: 'Edit profil & informasi personal',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const EditProfilScreen()),
-                  );
-                },
-              ),
-              SettingItemToggle(
-                icon: Icons.notifications_none_rounded,
-                iconBg: AppColors.blue.withValues(alpha: 0.08),
-                iconColor: AppColors.blue,
-                title: 'Notifikasi',
-                subtitle: 'Pengingat kuesioner harian',
-                value: ref.watch(notificationProvider),
-                onChanged: (v) => ref.read(notificationProvider.notifier).toggle(v),
-              ),
-              SettingItem(
-                icon: Icons.file_download_outlined,
-                iconBg: AppColors.amber.withValues(alpha: 0.08),
-                iconColor: AppColors.amber,
-                title: 'Ekspor Data',
-                subtitle: 'Unduh hasil analisis periode ini',
-                onTap: _showExportOptions,
-              ),
-              SettingItem(
-                icon: Icons.chat_bubble_outline_rounded,
-                iconBg: Colors.indigo.withValues(alpha: 0.08),
-                iconColor: Colors.indigo,
-                title: 'Kritik dan Saran',
-                subtitle: 'Kirim masukan Anda via Email',
-                onTap: () async {
-                  final Uri emailLaunchUri = Uri(
-                    scheme: 'mailto',
-                    path: 'activ4aaaaa@gmail.com',
-                    query: encodeQueryParameters(<String, String>{
-                      'subject': 'Kritik dan Saran Pengguna ACTIVA',
-                    }),
-                  );
-
-                  try {
-                    if (await canLaunchUrl(emailLaunchUri)) {
-                      await launchUrl(emailLaunchUri, mode: LaunchMode.externalApplication);
-                    } else {
-                      // Fallback if canLaunchUrl fails but maybe it still can launch
-                      await launchUrl(emailLaunchUri, mode: LaunchMode.externalApplication);
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Tidak dapat membuka aplikasi Email'),
-                          backgroundColor: AppColors.red,
-                        ),
-                      );
-                    }
-                  }
-                },
-                showDivider: false,
-              ),
-            ],
-          ),
-        ),
-      ],
+  Widget _sectionLabel(String text) {
+    return Text(
+      text,
+      style: TextStyle(
+        color: Colors.black.withValues(alpha: 0.35),
+        fontSize: 11,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 1.6,
+      ),
     );
   }
 
-  // ── Keluar Button ──────────────────────────────────────────────────────────
+  // ── Settings Card ─────────────────────────────────────────────────────────────
 
-  Widget _buildKeluarButton() {
+  Widget _buildSettingsCard(bool notifEnabled) {
     return Container(
-      width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: AppColors.red.withValues(alpha: 0.1),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: ElevatedButton(
-        onPressed: _showKeluarDialog,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.red.withValues(alpha: 0.06),
-          foregroundColor: AppColors.red,
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(vertical: 18),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-            side: BorderSide(color: AppColors.red.withValues(alpha: 0.1), width: 1.5),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(Icons.logout_rounded, size: 20),
-            SizedBox(width: 10),
-            Text(
-              'Keluar dari Akun',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+      child: Column(
+        children: [
+          PremiumSettingItem(
+            icon: Icons.person_outline_rounded,
+            iconGradient: const [Color(0xFF00E5C8), Color(0xFF0099AA)],
+            title: 'Data Diri',
+            subtitle: 'Edit profil & informasi personal',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const EditProfilScreen()),
             ),
-          ],
-        ),
+          ),
+          PremiumSettingToggle(
+            icon: Icons.notifications_none_rounded,
+            iconGradient: const [Color(0xFF4B9FFF), Color(0xFF1A5FD0)],
+            title: 'Notifikasi',
+            subtitle: 'Pengingat analisis harian',
+            value: notifEnabled,
+            onChanged: (v) => ref.read(notificationProvider.notifier).toggle(v),
+          ),
+          PremiumSettingItem(
+            icon: Icons.file_download_outlined,
+            iconGradient: const [Color(0xFFFFB347), Color(0xFFE08020)],
+            title: 'Ekspor Data',
+            subtitle: 'Unduh hasil analisis dan perkembangan',
+            onTap: _showExportOptions,
+          ),
+          PremiumSettingItem(
+            icon: Icons.chat_bubble_outline_rounded,
+            iconGradient: const [Color(0xFF8B7FFF), Color(0xFF5B4FD0)],
+            title: 'Kritik dan Saran',
+            subtitle: 'Bagikan pengalaman penggunaan Activa',
+            onTap: _launchFeedbackEmail,
+            showDivider: false,
+          ),
+        ],
       ),
     );
   }
+
+  // ── Dialogs & Actions ─────────────────────────────────────────────────────────
 
   void _showKeluarDialog() {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: AppColors.bgWhite,
+        backgroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         title: const Text(
           'Keluar dari Akun?',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: AppColors.textDark,
             fontSize: 20,
             fontWeight: FontWeight.w800,
+            color: Color(0xFF0D1F3C),
           ),
         ),
         content: const Text(
-          'Sesi Anda akan berakhir dan Anda perlu masuk kembali nanti.',
+          'Sesi kamu akan berakhir dan perlu masuk kembali nanti.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: AppColors.textMuted, fontSize: 14, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            color: Color(0xFF7A8AA0),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
         actions: [
@@ -537,11 +450,16 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
                   onPressed: () => Navigator.pop(context),
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   child: const Text(
                     'Batal',
-                    style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                      color: Color(0xFF7A8AA0),
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
@@ -550,7 +468,7 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
                 child: ElevatedButton(
                   onPressed: _onLogout,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.red,
+                    backgroundColor: const Color(0xFFFF6B8A),
                     foregroundColor: Colors.white,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -558,7 +476,10 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: const Text('Keluar', style: TextStyle(fontWeight: FontWeight.w700)),
+                  child: const Text(
+                    'Keluar',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
                 ),
               ),
             ],
@@ -568,115 +489,579 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
     );
   }
 
-  // ── Export Logic ───────────────────────────────────────────────────────────
+  Future<void> _launchFeedbackEmail() async {
+    final Uri uri = Uri(
+      scheme: 'mailto',
+      path: 'activ4aaaaa@gmail.com',
+      query:
+          'subject=${Uri.encodeComponent('Kritik dan Saran Pengguna ACTIVA')}',
+    );
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tidak dapat membuka aplikasi Email'),
+            backgroundColor: Color(0xFFFF6B8A),
+          ),
+        );
+      }
+    }
+  }
+
+  // ── Export ────────────────────────────────────────────────────────────────────
 
   void _showExportOptions() {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: AppColors.bgWhite,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      builder: (_) => _ExportBottomSheet(onExport: _handleExport),
+    );
+  }
+
+  Future<void> _handleExport(String format) async {
+    final storage = ref.read(localStorageProvider);
+    final token = await storage.getToken();
+    if (token == null) {
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Sesi berakhir, silakan login kembali')),
+        );
+      return;
+    }
+
+    if (kIsWeb) {
+      final url = Uri.parse(
+        '${ApiEndpoints.baseUrl}${ApiEndpoints.export}?format=$format&token=$token',
+      );
+      if (await canLaunchUrl(url))
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      return;
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Text('Mengunduh file $format...'),
+            ],
+          ),
+          backgroundColor: _PC.teal,
+          behavior: SnackBarBehavior.floating,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 24),
-              decoration: BoxDecoration(
-                color: AppColors.textMuted.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(2),
+      );
+    }
+
+    try {
+      final apiClient = ref.read(apiClientProvider);
+      Directory? directory;
+      if (Platform.isAndroid) {
+        directory = Directory('/storage/emulated/0/Download');
+        if (!await directory.exists())
+          directory = await getExternalStorageDirectory();
+      } else {
+        directory = await getApplicationDocumentsDirectory();
+      }
+      final fileName = format == 'pdf'
+          ? 'activa_report_${DateTime.now().millisecondsSinceEpoch}.pdf'
+          : 'activa_data_${DateTime.now().millisecondsSinceEpoch}.csv';
+      final savePath = '${directory!.path}/$fileName';
+      await apiClient.download(
+        ApiEndpoints.export,
+        savePath,
+        queryParams: {'format': format},
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text('Berhasil mengunduh: $fileName'),
+              backgroundColor: _PC.teal,
+              behavior: SnackBarBehavior.floating,
+              action: SnackBarAction(
+                label: 'BUKA',
+                textColor: Colors.white,
+                onPressed: () => OpenFile.open(savePath),
               ),
             ),
-            const Text(
-              'Ekspor Data Analisis',
-              style: TextStyle(
-                color: AppColors.textDark,
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
+          );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(
+                e is DioException
+                    ? (e.response?.data?['message'] ?? 'Gagal mengunduh')
+                    : 'Gagal mengunduh file',
+              ),
+              backgroundColor: _PC.rose,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+      }
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ── Background Layer  ─────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _BackgroundLayer extends StatelessWidget {
+  final Size size;
+  const _BackgroundLayer({required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.expand(
+      child: Stack(
+        children: [
+          // Base gradient
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [_PC.navy900, _PC.navy800, Color(0xFF0A1525)],
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              'Pilih format file untuk mengunduh riwayat analisis Anda',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.textMuted,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+          ),
+
+          // Teal glow orb — top left
+          Positioned(
+            top: -80,
+            left: -60,
+            child: _GlowOrb(color: _PC.teal, size: 260, opacity: 0.12),
+          ),
+
+          // Blue glow orb — top right
+          Positioned(
+            top: 80,
+            right: -80,
+            child: _GlowOrb(color: _PC.blue, size: 200, opacity: 0.10),
+          ),
+
+          // Rose orb — mid
+          Positioned(
+            top: size.height * 0.28,
+            left: size.width * 0.4,
+            child: _GlowOrb(color: _PC.rose, size: 150, opacity: 0.07),
+          ),
+
+          // Abstract wave overlay
+          Positioned(
+            bottom: size.height * 0.38,
+            left: 0,
+            right: 0,
+            child: CustomPaint(
+              size: Size(size.width, 120),
+              painter: _WavePainter(),
             ),
-            const SizedBox(height: 32),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildExportCard(
-                    icon: Icons.picture_as_pdf_rounded,
-                    color: AppColors.red,
-                    label: 'Format PDF',
-                    subtitle: 'Laporan Visual',
-                    onTap: () => _handleExport('pdf'),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildExportCard(
-                    icon: Icons.table_chart_rounded,
-                    color: AppColors.teal,
-                    label: 'Format Excel',
-                    subtitle: 'Data Mentah (CSV)',
-                    onTap: () => _handleExport('excel'),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GlowOrb extends StatelessWidget {
+  final Color color;
+  final double size;
+  final double opacity;
+  const _GlowOrb({
+    required this.color,
+    required this.size,
+    required this.opacity,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [
+            color.withValues(alpha: opacity),
+            color.withValues(alpha: 0),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildExportCard({
-    required IconData icon,
-    required Color color,
-    required String label,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: () {
-        Navigator.pop(context);
-        onTap();
+class _WavePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = _PC.teal.withValues(alpha: 0.04)
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    path.moveTo(0, 60);
+    path.cubicTo(
+      size.width * 0.25,
+      20,
+      size.width * 0.5,
+      100,
+      size.width * 0.75,
+      40,
+    );
+    path.cubicTo(size.width * 0.88, 10, size.width, 50, size.width, 50);
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ── Hero Section  ─────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _HeroSection extends StatelessWidget {
+  final dynamic user;
+  final Animation<double> pulseAnim;
+
+  const _HeroSection({required this.user, required this.pulseAnim});
+
+  @override
+  Widget build(BuildContext context) {
+    final name = user?.name ?? 'Pengguna';
+    final email = user?.email ?? 'pengguna@email.com';
+    final initials = user?.initials ?? '?';
+    final age = user?.age?.toString() ?? '-';
+
+    final eduToIndo = {
+      'High School': 'SMA/SMK',
+      'Bachelor': 'Sarjana',
+      'Master': 'Magister',
+      'PhD': 'Doktor',
+    };
+    final edu = user?.educationLevel != null
+        ? (eduToIndo[user!.educationLevel] ?? user!.educationLevel)
+        : '-';
+    final region = user?.region ?? '-';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 24, 0, 0),
+      child: Column(
+        children: [
+          // Avatar only (no mascot)
+          FuturisticAvatar(initials: initials, pulseAnim: pulseAnim, size: 96),
+
+          const SizedBox(height: 20),
+
+          // Name
+          Text(
+            name,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.6,
+            ),
+          ),
+          const SizedBox(height: 6),
+
+          // Email
+          Text(
+            email,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.55),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // Wellness badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+            decoration: BoxDecoration(
+              color: _PC.teal.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: _PC.teal.withValues(alpha: 0.25)),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.auto_awesome_rounded, color: _PC.teal, size: 13),
+                SizedBox(width: 6),
+                Text(
+                  'Digital Wellness Explorer',
+                  style: TextStyle(
+                    color: _PC.teal,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Info chips — pakai IconData bukan emoji
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GlassmorphismChip(icon: Icons.cake_outlined, label: '$age Tahun'),
+              const SizedBox(width: 10),
+              GlassmorphismChip(icon: Icons.school_outlined, label: edu),
+              const SizedBox(width: 10),
+              GlassmorphismChip(
+                icon: Icons.location_on_outlined,
+                label: region,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 32),
+        ],
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ── Logout Button  ────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _LogoutButton extends StatefulWidget {
+  final VoidCallback onTap;
+  const _LogoutButton({required this.onTap});
+
+  @override
+  State<_LogoutButton> createState() => _LogoutButtonState();
+}
+
+class _LogoutButtonState extends State<_LogoutButton> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.onTap();
       },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedScale(
+        scale: _pressed ? 0.97 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              colors: [
+                const Color(
+                  0xFFFF6B8A,
+                ).withValues(alpha: _pressed ? 0.15 : 0.08),
+                const Color(
+                  0xFFCC3060,
+                ).withValues(alpha: _pressed ? 0.12 : 0.05),
+              ],
+            ),
+            border: Border.all(
+              color: const Color(
+                0xFFFF6B8A,
+              ).withValues(alpha: _pressed ? 0.4 : 0.2),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(
+                  0xFFFF6B8A,
+                ).withValues(alpha: _pressed ? 0.15 : 0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.logout_rounded, color: Color(0xFFFF6B8A), size: 20),
+              SizedBox(width: 10),
+              Text(
+                'Keluar dari Akun',
+                style: TextStyle(
+                  color: Color(0xFFFF6B8A),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ── Export Bottom Sheet  ──────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _ExportBottomSheet extends StatelessWidget {
+  final Future<void> Function(String) onExport;
+  const _ExportBottomSheet({required this.onExport});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 24),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const Text(
+            'Ekspor Data Analisis',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF0D1F3C),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Pilih format file untuk mengunduh riwayat analisis kamu',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.black.withValues(alpha: 0.45),
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(height: 28),
+          Row(
+            children: [
+              Expanded(
+                child: _ExportCard(
+                  icon: Icons.picture_as_pdf_rounded,
+                  gradient: const [Color(0xFFFF6B8A), Color(0xFFCC3060)],
+                  label: 'Format PDF',
+                  subtitle: 'Laporan Visual',
+                  onTap: () {
+                    Navigator.pop(context);
+                    onExport('pdf');
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _ExportCard(
+                  icon: Icons.table_chart_rounded,
+                  gradient: const [Color(0xFF00E5C8), Color(0xFF0099AA)],
+                  label: 'Format CSV',
+                  subtitle: 'Data Mentah',
+                  onTap: () {
+                    Navigator.pop(context);
+                    onExport('excel');
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExportCard extends StatelessWidget {
+  final IconData icon;
+  final List<Color> gradient;
+  final String label;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _ExportCard({
+    required this.icon,
+    required this.gradient,
+    required this.label,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.05),
+          gradient: LinearGradient(
+            colors: [
+              gradient[0].withValues(alpha: 0.08),
+              gradient[1].withValues(alpha: 0.05),
+            ],
+          ),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withValues(alpha: 0.1)),
+          border: Border.all(color: gradient[0].withValues(alpha: 0.2)),
         ),
         child: Column(
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
+                gradient: LinearGradient(colors: gradient),
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: gradient[0].withValues(alpha: 0.3),
+                    blurRadius: 12,
+                  ),
+                ],
               ),
-              child: Icon(icon, color: color, size: 28),
+              child: Icon(icon, color: Colors.white, size: 26),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             Text(
               label,
               style: TextStyle(
-                color: color,
-                fontSize: 15,
+                color: gradient[0],
+                fontSize: 14,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -684,7 +1069,7 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
             Text(
               subtitle,
               style: TextStyle(
-                color: color.withValues(alpha: 0.6),
+                color: gradient[0].withValues(alpha: 0.6),
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),
@@ -693,133 +1078,5 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _handleExport(String format) async {
-    // 1. Ambil token (diperlukan untuk download via URL di Web)
-    final storage = ref.read(localStorageProvider);
-    final token = await storage.getToken();
-
-    if (token == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sesi berakhir, silakan login kembali')),
-        );
-      }
-      return;
-    }
-
-    // 2. Jika di WEB, gunakan launchUrl agar browser yang menangani download
-    if (kIsWeb) {
-      final url = Uri.parse(
-        '${ApiEndpoints.baseUrl}${ApiEndpoints.export}?format=$format&token=$token',
-      );
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Mengunduh $format melalui browser...'), backgroundColor: AppColors.teal),
-          );
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Tidak dapat membuka link download'), backgroundColor: AppColors.red),
-          );
-        }
-      }
-      return;
-    }
-
-    // 3. Jika di MOBILE (Android/iOS), gunakan Dio Download + OpenFile
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
-              const SizedBox(width: 16),
-              Text('Mengunduh file $format...'),
-            ],
-          ),
-          backgroundColor: AppColors.teal,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-
-    try {
-      final apiClient = ref.read(apiClientProvider);
-      
-      // Tentukan lokasi simpan
-      Directory? directory;
-      if (Platform.isAndroid) {
-        directory = Directory('/storage/emulated/0/Download');
-        if (!await directory.exists()) {
-          directory = await getExternalStorageDirectory();
-        }
-      } else {
-        directory = await getApplicationDocumentsDirectory();
-      }
-
-      final fileName = format == 'pdf' 
-          ? "activa_report_${DateTime.now().millisecondsSinceEpoch}.pdf"
-          : "activa_data_${DateTime.now().millisecondsSinceEpoch}.csv";
-      
-      final savePath = "${directory!.path}/$fileName";
-
-      // Download via ApiClient
-      await apiClient.download(
-        ApiEndpoints.export,
-        savePath,
-        queryParams: {'format': format},
-      );
-
-      // Berhasil! Tawarkan untuk buka file
-      if (mounted) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Berhasil mengunduh ke: $fileName'),
-            backgroundColor: AppColors.teal,
-            behavior: SnackBarBehavior.floating,
-            action: SnackBarAction(
-              label: 'BUKA',
-              textColor: Colors.white,
-              onPressed: () => OpenFile.open(savePath),
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        String errorMessage = 'Gagal mengunduh file';
-        
-        if (e is DioException) {
-          final data = e.response?.data;
-          if (data is Map<String, dynamic> && data['message'] != null) {
-            errorMessage = data['message'];
-          } else if (e.type == DioExceptionType.connectionError) {
-            errorMessage = 'Tidak dapat terhubung ke server';
-          }
-        }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: AppColors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
-  }
-  
-  String? encodeQueryParameters(Map<String, String> params) {
-    return params.entries
-        .map((MapEntry<String, String> e) =>
-            '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
-        .join('&');
   }
 }

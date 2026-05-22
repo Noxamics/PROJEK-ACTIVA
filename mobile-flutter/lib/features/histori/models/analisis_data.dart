@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../hasil_prediksi/models/ml_result_model.dart';
 
 class AnalisisData {
   final int number;
@@ -21,21 +22,37 @@ class AnalisisData {
     this.note,
     this.noteColor,
   });
+
+  // ── Getters untuk histori_screen.dart ─────────────────────────
+  String get kategori => category;
+  String get title => 'Analisis #$number';
+  double get score => digitalDependenceScore;
+  String get relativeTime => '$day $month';
+
+  // score alias — pakai dep karena itu digitalDependenceScore.round()
+  double get digitalDependenceScore => dep.toDouble();
+
+  String get statusWellness => switch (category.toLowerCase()) {
+    'rendah' => 'Hidup Sehat',
+    'sedang' => 'Mulai Stabil',
+    'tinggi' => 'Perlu Perhatian',
+    _ => 'Dalam Pemantauan',
+  };
 }
 
-/// Extension untuk convert MlResultModel → AnalisisData
 extension AnalisisDataConverter on AnalisisData {
-  static AnalisisData fromMlResult(dynamic mlResult) {
-    final isHighRisk = mlResult.category.toLowerCase() == 'tinggi';
+  static AnalisisData fromMlResult(MlResultModel ml) {
     return AnalisisData(
-      number: mlResult.dependenceInt,
-      day: mlResult.dayStr,
-      month: mlResult.monthStr,
-      dep: mlResult.dependenceInt,
-      category: mlResult.category,
-      confidence: mlResult.confidence.confidenceFinalPct,
-      note: mlResult.riskLevel,
-      noteColor: isHighRisk ? AppColors.red : AppColors.teal,
+      number: ml.dependenceInt, // digitalDependenceScore.round()
+      day: ml.dayStr, // '23'
+      month: ml.monthStr, // 'MEI'
+      dep: ml.dependenceInt,
+      category: ml.category, // 'rendah' | 'sedang' | 'tinggi'
+      confidence: ml.confidence.confidenceFinalPct, // 0–100
+      note: ml.riskLevel, // 'Hidup Sehat' | 'Perlu Perhatian' | 'Risiko Tinggi'
+      noteColor: ml.category.toLowerCase() == 'tinggi'
+          ? AppColors.red
+          : AppColors.teal,
     );
   }
 }
