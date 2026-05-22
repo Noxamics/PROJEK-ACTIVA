@@ -496,15 +496,15 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
                         : isCompleted
                         ? const Color(0xFF5EEAD4)
                         : Colors.white.withValues(alpha: 0.2),
-                    boxShadow: isActive
-                        ? [
-                            BoxShadow(
-                              color: AppColors.teal.withValues(alpha: 0.5),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ]
-                        : null,
+                    boxShadow: [
+                      BoxShadow(
+                        color: isActive
+                            ? AppColors.teal.withValues(alpha: 0.5)
+                            : AppColors.teal.withValues(alpha: 0.0),
+                        blurRadius: 12,
+                        offset: isActive ? const Offset(0, 4) : Offset.zero,
+                      ),
+                    ],
                   ),
                   child: Center(
                     child: Text(
@@ -785,6 +785,7 @@ child: ClipOval(
   child: Transform.scale(
     scale: 0.8, // sesuaikan nilai ini, 1.0 = ukuran normal
     child: Image.asset(
+
       'assets/images/maskot.png',
       width: 72,
       height: 72,
@@ -2196,5 +2197,184 @@ class _QuestionBlock extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════��════════════
+// DATA CLASS FOR 5 OPTIONS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class _OptionData {
+  final String label;
+  final int value;
+
+  const _OptionData({required this.label, required this.value});
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 5 OPTION PICKER WITH PYRAMID LAYOUT
+// Layout: 1 kiri, 2 kanan, 3 bawah 1, 4 bawah 2, 5 center bawah
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class _FiveOptionPicker extends StatelessWidget {
+  final List<_OptionData> options;
+  final int selectedValue;
+  final String? lowLabel;
+  final String? highLabel;
+  final bool invertColor;
+  final ValueChanged<int> onChanged;
+
+  const _FiveOptionPicker({
+    required this.options,
+    required this.selectedValue,
+    required this.onChanged,
+    this.lowLabel,
+    this.highLabel,
+    this.invertColor = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Labels row
+        if (lowLabel != null || highLabel != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  lowLabel ?? '',
+                  style: TextStyle(
+                    color: invertColor ? AppColors.green : AppColors.red,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  highLabel ?? '',
+                  style: TextStyle(
+                    color: invertColor ? AppColors.red : AppColors.green,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+        // Row 1: Options 1 & 2
+        Row(
+          children: [
+            Expanded(child: _buildOptionButton(options[0], 0)),
+            const SizedBox(width: 10),
+            Expanded(child: _buildOptionButton(options[1], 1)),
+          ],
+        ),
+        const SizedBox(height: 10),
+
+        // Row 2: Options 3 & 4
+        Row(
+          children: [
+            Expanded(child: _buildOptionButton(options[2], 2)),
+            const SizedBox(width: 10),
+            Expanded(child: _buildOptionButton(options[3], 3)),
+          ],
+        ),
+        const SizedBox(height: 10),
+
+        // Row 3: Option 5 (centered)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.4,
+              child: _buildOptionButton(options[4], 4),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOptionButton(_OptionData option, int index) {
+    final isSelected = option.value == selectedValue;
+    final color = _getColorForIndex(index);
+
+    return GestureDetector(
+      onTap: () => onChanged(option.value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutBack,
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? color : color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? color : color.withValues(alpha: 0.3),
+            width: isSelected ? 2 : 1.5,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.35),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
+        ),
+        child: Center(
+          child: Text(
+            option.label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isSelected ? Colors.white : color,
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+              height: 1.2,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _getColorForIndex(int index) {
+    // 5 options: 0=lowest, 1, 2=middle, 3, 4=highest
+    if (invertColor) {
+      // For stress: low = good (green), high = bad (red)
+      switch (index) {
+        case 0:
+          return AppColors.green;
+        case 1:
+          return AppColors.green.withValues(alpha: 0.8);
+        case 2:
+          return AppColors.amber;
+        case 3:
+          return AppColors.red.withValues(alpha: 0.8);
+        case 4:
+          return AppColors.red;
+        default:
+          return AppColors.amber;
+      }
+    } else {
+      // For happiness: low = bad (red), high = good (green)
+      switch (index) {
+        case 0:
+          return AppColors.red;
+        case 1:
+          return AppColors.red.withValues(alpha: 0.8);
+        case 2:
+          return AppColors.amber;
+        case 3:
+          return AppColors.green.withValues(alpha: 0.8);
+        case 4:
+          return AppColors.green;
+        default:
+          return AppColors.amber;
+      }
+    }
   }
 }

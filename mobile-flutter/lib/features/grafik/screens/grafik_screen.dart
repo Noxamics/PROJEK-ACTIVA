@@ -19,19 +19,18 @@ class GrafikScreen extends ConsumerStatefulWidget {
 }
 
 class _GrafikScreenState extends ConsumerState<GrafikScreen> {
-  static const _periodLabels = ['7 Hari', 'Bulanan', '3 Bulan'];
+  static const _periodLabels = ['7 Hari', 'Bulanan', 'Tahun'];
 
   // Map index selector → GrafikPeriod
   static const _periodMap = [
     GrafikPeriod.week,
     GrafikPeriod.month,
-    GrafikPeriod.threeMonths,
+    GrafikPeriod.year,
   ];
 
   @override
   Widget build(BuildContext context) {
     final grafikState = ref.watch(grafikProvider);
-    final data = grafikState.data;
     final selectedPeriodIndex = _periodMap.indexOf(grafikState.period);
 
     return Scaffold(
@@ -46,80 +45,21 @@ class _GrafikScreenState extends ConsumerState<GrafikScreen> {
                   color: AppColors.bgLight,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
                 ),
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-                  child: Column(
-                    children: [
-                      _buildPeriodSelector(selectedPeriodIndex),
-                      const SizedBox(height: 32),
-
-                      // 1. Trend Skor Dependensi
-                      _card(
-                        title: 'Trend Skor Dependensi',
-                        subtitle: 'Analisis tingkat ketergantungan digital',
-                        child: SimpleLineChart(
-                          values: data.dependenceValues,
-                          labels: data.labels,
-                          color: AppColors.teal,
-                          maxValue: 100,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // 2. Rata-rata Screen Time
-                      _card(
-                        title: 'Rata-rata Screen Time',
-                        subtitle: 'Durasi penggunaan perangkat dalam jam/hari',
-                        child: SimpleLineChart(
-                          values: data.deviceHourValues,
-                          labels: data.labels,
-                          color: AppColors.blue,
-                          maxValue: 15,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // 3. Media Sosial
-                      _card(
-                        title: 'Media Sosial',
-                        subtitle:
-                            'Menit yang dihabiskan untuk hiburan & sosial',
-                        child: GenericBarChart(
-                          values: data.socialMediaValues,
-                          labels: data.labels,
-                          color: AppColors.purple,
-                          maxValue: 500,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // 4. Kualitas Tidur
-                      _card(
-                        title: 'Kualitas Tidur',
-                        subtitle: 'Durasi istirahat malam (jam tidur)',
-                        child: GenericBarChart(
-                          values: data.sleepHourValues,
-                          labels: data.labels,
-                          color: Colors.indigo,
-                          maxValue: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // 5. Kategori Dependensi
-                      _card(
-                        title: 'Kategori Dependensi',
-                        subtitle:
-                            'Distribusi tingkat dependensi selama periode ini',
-                        child: DonutChartWidget(
-                          low: data.kategori.low,
-                          medium: data.kategori.medium,
-                          high: data.kategori.high,
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                    ],
+                child: RefreshIndicator(
+                  color: AppColors.teal,
+                  backgroundColor: AppColors.bgWhite,
+                  onRefresh: () => ref.read(grafikProvider.notifier).fetchGrafikData(grafikState.period),
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+                    child: Column(
+                      children: [
+                        _buildPeriodSelector(selectedPeriodIndex),
+                        const SizedBox(height: 32),
+                        _buildContent(grafikState),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -132,6 +72,180 @@ class _GrafikScreenState extends ConsumerState<GrafikScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildContent(GrafikState grafikState) {
+    if (grafikState.isLoading) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 80),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.teal),
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Mengambil data dari database...',
+                style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (grafikState.errorMessage != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline_rounded, color: AppColors.red, size: 48),
+              const SizedBox(height: 16),
+              Text(
+                grafikState.errorMessage!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: AppColors.textDark, fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: () => ref.read(grafikProvider.notifier).fetchGrafikData(grafikState.period),
+                icon: const Icon(Icons.refresh_rounded, color: Colors.white, size: 18),
+                label: const Text('Coba Lagi', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.bgDark,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final data = grafikState.data;
+    if (data.entries.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                '📊',
+                style: TextStyle(fontSize: 48),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Belum Cukup Data',
+                style: TextStyle(
+                  color: AppColors.textDark,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Isi kuesioner terlebih dahulu untuk melihat analisis grafik perkembanganmu.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColors.textMuted, fontSize: 13, height: 1.4),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const KuesionerScreen()),
+                  );
+                },
+                icon: const Icon(Icons.assignment_outlined, color: Colors.white, size: 18),
+                label: const Text(
+                  'Isi Kuesioner',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.teal,
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        // 1. Trend Skor Dependensi
+        _card(
+          title: 'Trend Skor Dependensi',
+          subtitle: 'Analisis tingkat ketergantungan digital',
+          child: SimpleLineChart(
+            values: data.dependenceValues,
+            labels: data.labels,
+            color: AppColors.teal,
+            maxValue: 100,
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        // 2. Rata-rata Screen Time
+        _card(
+          title: 'Rata-rata Screen Time',
+          subtitle: 'Durasi penggunaan perangkat dalam jam/hari',
+          child: SimpleLineChart(
+            values: data.deviceHourValues,
+            labels: data.labels,
+            color: AppColors.blue,
+            maxValue: 15,
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        // 3. Media Sosial
+        _card(
+          title: 'Media Sosial',
+          subtitle: 'Menit yang dihabiskan untuk hiburan & sosial',
+          child: GenericBarChart(
+            values: data.socialMediaValues,
+            labels: data.labels,
+            color: AppColors.purple,
+            maxValue: 500,
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        // 4. Kualitas Tidur
+        _card(
+          title: 'Kualitas Tidur',
+          subtitle: 'Durasi istirahat malam (jam tidur)',
+          child: GenericBarChart(
+            values: data.sleepHourValues,
+            labels: data.labels,
+            color: Colors.indigo,
+            maxValue: 12,
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        // 5. Kategori Dependensi
+        _card(
+          title: 'Kategori Dependensi',
+          subtitle: 'Distribusi tingkat dependensi selama periode ini',
+          child: DonutChartWidget(
+            low: data.kategori.low,
+            medium: data.kategori.medium,
+            high: data.kategori.high,
+          ),
+        ),
+      ],
     );
   }
 
@@ -226,15 +340,15 @@ class _GrafikScreenState extends ConsumerState<GrafikScreen> {
           decoration: BoxDecoration(
             color: isSelected ? AppColors.bgDark : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: AppColors.bgDark.withValues(alpha: 0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
+            boxShadow: [
+              BoxShadow(
+                color: isSelected
+                    ? AppColors.bgDark.withValues(alpha: 0.2)
+                    : AppColors.bgDark.withValues(alpha: 0.0),
+                blurRadius: 8,
+                offset: isSelected ? const Offset(0, 2) : Offset.zero,
+              ),
+            ],
           ),
           child: Text(
             _periodLabels[i],

@@ -800,15 +800,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(50),
-          boxShadow: isLoading
-              ? []
-              : [
-                  BoxShadow(
-                    color: const Color(0xFF0D9488).withValues(alpha: 0.35),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
+          boxShadow: [
+            BoxShadow(
+              color: isLoading
+                  ? const Color(0xFF0D9488).withValues(alpha: 0.0)
+                  : const Color(0xFF0D9488).withValues(alpha: 0.35),
+              blurRadius: 20,
+              offset: isLoading ? Offset.zero : const Offset(0, 8),
+            ),
+          ],
         ),
         child: isLoading
             ? const Row(
