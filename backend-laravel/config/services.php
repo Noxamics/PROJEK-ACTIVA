@@ -31,4 +31,25 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'ai' => [
+        // Ganti ke 'gemini' atau 'openai' kalau mau pakai driver lain
+        'driver' => env('AI_DRIVER', 'groq'),
+
+        // Groq
+        'groq_key' => env('GROQ_API_KEY'),
+        'groq_model' => env('GROQ_MODEL', 'llama-3.3-70b-versatile'),
+
+        // Gemini (opsional)
+        'gemini_key' => env('GEMINI_API_KEY'),
+        'gemini_model' => env('GEMINI_MODEL', 'gemini-1.5-flash'),
+
+        // OpenAI (opsional)
+        'openai_key' => env('OPENAI_API_KEY'),
+        'openai_model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+    ],
+
+    'ml' => [
+        'url' => env('ML_SERVICE_URL', 'http://localhost:5000'),
+        'timeout' => env('ML_SERVICE_TIMEOUT', 30),
+    ],
 ];
