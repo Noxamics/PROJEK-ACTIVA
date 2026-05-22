@@ -17,7 +17,7 @@ class _AT {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// OPTION CARD  (title only — no subtitle inside the card)
+// OPTION CARD
 // ─────────────────────────────────────────────────────────────────────────────
 
 class QuestionOptionCard extends StatelessWidget {
@@ -39,7 +39,10 @@ class QuestionOptionCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 260),
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        padding: const EdgeInsets.symmetric(
+          vertical: 14,
+          horizontal: 10,
+        ),
         decoration: BoxDecoration(
           color: isSelected ? _AT.iceWhite : _AT.bgCard,
           borderRadius: BorderRadius.circular(14),
@@ -68,23 +71,19 @@ class QuestionOptionCard extends StatelessWidget {
                   ),
                 ],
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // ── Label ──────────────────────────────────────────────────────
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: isSelected ? _AT.black : _AT.darkGray,
-                fontSize: 11.5,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                height: 1.2,
-                letterSpacing: -0.1,
-              ),
+        child: Center(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isSelected ? _AT.black : _AT.darkGray,
+              fontSize: 11.5,
+              fontWeight:
+                  isSelected ? FontWeight.w700 : FontWeight.w600,
+              height: 1.2,
+              letterSpacing: -0.1,
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -97,7 +96,7 @@ class QuestionOptionCard extends StatelessWidget {
 
 class GridOptionData {
   final String label;
-  final String description; // shown in the panel below, NOT inside the card
+  final String description;
   final dynamic value;
 
   const GridOptionData({
@@ -109,11 +108,13 @@ class GridOptionData {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FIVE OPTION GRID PICKER
-// Layout:  [0] [1]
-//          [2] [3]
-//             [4]   (centered, ~44 % width)
 //
-// Selected description appears BELOW all cards in a dedicated panel.
+// Layout:
+// [0] [1]
+// [2] [3]
+//    [4]
+//
+// Selected description appears below
 // ─────────────────────────────────────────────────────────────────────────────
 
 class FiveOptionGridPicker extends StatelessWidget {
@@ -127,9 +128,9 @@ class FiveOptionGridPicker extends StatelessWidget {
     required this.selectedValue,
     required this.onChanged,
   }) : assert(
-         options.length == 5,
-         'FiveOptionGridPicker requires exactly 5 options',
-       );
+          options.length == 5,
+          'FiveOptionGridPicker requires exactly 5 options',
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -138,144 +139,88 @@ class FiveOptionGridPicker extends StatelessWidget {
       orElse: () => null,
     );
 
+    Widget buildCard(GridOptionData option) {
+      return Expanded(
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: QuestionOptionCard(
+            label: option.label,
+            isSelected: selectedValue == option.value,
+            onTap: () => onChanged(option.value),
+          ),
+        ),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // ── Row 1 ────────────────────────────────────────────────────────
+        // ───────────────── Row 1 ─────────────────
         Row(
           children: [
-            Expanded(child: _card(options[0])),
-            const SizedBox(width: 10),
-            Expanded(child: _card(options[1])),
+            buildCard(options[0]),
+            buildCard(options[1]),
           ],
         ),
-        const SizedBox(height: 10),
 
-        // ── Row 2 ────────────────────────────────────────────────────────
+        // ───────────────── Row 2 ─────────────────
         Row(
           children: [
-            Expanded(child: _card(options[2])),
-            const SizedBox(width: 10),
-            Expanded(child: _card(options[3])),
+            buildCard(options[2]),
+            buildCard(options[3]),
           ],
         ),
-        const SizedBox(height: 10),
 
-        // ── Row 3 — fifth option centered ────────────────────────────────
+        // ───────────────── Row 3 ─────────────────
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.44,
-              child: _card(options[4]),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
+            const Spacer(),
 
-        // ── Description panel ─────────────────────────────────────────────
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          transitionBuilder: (child, animation) => FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position:
-                  Tween<Offset>(
-                    begin: const Offset(0, 0.08),
-                    end: Offset.zero,
-                  ).animate(
-                    CurvedAnimation(parent: animation, curve: Curves.easeOut),
-                  ),
-              child: child,
-            ),
-          ),
-          child: selectedOpt != null
-              ? _DescriptionPanel(
-                  key: ValueKey(selectedOpt.value),
-                  label: selectedOpt.label,
-                  description: selectedOpt.description,
-                )
-              : const SizedBox.shrink(),
-        ),
-      ],
-    );
-  }
-
-  Widget _card(GridOptionData opt) {
-    return QuestionOptionCard(
-      label: opt.label,
-      isSelected: opt.value == selectedValue,
-      onTap: () => onChanged(opt.value),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DESCRIPTION PANEL
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _DescriptionPanel extends StatelessWidget {
-  final String label;
-  final String description;
-
-  const _DescriptionPanel({
-    super.key,
-    required this.label,
-    required this.description,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-      decoration: BoxDecoration(
-        color: _AT.bgCard,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _AT.borderDef, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Header ────────────────────────────────────────────────────
-          Row(
-            children: [
-              Icon(Icons.info_outline_rounded, size: 14, color: _AT.navy),
-              const SizedBox(width: 6),
-              Text(
-                'KETERANGAN',
-                style: TextStyle(
-                  color: _AT.navy,
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.9,
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: QuestionOptionCard(
+                  label: options[4].label,
+                  isSelected:
+                      selectedValue == options[4].value,
+                  onTap: () =>
+                      onChanged(options[4].value),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Divider(color: _AT.borderDef, height: 1, thickness: 1),
-          const SizedBox(height: 10),
+            ),
 
-          // ── Description text ──────────────────────────────────────────
-          Text(
-            description,
-            style: const TextStyle(
-              color: _AT.darkGray,
-              fontSize: 11.5,
-              height: 1.4,
-              fontStyle: FontStyle.italic,
+            const Spacer(),
+          ],
+        ),
+
+        // ───────────────── Description Panel ─────────────────
+        if (selectedOpt != null) ...[
+          const SizedBox(height: 14),
+
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: _AT.iceWhite,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: _AT.teal.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Text(
+              selectedOpt.description,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 13,
+                height: 1.5,
+                color: _AT.darkGray,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-          const SizedBox(height: 10),
         ],
-      ),
+      ],
     );
   }
 }

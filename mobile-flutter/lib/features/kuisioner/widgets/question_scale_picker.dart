@@ -82,45 +82,38 @@ class QuestionScalePicker extends StatelessWidget {
         final number = min + i;
         final isSelected = number == selectedInt;
 
-        return Expanded(
-          child: GestureDetector(
-            onTap: () => onChanged(number),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 240),
-              curve: Curves.easeOutBack,
-              margin: EdgeInsets.only(right: i < total - 1 ? 4 : 0),
-              height: 48,
-              decoration: BoxDecoration(
-                color: isSelected ? _navy : Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isSelected ? _navy : _softGray,
-                  width: isSelected ? 0 : 1.2,
-                ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: _navy.withValues(alpha: 0.28),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ]
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+      return Expanded(
+        child: GestureDetector(
+          onTap: () => onChanged(number),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutBack,
+            margin: EdgeInsets.only(right: i < total - 1 ? 4 : 0),
+            height: 48,
+            decoration: BoxDecoration(
+              color: isSelected ? color : color.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected ? color : color.withValues(alpha: 0.3),
+                width: isSelected ? 2.5 : 1.5,
               ),
-              child: Center(
-                child: Text(
-                  '$number',
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : _darkGray,
-                    fontSize: 14,
-                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                  ),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: color.withValues(alpha: 0.4),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Center(
+              child: Text(
+                '$number',
+                style: TextStyle(
+                  color: isSelected ? Colors.white : color,
+                  fontSize: 15,
+                  fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
                 ),
               ),
             ),

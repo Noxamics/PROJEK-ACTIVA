@@ -492,8 +492,8 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
                         ? [
                             BoxShadow(
                               color: AppColors.teal.withValues(alpha: 0.5),
-                              blurRadius: 10,
-                              offset: const Offset(0, 3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
                             ),
                           ]
                         : null,
@@ -683,6 +683,41 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
       color: color.withValues(alpha: 0.7),
     ),
   );
+
+  Widget _buildMascot() {
+    return Container(
+      width: 72,
+      height: 72,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [_kTeal, _kPurple],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: _kTeal.withValues(alpha: 0.45),
+            blurRadius: 24,
+            spreadRadius: 4,
+          ),
+        ],
+      ),
+      child: ClipOval(
+child: ClipOval(
+  child: Transform.scale(
+    scale: 0.8, // sesuaikan nilai ini, 1.0 = ukuran normal
+    child: Image.asset(
+      'assets/images/maskot.png',
+      width: 72,
+      height: 72,
+      fit: BoxFit.cover,
+    ),
+  ),
+),
+),
+    );
+  }
 
   // ── Wave + white content area ──────────────────────────────────────────────
 
@@ -2106,47 +2141,4 @@ class _QuestionBlock extends StatelessWidget {
       ),
     );
   }
-}
-
-// ══════════════════════════════════════════════════════════════════════════════
-// ARC PAINTER
-// ══════════════════════════════════════════════════════════════════════════════
-
-class _ArcPainter extends CustomPainter {
-  final Color color;
-  final double strokeWidth;
-  final double sweepFraction;
-
-  const _ArcPainter({
-    required this.color,
-    required this.strokeWidth,
-    required this.sweepFraction,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final rect = Rect.fromLTWH(
-      strokeWidth / 2,
-      strokeWidth / 2,
-      size.width - strokeWidth,
-      size.height - strokeWidth,
-    );
-
-    canvas.drawArc(
-      rect,
-      -math.pi / 2,
-      2 * math.pi * sweepFraction,
-      false,
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_ArcPainter old) => false;
 }

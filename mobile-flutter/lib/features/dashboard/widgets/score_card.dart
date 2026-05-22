@@ -154,7 +154,7 @@ class DependencyScoreCard extends StatelessWidget {
               right: -10,
               bottom: -10,
               child: Image.asset(
-                'assets/images/maskot.png',
+                'assets/images/Maskot.png',
                 width: 140,
                 height: 140,
                 fit: BoxFit.contain,
