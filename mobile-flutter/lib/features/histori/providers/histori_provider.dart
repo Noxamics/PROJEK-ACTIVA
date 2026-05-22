@@ -162,3 +162,52 @@ final dependenceChangeProvider = Provider<double>((ref) {
   if (prev == 0) return 0.0;
   return ((latest - prev) / prev) * 100;
 });
+
+/// Jumlah minimum data untuk menampilkan rata-rata mingguan
+const int kWeeklyDataMinimum = 7;
+
+/// Flag — apakah sudah ada ≥7 data sehingga rata-rata mingguan bisa dihitung
+final hasWeeklyDataProvider = Provider<bool>((ref) {
+  return ref.watch(historiProvider).items.length >= kWeeklyDataMinimum;
+});
+
+/// Rata-rata screen time & sleep dari 7 data terbaru
+/// Returns: (avgScreenTime, avgSleepHours)
+final weeklyStatsProvider = Provider<({double screenTime, double sleepHours, int dataCount})>((ref) {
+  final items = ref.watch(historiProvider).items;
+  if (items.isEmpty) {
+    return (screenTime: 0.0, sleepHours: 0.0, dataCount: 0);
+  }
+  // Ambil maksimal 7 data terbaru (sudah terurut terbaru di index 0)
+  final recent = items.take(kWeeklyDataMinimum).toList();
+  final avgScreen = recent.map((e) => e.screenTime).reduce((a, b) => a + b) / recent.length;
+  final avgSleep  = recent.map((e) => e.sleepHours).reduce((a, b) => a + b) / recent.length;
+  return (screenTime: avgScreen, sleepHours: avgSleep, dataCount: recent.length);
+});
+
+/// Shortcut — Hitung distribusi kategori dependensi dari seluruh history user
+final dependencyDistributionProvider = Provider<({int low, int medium, int high, int total})>((ref) {
+  final items = ref.watch(historiProvider).items;
+  
+  if (items.isEmpty) {
+    return (low: 0, medium: 0, high: 0, total: 0);
+  }
+  
+  int countLow = 0;
+  int countMedium = 0;
+  int countHigh = 0;
+  
+  for (final item in items) {
+    final cat = item.category.toLowerCase();
+    if (cat == 'tinggi' || cat == 'high') {
+      countHigh++;
+    } else if (cat == 'sedang' || cat == 'moderate') {
+      countMedium++;
+    } else {
+      countLow++;
+    }
+  }
+  
+  return (low: countLow, medium: countMedium, high: countHigh, total: items.length);
+});
+

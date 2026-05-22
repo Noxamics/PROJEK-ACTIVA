@@ -5,14 +5,26 @@ class QuickStatsGrid extends StatelessWidget {
   final double screenTime;
   final double sleepDuration;
 
+  /// Jika false, tampilkan "belum cukup data" state
+  final bool hasWeeklyData;
+
+  /// Jumlah data yang sudah diisi (untuk progress bar, maks 7)
+  final int dataCount;
+
   const QuickStatsGrid({
     super.key,
-    this.screenTime = 8.2,
-    this.sleepDuration = 5.4,
+    this.screenTime = 0.0,
+    this.sleepDuration = 0.0,
+    this.hasWeeklyData = false,
+    this.dataCount = 0,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (!hasWeeklyData) {
+      return _buildUnlockCard();
+    }
+
     return Row(
       children: [
         // Screen Time Card
@@ -27,6 +39,7 @@ class QuickStatsGrid extends StatelessWidget {
             label: 'Screen Time',
             value: screenTime,
             unit: 'Jam',
+            sublabel: 'Rata-rata 7 hari',
           ),
         ),
         const SizedBox(width: 12),
@@ -42,9 +55,147 @@ class QuickStatsGrid extends StatelessWidget {
             label: 'Durasi Tidur',
             value: sleepDuration,
             unit: 'Jam',
+            sublabel: 'Rata-rata 7 hari',
           ),
         ),
       ],
+    );
+  }
+
+  /// Card menarik yang menampilkan progress menuju 7 pengisian
+  Widget _buildUnlockCard() {
+    final progress = (dataCount / 7).clamp(0.0, 1.0);
+    final remaining = 7 - dataCount;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.teal.withValues(alpha: 0.08),
+            AppColors.blue.withValues(alpha: 0.06),
+          ],
+        ),
+        border: Border.all(
+          color: AppColors.teal.withValues(alpha: 0.18),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.teal.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // ── Ikon kiri ────────────────────────────────────────────────
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppColors.teal, AppColors.blue],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.teal.withValues(alpha: 0.25),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.bar_chart_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+
+          // ── Teks + Progress ──────────────────────────────────────────
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Statistik Mingguan',
+                  style: TextStyle(
+                    color: AppColors.textDark,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  remaining == 0
+                      ? 'Sedang memproses data...'
+                      : 'Isi $remaining pengisian lagi untuk membuka',
+                  style: TextStyle(
+                    color: AppColors.textMuted.withValues(alpha: 0.8),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Progress bar
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 6,
+                    backgroundColor: AppColors.teal.withValues(alpha: 0.12),
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.teal),
+                  ),
+                ),
+                const SizedBox(height: 6),
+
+                // Label progress
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: List.generate(7, (i) {
+                        final filled = i < dataCount;
+                        return Container(
+                          margin: const EdgeInsets.only(right: 3),
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: filled
+                                ? AppColors.teal
+                                : AppColors.teal.withValues(alpha: 0.18),
+                          ),
+                        );
+                      }),
+                    ),
+                    Text(
+                      '$dataCount / 7',
+                      style: const TextStyle(
+                        color: AppColors.teal,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -59,6 +210,7 @@ class _StatCard extends StatelessWidget {
   final String label;
   final double value;
   final String unit;
+  final String? sublabel;
 
   const _StatCard({
     required this.icon,
@@ -70,6 +222,7 @@ class _StatCard extends StatelessWidget {
     required this.label,
     required this.value,
     required this.unit,
+    this.sublabel,
   });
 
   @override
@@ -149,6 +302,17 @@ class _StatCard extends StatelessWidget {
                   ),
                 ],
               ),
+              if (sublabel != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  sublabel!,
+                  style: TextStyle(
+                    color: iconColor.withValues(alpha: 0.7),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ],
           ),
         ],
