@@ -20,8 +20,6 @@ Route::prefix('auth')->group(function () {
     // HAPUS: Route::get('/surveys', ...) yang ada di sini sebelumnya
 });
 
-Route::get('announcements', [AnnouncementController::class, 'index']);
-
 Route::post('admin/login', [AdminController::class, 'login']);
 Route::post('admin/request-otp', [AdminController::class, 'requestOtp']);
 Route::post('admin/verify-otp', [AdminController::class, 'verifyOtp']);

@@ -59,6 +59,9 @@ flutter:
   assets:
     - assets/images/logo.png
     - assets/images/maskot.png
+    - assets/images/Maskot_Tinggi.png
+    - assets/images/Maskot_Rendah.png
+    - assets/images/Maskot_Sedang.png
     - assets/images/maskot1.png
     - assets/images/maskot2.png
     - assets/images/maskot3.png
