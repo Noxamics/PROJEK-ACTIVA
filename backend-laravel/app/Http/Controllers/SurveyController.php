@@ -41,6 +41,8 @@ class SurveyController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        Log::info('STEP 1: request masuk');
+
         $validated = $request->validate([
             'device_type' => 'nullable|string|max:50',
             'device_hours_per_day' => 'required|numeric|min:0|max:24',
@@ -56,6 +58,8 @@ class SurveyController extends Controller
             'stress_level' => 'nullable|numeric|min:1|max:10',
             'happiness_score' => 'nullable|numeric|min:0|max:10',
         ]);
+
+        Log::info('STEP 2: validation selesai');
 
         $user = auth()->user();
 
@@ -78,9 +82,18 @@ class SurveyController extends Controller
             'happiness_score' => $validated['happiness_score'] ?? 5,
         ]);
 
+        Log::info('STEP 3: questionnaire saved');
+
         $mlResult = $this->mlService->predict($questionnaire);
 
+        Log::info('STEP 4: ML selesai', [
+            'result' => $mlResult
+        ]);
+
         if (!$mlResult['success']) {
+
+            Log::info('STEP 5: ML gagal');
+
             return response()->json([
                 'success' => false,
                 'message' => $mlResult['error'] ?? 'Prediksi ML gagal',
@@ -91,6 +104,8 @@ class SurveyController extends Controller
             ], 207);
         }
 
+        Log::info('STEP 6: sebelum return success');
+
         return response()->json([
             'success' => true,
             'message' => 'Survey berhasil disubmit',
@@ -100,7 +115,6 @@ class SurveyController extends Controller
             ],
         ], 201);
     }
-
     public function latest(): JsonResponse
     {
         $user = auth()->user();

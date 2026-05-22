@@ -3,8 +3,11 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 
-/// Widget slider untuk pertanyaan numerik dengan tampilan premium.
-/// Menampilkan nilai besar di tengah dengan label kualitas.
+// ─────────────────────────────────────────────────────────────────────────────
+// PREMIUM MONOCHROME SLIDER — Activa
+// Large numeric display + navy/gray track. No rainbow colors.
+// ─────────────────────────────────────────────────────────────────────────────
+
 class QuestionSlider extends StatelessWidget {
   final double value;
   final double min;
@@ -14,6 +17,9 @@ class QuestionSlider extends StatelessWidget {
   final String? minLabel;
   final String? maxLabel;
   final String? qualityLabel;
+
+  /// [activeColor] is kept for API compatibility but defaults to navy.
+  /// Pass AppColors.teal only if you want a teal track for a specific question.
   final Color activeColor;
   final ValueChanged<double> onChanged;
 
@@ -28,20 +34,34 @@ class QuestionSlider extends StatelessWidget {
     this.minLabel,
     this.maxLabel,
     this.qualityLabel,
-    this.activeColor = AppColors.teal,
+    this.activeColor = const Color(0xFF1E3A5F), // navy default
   });
+
+  // ── Design tokens ──────────────────────────────────────────────────────────
+  static const Color _navy = Color(0xFF1E3A5F);
+  static const Color _iceWhite = Color(0xFFF0F9FF);
+  static const Color _softGray = Color(0xFFE5E7EB);
+  static const Color _darkGray = Color(0xFF374151);
+  static const Color _textMuted = Color(0xFF9CA3AF);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.bgLight,
+        color: _iceWhite,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: activeColor.withValues(alpha: 0.15),
-          width: 1.5,
+          color: activeColor.withValues(alpha: 0.12),
+          width: 1.4,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -55,7 +75,7 @@ class QuestionSlider extends StatelessWidget {
     );
   }
 
-  // ── Value Display ──────────────────────────────────────────────────────────
+  // ── Value display ──────────────────────────────────────────────────────────
 
   Widget _buildValueDisplay() {
     final displayVal = value == value.roundToDouble()
@@ -64,41 +84,48 @@ class QuestionSlider extends StatelessWidget {
 
     return Column(
       children: [
-        // Large value
+        // Large number
         Text(
           displayVal,
           style: TextStyle(
             color: activeColor,
-            fontSize: 56,
+            fontSize: 60,
             fontWeight: FontWeight.w900,
-            letterSpacing: -2,
+            letterSpacing: -3,
             height: 1,
           ),
         ),
         const SizedBox(height: 4),
-        // Unit label
+
+        // Unit
         Text(
           unit.toUpperCase(),
           style: TextStyle(
-            color: activeColor.withValues(alpha: 0.6),
-            fontSize: 14,
+            color: activeColor.withValues(alpha: 0.5),
+            fontSize: 13,
             fontWeight: FontWeight.w800,
             letterSpacing: 2,
           ),
         ),
-        // Quality label
+
+        // Quality label pill
         if (qualityLabel != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
-              color: activeColor.withValues(alpha: 0.1),
+              color: activeColor.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: activeColor.withValues(alpha: 0.15),
+                width: 1,
+              ),
             ),
             child: Text(
               qualityLabel!,
               style: TextStyle(
-                color: activeColor,
+                color: activeColor.withValues(alpha: 0.85),
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1,
@@ -116,33 +143,21 @@ class QuestionSlider extends StatelessWidget {
     return SliderTheme(
       data: SliderTheme.of(context).copyWith(
         activeTrackColor: activeColor,
-        inactiveTrackColor: activeColor.withValues(alpha: 0.15),
+        inactiveTrackColor: activeColor.withValues(alpha: 0.12),
         thumbColor: Colors.white,
-        overlayColor: activeColor.withValues(alpha: 0.1),
-        thumbShape: _CustomThumbShape(color: activeColor),
+        overlayColor: activeColor.withValues(alpha: 0.08),
+        thumbShape: _MonochromeThumbShape(color: activeColor),
         trackHeight: 10,
         trackShape: const RoundedRectSliderTrackShape(),
         activeTickMarkColor: Colors.transparent,
         inactiveTickMarkColor: Colors.transparent,
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: activeColor.withValues(alpha: 0.2),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Slider(
-          value: value,
-          min: min,
-          max: max,
-          divisions: divisions,
-          onChanged: onChanged,
-        ),
+      child: Slider(
+        value: value,
+        min: min,
+        max: max,
+        divisions: divisions,
+        onChanged: onChanged,
       ),
     );
   }
@@ -156,36 +171,36 @@ class QuestionSlider extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            minLabel ?? '',
-            style: TextStyle(
-              color: AppColors.textMuted.withValues(alpha: 0.7),
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          Text(
-            maxLabel ?? '',
-            style: TextStyle(
-              color: AppColors.textMuted.withValues(alpha: 0.7),
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          _labelText(minLabel ?? ''),
+          _labelText(maxLabel ?? ''),
         ],
+      ),
+    );
+  }
+
+  Widget _labelText(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        color: _textMuted,
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
       ),
     );
   }
 }
 
-// ── Custom Thumb Shape ───────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// CUSTOM THUMB SHAPE
+// ─────────────────────────────────────────────────────────────────────────────
 
-class _CustomThumbShape extends SliderComponentShape {
+class _MonochromeThumbShape extends SliderComponentShape {
   final Color color;
-  const _CustomThumbShape({required this.color});
+  const _MonochromeThumbShape({required this.color});
 
   @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete) => const Size(32, 32);
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) =>
+      const Size(32, 32);
 
   @override
   void paint(
@@ -202,27 +217,21 @@ class _CustomThumbShape extends SliderComponentShape {
     required double textScaleFactor,
     required Size sizeWithOverflow,
   }) {
-    final Canvas canvas = context.canvas;
+    final canvas = context.canvas;
 
-    // Outer shadow
+    // Drop shadow
     canvas.drawCircle(
       center + const Offset(0, 2),
       16,
       Paint()
-        ..color = Colors.black.withValues(alpha: 0.15)
+        ..color = Colors.black.withValues(alpha: 0.14)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
     );
 
     // White outer circle
-    canvas.drawCircle(
-      center,
-      16,
-      Paint()
-        ..color = Colors.white
-        ..style = PaintingStyle.fill,
-    );
+    canvas.drawCircle(center, 16, Paint()..color = Colors.white);
 
-    // Colored inner circle
+    // Colored inner dot
     canvas.drawCircle(center, 8, Paint()..color = color);
   }
 }
