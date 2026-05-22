@@ -19,7 +19,7 @@ import 'dart:math';
 // Enum periode yang tersedia
 // ─────────────────────────────────────────────────────────────────────────────
 
-enum GrafikPeriod { week, month, threeMonths }
+enum GrafikPeriod { week, month, year }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Model: satu titik data pada chart
@@ -107,7 +107,7 @@ class GrafikFaker {
     return switch (period) {
       GrafikPeriod.week => _generateWeek(),
       GrafikPeriod.month => _generateMonth(),
-      GrafikPeriod.threeMonths => _generateThreeMonths(),
+      GrafikPeriod.year => _generateYear(),
     };
   }
 
@@ -186,26 +186,29 @@ class GrafikFaker {
     );
   }
 
-  static GrafikData _generateThreeMonths() {
-    const labels = ['Jan', 'Feb', 'Mar'];
+  static GrafikData _generateYear() {
+    const labels = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+    ];
 
-    final dependence = _smoothSeries(start: 35, end: 58, count: 3, noiseMax: 4);
+    final dependence = _smoothSeries(start: 35, end: 58, count: 12, noiseMax: 4);
     final deviceHours = _smoothSeries(
       start: 5.8,
       end: 7.8,
-      count: 3,
+      count: 12,
       noiseMax: 0.6,
     );
     final socialMedia = _smoothSeries(
       start: 130,
       end: 260,
-      count: 3,
+      count: 12,
       noiseMax: 25,
     );
-    final sleep = _smoothSeries(start: 7.5, end: 6.0, count: 3, noiseMax: 0.4);
+    final sleep = _smoothSeries(start: 7.5, end: 6.0, count: 12, noiseMax: 0.4);
 
     final entries = List.generate(
-      3,
+      12,
       (i) => GrafikEntry(
         label: labels[i],
         dependenceScore: dependence[i],
@@ -217,7 +220,7 @@ class GrafikFaker {
 
     return GrafikData(
       entries: entries,
-      kategori: const GrafikKategori(low: 12, medium: 18, high: 6),
+      kategori: const GrafikKategori(low: 45, medium: 60, high: 20),
     );
   }
 

@@ -17,7 +17,7 @@ class _AT {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// OPTION CARD  (title only — no subtitle inside the card)
+// OPTION CARD
 // ─────────────────────────────────────────────────────────────────────────────
 
 class QuestionOptionCard extends StatelessWidget {
@@ -39,7 +39,10 @@ class QuestionOptionCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 260),
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        padding: const EdgeInsets.symmetric(
+          vertical: 14,
+          horizontal: 10,
+        ),
         decoration: BoxDecoration(
           color: isSelected ? _AT.iceWhite : _AT.bgCard,
           borderRadius: BorderRadius.circular(14),
@@ -68,23 +71,19 @@ class QuestionOptionCard extends StatelessWidget {
                   ),
                 ],
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // ── Label ──────────────────────────────────────────────────────
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: isSelected ? _AT.black : _AT.darkGray,
-                fontSize: 11.5,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                height: 1.2,
-                letterSpacing: -0.1,
-              ),
+        child: Center(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isSelected ? _AT.black : _AT.darkGray,
+              fontSize: 11.5,
+              fontWeight:
+                  isSelected ? FontWeight.w700 : FontWeight.w600,
+              height: 1.2,
+              letterSpacing: -0.1,
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -97,7 +96,7 @@ class QuestionOptionCard extends StatelessWidget {
 
 class GridOptionData {
   final String label;
-  final String description; // shown in the panel below, NOT inside the card
+  final String description;
   final dynamic value;
 
   const GridOptionData({
@@ -109,11 +108,13 @@ class GridOptionData {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FIVE OPTION GRID PICKER
-// Layout:  [0] [1]
-//          [2] [3]
-//             [4]   (centered, ~44 % width)
 //
-// Selected description appears BELOW all cards in a dedicated panel.
+// Layout:
+// [0] [1]
+// [2] [3]
+//    [4]
+//
+// Selected description appears below
 // ─────────────────────────────────────────────────────────────────────────────
 
 class FiveOptionGridPicker extends StatelessWidget {
@@ -127,9 +128,9 @@ class FiveOptionGridPicker extends StatelessWidget {
     required this.selectedValue,
     required this.onChanged,
   }) : assert(
-         options.length == 5,
-         'FiveOptionGridPicker requires exactly 5 options',
-       );
+          options.length == 5,
+          'FiveOptionGridPicker requires exactly 5 options',
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -138,98 +139,88 @@ class FiveOptionGridPicker extends StatelessWidget {
       orElse: () => null,
     );
 
+    Widget buildCard(GridOptionData option) {
+      return Expanded(
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: QuestionOptionCard(
+            label: option.label,
+            isSelected: selectedValue == option.value,
+            onTap: () => onChanged(option.value),
+          ),
+        ),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // ── Row 1 ────────────────────────────────────────────────────────
+        // ───────────────── Row 1 ─────────────────
         Row(
           children: [
-            // Icon/Prefix
-            if (icon != null) ...[
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.teal.withValues(alpha: 0.15)
-                      : AppColors.bgLight,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  icon,
-                  color: isSelected ? AppColors.teal : AppColors.textMuted,
-                  size: 18,
-                ),
-              ),
-              const SizedBox(width: 14),
-            ],
+            buildCard(options[0]),
+            buildCard(options[1]),
+          ],
+        ),
 
-            // Label & Subtitle
+        // ───────────────── Row 2 ─────────────────
+        Row(
+          children: [
+            buildCard(options[2]),
+            buildCard(options[3]),
+          ],
+        ),
+
+        // ───────────────── Row 3 ─────────────────
+        Row(
+          children: [
+            const Spacer(),
+
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      color: isSelected ? AppColors.teal : AppColors.textDark,
-                      fontSize: 14,
-                      fontWeight: isSelected
-                          ? FontWeight.w700
-                          : FontWeight.w600,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle!,
-                      style: TextStyle(
-                        color: isSelected
-                            ? AppColors.teal.withValues(alpha: 0.7)
-                            : AppColors.textMuted,
-                        fontSize: 11,
-                        height: 1.3,
-                      ),
-                    ),
-                  ],
-                ],
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: QuestionOptionCard(
+                  label: options[4].label,
+                  isSelected:
+                      selectedValue == options[4].value,
+                  onTap: () =>
+                      onChanged(options[4].value),
+                ),
               ),
             ),
 
-            // Selection indicator
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              width: 22,
-              height: 22,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isSelected ? AppColors.teal : Colors.transparent,
-                border: Border.all(
-                  color: isSelected ? AppColors.teal : AppColors.textDisabled,
-                  width: 2,
-                ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: AppColors.teal.withValues(alpha: 0.3),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : null,
+            const Spacer(),
+          ],
+        ),
+
+        // ───────────────── Description Panel ─────────────────
+        if (selectedOpt != null) ...[
+          const SizedBox(height: 14),
+
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: _AT.iceWhite,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: _AT.teal.withValues(alpha: 0.2),
               ),
-              child: isSelected
-                  ? const Icon(
-                      Icons.check_rounded,
-                      size: 14,
-                      color: Colors.white,
-                    )
-                  : null,
+            ),
+            child: Text(
+              selectedOpt.description,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 13,
+                height: 1.5,
+                color: _AT.darkGray,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-          const SizedBox(height: 10),
         ],
-      ),
+      ],
     );
   }
 }

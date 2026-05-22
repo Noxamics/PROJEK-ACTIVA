@@ -117,9 +117,10 @@ class AnalyticsController extends Controller
      */
     public function history(Request $request): JsonResponse
     {
-        $days = min((int) $request->get('days', 30), 90); // max 90 hari
+        $days = min((int) $request->get('days', 30), 365); // max 365 hari
 
-        $results = MlResult::where('user_id', auth()->id())
+        $results = MlResult::with('questionnaire')
+            ->where('user_id', auth()->id())
             ->where('created_at', '>=', now()->subDays($days))
             ->orderBy('created_at', 'asc')
             ->get();
@@ -134,6 +135,9 @@ class AnalyticsController extends Controller
                     'category' => $r->ml_result['category'] ?? 'rendah',
                     'confidence' => $r->ml_result['confidence'] ?? 0,
                     'week_group' => $r->week_group,
+                    'device_hours' => $r->questionnaire->device_hours_per_day ?? 0.0,
+                    'social_media_mins' => $r->questionnaire->social_media_mins ?? 0,
+                    'sleep_hours' => $r->questionnaire->sleep_hours ?? 0.0,
                 ]),
             ],
         ]);

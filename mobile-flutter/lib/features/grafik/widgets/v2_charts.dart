@@ -176,6 +176,21 @@ class _LineChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (values.isEmpty) return;
 
+    if (values.length < 2) {
+      final x = size.width / 2;
+      final y = size.height - (values[0] / maxValue * size.height).clamp(0.0, size.height);
+      
+      final highlightPaint = Paint()..color = color.withValues(alpha: 0.2);
+      canvas.drawCircle(Offset(x, y), 10, highlightPaint);
+      
+      final outerDotPaint = Paint()..color = color;
+      canvas.drawCircle(Offset(x, y), 6, outerDotPaint);
+      
+      final innerDotPaint = Paint()..color = Colors.white;
+      canvas.drawCircle(Offset(x, y), 3, innerDotPaint);
+      return;
+    }
+
     final stepX = size.width / (values.length - 1);
 
     // Draw grid lines
