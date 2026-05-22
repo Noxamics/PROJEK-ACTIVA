@@ -6,19 +6,25 @@ import '../../auth/providers/auth_provider.dart';
 // ── State ──────────────────────────────────────────────────────────────────────
 
 enum HistoriStatus { initial, loading, success, empty, error }
+
 enum HistoriSortOption { terbaru, terlama, skorTertinggi, skorTerendah }
+
+// [NEW] Enum kategori filter — menggantikan chips baris atas di screen
+enum HistoriCategoryFilter { semua, rendah, sedang, tinggi, mingguIni }
 
 class HistoriState {
   final HistoriStatus status;
   final List<MlResultModel> items;
   final String? errorMessage;
   final HistoriSortOption sortOption;
+  final HistoriCategoryFilter categoryFilter; // [NEW]
 
   const HistoriState({
     this.status = HistoriStatus.initial,
     this.items = const [],
     this.errorMessage,
     this.sortOption = HistoriSortOption.terbaru,
+    this.categoryFilter = HistoriCategoryFilter.semua, // [NEW]
   });
 
   bool get isLoading => status == HistoriStatus.loading;
@@ -29,17 +35,18 @@ class HistoriState {
     List<MlResultModel>? items,
     String? errorMessage,
     HistoriSortOption? sortOption,
+    HistoriCategoryFilter? categoryFilter, // [NEW]
   }) {
     return HistoriState(
       status: status ?? this.status,
       items: items ?? this.items,
       errorMessage: errorMessage ?? this.errorMessage,
       sortOption: sortOption ?? this.sortOption,
+      categoryFilter: categoryFilter ?? this.categoryFilter, // [NEW]
     );
   }
 
   // ── Group by bulan untuk tampilan list ────────────────────────────────────
-  // Contoh output: { 'APRIL 2025': [...], 'MARET 2025': [...] }
   Map<String, List<MlResultModel>> get groupedByMonth {
     const monthNames = [
       '',
@@ -59,10 +66,29 @@ class HistoriState {
 
     final Map<String, List<MlResultModel>> grouped = {};
 
-    // 1. Copy list for sorting
     var filteredItems = List<MlResultModel>.from(items);
 
-    // 2. Sort
+    // [NEW] Filter berdasarkan kategori
+    if (categoryFilter != HistoriCategoryFilter.semua) {
+      filteredItems = filteredItems.where((item) {
+        final cat = item.category.toLowerCase();
+        switch (categoryFilter) {
+          case HistoriCategoryFilter.rendah:
+            return cat == 'rendah' || cat == 'low';
+          case HistoriCategoryFilter.sedang:
+            return cat == 'sedang' || cat == 'moderate';
+          case HistoriCategoryFilter.tinggi:
+            return cat == 'tinggi' || cat == 'high';
+          case HistoriCategoryFilter.mingguIni:
+            final weekAgo = DateTime.now().subtract(const Duration(days: 7));
+            return item.createdAt.isAfter(weekAgo);
+          case HistoriCategoryFilter.semua:
+            return true;
+        }
+      }).toList();
+    }
+
+    // Sort
     filteredItems.sort((a, b) {
       switch (sortOption) {
         case HistoriSortOption.terbaru:
@@ -89,17 +115,15 @@ class HistoriState {
 
 class HistoriNotifier extends StateNotifier<HistoriState> {
   final HistoriService _service;
-  final String? _currentUserId;
 
-  HistoriNotifier(this._service, [this._currentUserId]) : super(const HistoriState()) {
+  HistoriNotifier(this._service, [String? currentUserId])
+    : super(const HistoriState()) {
     fetch();
   }
 
-  // ── Fetch histori ──────────────────────────────────────────────────────────
   Future<void> fetch({bool useMock = false}) async {
     state = state.copyWith(status: HistoriStatus.loading, errorMessage: null);
     try {
-      // Ganti getMockHistory() → getHistory() saat backend siap
       final items = useMock
           ? await _service.getMockHistory()
           : await _service.getHistory();
@@ -116,16 +140,17 @@ class HistoriNotifier extends StateNotifier<HistoriState> {
     }
   }
 
-  // ── Refresh ────────────────────────────────────────────────────────────────
   Future<void> refresh() => fetch();
 
-  // ── Filter & Sort ──────────────────────────────────────────────────────────
   void setSortOption(HistoriSortOption option) {
     state = state.copyWith(sortOption: option);
   }
 
-  // ── Tambah item baru setelah submit kuesioner ──────────────────────────────
-  // Dipanggil setelah kuesioner berhasil → tidak perlu fetch ulang
+  // [NEW] Set filter kategori
+  void setCategoryFilter(HistoriCategoryFilter filter) {
+    state = state.copyWith(categoryFilter: filter);
+  }
+
   void addItem(MlResultModel result) {
     state = state.copyWith(
       status: HistoriStatus.success,
@@ -144,16 +169,12 @@ final historiProvider = StateNotifierProvider<HistoriNotifier, HistoriState>((
   return HistoriNotifier(service, user?.id);
 });
 
-/// Shortcut — cek apakah ada perkembangan positif (untuk banner)
-/// Untuk dependensi: skor turun = positif (membaik)
 final hasPerkembanganProvider = Provider<bool>((ref) {
   final items = ref.watch(historiProvider).items;
   if (items.length < 2) return false;
-  // Bandingkan dependence score 2 data terbaru — turun = membaik
   return items[0].digitalDependenceScore < items[1].digitalDependenceScore;
 });
 
-/// Shortcut — persentase perubahan dependence score terbaru vs sebelumnya
 final dependenceChangeProvider = Provider<double>((ref) {
   final items = ref.watch(historiProvider).items;
   if (items.length < 2) return 0.0;
@@ -163,51 +184,52 @@ final dependenceChangeProvider = Provider<double>((ref) {
   return ((latest - prev) / prev) * 100;
 });
 
-/// Jumlah minimum data untuk menampilkan rata-rata mingguan
 const int kWeeklyDataMinimum = 7;
 
-/// Flag — apakah sudah ada ≥7 data sehingga rata-rata mingguan bisa dihitung
 final hasWeeklyDataProvider = Provider<bool>((ref) {
   return ref.watch(historiProvider).items.length >= kWeeklyDataMinimum;
 });
 
-/// Rata-rata screen time & sleep dari 7 data terbaru
-/// Returns: (avgScreenTime, avgSleepHours)
-final weeklyStatsProvider = Provider<({double screenTime, double sleepHours, int dataCount})>((ref) {
-  final items = ref.watch(historiProvider).items;
-  if (items.isEmpty) {
-    return (screenTime: 0.0, sleepHours: 0.0, dataCount: 0);
-  }
-  // Ambil maksimal 7 data terbaru (sudah terurut terbaru di index 0)
-  final recent = items.take(kWeeklyDataMinimum).toList();
-  final avgScreen = recent.map((e) => e.screenTime).reduce((a, b) => a + b) / recent.length;
-  final avgSleep  = recent.map((e) => e.sleepHours).reduce((a, b) => a + b) / recent.length;
-  return (screenTime: avgScreen, sleepHours: avgSleep, dataCount: recent.length);
-});
+final weeklyStatsProvider =
+    Provider<({double screenTime, double sleepHours, int dataCount})>((ref) {
+      final items = ref.watch(historiProvider).items;
+      if (items.isEmpty) {
+        return (screenTime: 0.0, sleepHours: 0.0, dataCount: 0);
+      }
+      final recent = items.take(kWeeklyDataMinimum).toList();
+      final avgScreen =
+          recent.map((e) => e.screenTime).reduce((a, b) => a + b) /
+          recent.length;
+      final avgSleep =
+          recent.map((e) => e.sleepHours).reduce((a, b) => a + b) /
+          recent.length;
+      return (
+        screenTime: avgScreen,
+        sleepHours: avgSleep,
+        dataCount: recent.length,
+      );
+    });
 
-/// Shortcut — Hitung distribusi kategori dependensi dari seluruh history user
-final dependencyDistributionProvider = Provider<({int low, int medium, int high, int total})>((ref) {
-  final items = ref.watch(historiProvider).items;
-  
-  if (items.isEmpty) {
-    return (low: 0, medium: 0, high: 0, total: 0);
-  }
-  
-  int countLow = 0;
-  int countMedium = 0;
-  int countHigh = 0;
-  
-  for (final item in items) {
-    final cat = item.category.toLowerCase();
-    if (cat == 'tinggi' || cat == 'high') {
-      countHigh++;
-    } else if (cat == 'sedang' || cat == 'moderate') {
-      countMedium++;
-    } else {
-      countLow++;
-    }
-  }
-  
-  return (low: countLow, medium: countMedium, high: countHigh, total: items.length);
-});
+final dependencyDistributionProvider =
+    Provider<({int low, int medium, int high, int total})>((ref) {
+      final items = ref.watch(historiProvider).items;
+      if (items.isEmpty) return (low: 0, medium: 0, high: 0, total: 0);
 
+      int countLow = 0, countMedium = 0, countHigh = 0;
+      for (final item in items) {
+        final cat = item.category.toLowerCase();
+        if (cat == 'tinggi' || cat == 'high') {
+          countHigh++;
+        } else if (cat == 'sedang' || cat == 'moderate') {
+          countMedium++;
+        } else {
+          countLow++;
+        }
+      }
+      return (
+        low: countLow,
+        medium: countMedium,
+        high: countHigh,
+        total: items.length,
+      );
+    });

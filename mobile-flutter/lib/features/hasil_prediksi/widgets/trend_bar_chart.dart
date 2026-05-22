@@ -1,13 +1,11 @@
 // lib/features/hasil_prediksi/widgets/trend_bar_chart.dart
 
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 // ─── Color Tokens ─────────────────────────────────────────────────────────────
 
 const _iceWhite = Color(0xFFF0F9FF);
 const _teal = Color(0xFF0D9488);
-const _cyan = Color(0xFF67E8F9);
 const _navy = Color(0xFF1E3A5F);
 const _deepNavy = Color(0xFF0B1F3A);
 

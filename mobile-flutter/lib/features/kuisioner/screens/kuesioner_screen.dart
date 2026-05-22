@@ -8,12 +8,13 @@ import '../widgets/question_option_card.dart';
 import '../widgets/question_slider.dart';
 import '../../hasil_prediksi/screens/hasil_prediksi_screen.dart';
 import '../../hasil_prediksi/providers/result_provider.dart';
-
+import 'dart:math' as math;
 import '../../../shared/widgets/bottom_nav.dart';
 import '../../profil/screens/profil_screen.dart';
 import '../../grafik/screens/grafik_screen.dart';
 import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
 import '../../histori/screens/histori_screen.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 // true  = hitung lokal (backend belum siap)
 // false = kirim ke Laravel → data masuk MongoDB
@@ -26,6 +27,27 @@ const _kTeal = Color(0xFF0D9488);
 const _kIce = Color(0xFFF0F9FF);
 const _kPurple = Color(0xFF7C83FD);
 const _kCyan = Color(0xFF67E8F9);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// WAVE CLIPPER — Unified, dipakai di semua layar
+// Melengkung ke atas (U terbalik), konsisten dengan dashboard & laporan
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _WaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final p = Path();
+    p.moveTo(0, size.height * 0.5);
+    p.quadraticBezierTo(size.width * 0.5, 0, size.width, size.height * 0.5);
+    p.lineTo(size.width, size.height);
+    p.lineTo(0, size.height);
+    p.close();
+    return p;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
 
 class KuesionerScreen extends ConsumerStatefulWidget {
   const KuesionerScreen({super.key});
@@ -235,49 +257,44 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
       children: [
         Scaffold(
           backgroundColor: AppColors.bgLight,
-          body: Stack(
-            children: [
-              _buildBackgroundDecorations(),
-              SafeArea(
-                child: Column(
-                  children: [
-                    _buildTopbarContainer(state),
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.bgLight,
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(28),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.05),
-                              blurRadius: 20,
-                              offset: const Offset(0, -5),
-                            ),
-                          ],
+          body: SafeArea(
+            child: Column(
+              children: [
+                _buildTopbarContainer(state),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.bgLight,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(28),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 20,
+                          offset: const Offset(0, -5),
                         ),
-                        child: ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(28),
-                          ),
-                          child: PageView(
-                            controller: _pageController,
-                            physics: const NeverScrollableScrollPhysics(),
-                            children: [
-                              _PagePenggunaanDigital(),
-                              _PageAktivitasTidur(),
-                              _PageKondisiMental(),
-                            ],
-                          ),
-                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(28),
+                      ),
+                      child: PageView(
+                        controller: _pageController,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: [
+                          _PagePenggunaanDigital(),
+                          _PageAktivitasTidur(),
+                          _PageKondisiMental(),
+                        ],
                       ),
                     ),
-                    _buildBottomBar(state),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+                _buildBottomBar(state),
+              ],
+            ),
           ),
         ),
         if (_isSubmitting) const _SubmittingOverlay(),
@@ -285,64 +302,7 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
     );
   }
 
-  // ── Background Decorations ─────────────────────────────────────────────────
-
-  Widget _buildBackgroundDecorations() {
-    return Stack(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                AppColors.textDark,
-                AppColors.textDark.withValues(alpha: 0.95),
-              ],
-            ),
-          ),
-        ),
-        Positioned(
-          top: -60,
-          right: -40,
-          child: Container(
-            width: 180,
-            height: 180,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.teal.withValues(alpha: 0.15),
-            ),
-          ),
-        ),
-        Positioned(
-          top: 100,
-          left: -50,
-          child: Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.blue.withValues(alpha: 0.1),
-            ),
-          ),
-        ),
-        Positioned(
-          top: 50,
-          right: 80,
-          child: Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.amber.withValues(alpha: 0.1),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ── Topbar Container ───────────────────────────────────────────────────────
+  // ── Topbar Container — unified dengan wave clipper baru ────────────────────
 
   Widget _buildTopbarContainer(QuestionnaireState state) {
     const titles = [
@@ -351,118 +311,150 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
       'Kondisi Mental',
     ];
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-      child: Column(
-        children: [
-          Row(
+    return Stack(
+      children: [
+        // ── Background gelap beserta konten header ─────────────────────
+        Container(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 72),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.textDark,
+                AppColors.textDark.withValues(alpha: 0.95),
+              ],
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GestureDetector(
-                onTap: _prevPage,
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.15),
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.arrow_back_rounded,
-                    color: Colors.white,
-                    size: 22,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Kuesioner Digital',
-                      style: TextStyle(
+              // Row: back button + title + page badge
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: _prevPage,
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.15),
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back_rounded,
                         color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
+                        size: 22,
                       ),
                     ),
-                    Text(
-                      titles[state.currentPage],
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
-                        fontSize: 14,
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Kuesioner Digital',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          titles[state.currentPage],
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.55),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.15),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  'Halaman ${state.currentPage + 1} dari ${QuestionnaireState.totalPages}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Stack(
-            children: [
-              Container(
-                height: 8,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 500),
-                curve: Curves.easeOutCubic,
-                height: 8,
-                width:
-                    MediaQuery.of(context).size.width *
-                        ((state.currentPage + 1) /
-                            QuestionnaireState.totalPages) -
-                    40,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.teal.withValues(alpha: 0.7),
-                      AppColors.teal,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.teal.withValues(alpha: 0.5),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
+                    child: Text(
+                      '${state.currentPage + 1} / ${QuestionnaireState.totalPages}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 20),
+
+              // Progress bar
+              Stack(
+                children: [
+                  Container(
+                    height: 6,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.easeOutCubic,
+                    height: 6,
+                    width:
+                        MediaQuery.of(context).size.width *
+                            ((state.currentPage + 1) /
+                                QuestionnaireState.totalPages) -
+                        40,
+                    decoration: BoxDecoration(
+                      color: AppColors.teal,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.teal.withValues(alpha: 0.5),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Step indicator
+              _buildStepIndicator(state),
             ],
           ),
-          const SizedBox(height: 24),
-          _buildStepIndicator(state),
-        ],
-      ),
+        ),
+
+        // ── Wave putih melengkung ke atas — unified clipper ────────────
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: ClipPath(
+            clipper: _WaveClipper(),
+            child: Container(height: 60, color: AppColors.bgLight),
+          ),
+        ),
+      ],
     );
   }
 
@@ -487,8 +479,8 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
               children: [
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
-                  width: 40,
-                  height: 40,
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isActive
@@ -496,15 +488,15 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
                         : isCompleted
                         ? const Color(0xFF5EEAD4)
                         : Colors.white.withValues(alpha: 0.2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: isActive
-                            ? AppColors.teal.withValues(alpha: 0.5)
-                            : AppColors.teal.withValues(alpha: 0.0),
-                        blurRadius: 12,
-                        offset: isActive ? const Offset(0, 4) : Offset.zero,
-                      ),
-                    ],
+                    boxShadow: isActive
+                        ? [
+                            BoxShadow(
+                              color: AppColors.teal.withValues(alpha: 0.5),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ]
+                        : null,
                   ),
                   child: Center(
                     child: Text(
@@ -514,12 +506,12 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
                             ? Colors.white
                             : Colors.white.withValues(alpha: 0.5),
                         fontWeight: FontWeight.w700,
-                        fontSize: 14,
+                        fontSize: 13,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   steps[index],
                   textAlign: TextAlign.center,
@@ -538,8 +530,8 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
             ),
             if (index < steps.length - 1) ...[
               Container(
-                margin: const EdgeInsets.only(bottom: 28),
-                width: 40,
+                margin: const EdgeInsets.only(bottom: 24),
+                width: 36,
                 height: 2,
                 color: index < state.currentPage
                     ? const Color(0xFF5EEAD4)
@@ -553,24 +545,20 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
   }
 
   // ══════════════════════════════════════════════════════════════════════════════
-  // SELECTION VIEW — Redesigned premium wellness landing
+  // SELECTION VIEW
   // ══════════════════════════════════════════════════════════════════════════════
 
   Widget _buildSelectionView() {
     return Scaffold(
       backgroundColor: _kDeepNavy,
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Dark navy header — compact, like dashboard topbar ───────────
           _buildSelectionHeader(),
-
-          // ── Wave + white card area — fills remaining space ──────────────
           Expanded(
             child: Stack(
               children: [
                 _buildWaveContentArea(),
-
-                // Bottom nav pinned at the very bottom
                 Positioned(
                   left: 0,
                   right: 0,
@@ -589,165 +577,100 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
     );
   }
 
-  // ── Header (dark navy area) ────────────────────────────────────────────────
-
   Widget _buildSelectionHeader() {
-    // Compact header — hanya wraps kontennya, tidak Expanded
     return SafeArea(
       bottom: false,
-      child: ClipRect(
-        child: SizedBox(
-          // Tinggi fixed mirip dashboard topbar: cukup untuk back btn + title
-          height: 160,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              // Glow orb kiri atas
-              Positioned(
-                top: -40,
-                left: -40,
-                child: Container(
-                  width: 140,
-                  height: 140,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _kTeal.withValues(alpha: 0.18),
-                  ),
-                ),
+      child: Stack(
+        children: [
+          // ── Background gelap beserta konten header ─────────────────────
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 52),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [_kDeepNavy, _kDeepNavy.withValues(alpha: 0.95)],
               ),
-              // Glow orb kanan
-              Positioned(
-                top: 10,
-                right: -20,
-                child: Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _kPurple.withValues(alpha: 0.18),
-                  ),
-                ),
-              ),
-              // Partikel kecil
-              Positioned(top: 20, left: 120, child: _dot(4, _kCyan)),
-              Positioned(top: 55, left: 60, child: _dot(3, _kPurple)),
-              Positioned(top: 30, right: 110, child: _dot(3, _kCyan)),
-              Positioned(top: 100, right: 60, child: _dot(2, _kPurple)),
-
-              // Konten utama
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    // Baris: back button + label chip + mascot
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: _kCyan.withValues(alpha: 0.3),
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.arrow_back_rounded,
-                              color: _kCyan,
-                              size: 20,
-                            ),
-                          ),
+                    // Icon kuesioner
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: _kTeal.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: _kTeal.withValues(alpha: 0.25),
                         ),
-                        const SizedBox(width: 12),
-                        // Label chip
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _kCyan.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(50),
-                            border: Border.all(
-                              color: _kCyan.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 5,
-                                height: 5,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: _kCyan,
-                                ),
-                              ),
-                              const SizedBox(width: 5),
-                              const Text(
-                                'Activa AI',
-                                style: TextStyle(
-                                  color: _kCyan,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 1.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Spacer(),
-                        // Mascot
-                        _buildMascot(),
-                      ],
+                      ),
+                      child: const Icon(
+                        Icons.assignment_rounded,
+                        color: _kTeal,
+                        size: 22,
+                      ),
                     ),
-                    const SizedBox(height: 16),
-
-                    // Title + subtitle
-                    RichText(
-                      text: const TextSpan(
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          TextSpan(
-                            text: 'Kuesioner ',
-                            style: TextStyle(
-                              color: _kIce,
-                              fontSize: 26,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.6,
+                          RichText(
+                            text: const TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: 'Kuesioner ',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: 'Analisis',
+                                  style: TextStyle(
+                                    color: _kCyan,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          TextSpan(
-                            text: 'Analisis',
+                          const SizedBox(height: 2),
+                          Text(
+                            'Kenali pola digitalmu hari ini',
                             style: TextStyle(
-                              color: _kCyan,
-                              fontSize: 26,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.6,
+                              color: Colors.white.withValues(alpha: 0.55),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Kenali pola digitalmu hari ini',
-                      style: TextStyle(
-                        color: _kIce.withValues(alpha: 0.5),
-                        fontSize: 13,
-                      ),
-                    ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+
+          // ── Wave putih — unified clipper ───────────────────────────────
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: ClipPath(
+              clipper: _WaveClipper(),
+              child: Container(height: 60, color: _kIce),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -785,7 +708,6 @@ child: ClipOval(
   child: Transform.scale(
     scale: 0.8, // sesuaikan nilai ini, 1.0 = ukuran normal
     child: Image.asset(
-
       'assets/images/maskot.png',
       width: 72,
       height: 72,
@@ -801,89 +723,52 @@ child: ClipOval(
 
   Widget _buildWaveContentArea() {
     return SizedBox.expand(
-      child: Stack(
-        children: [
-          // ── Ice white background — fills entire area ───────────────────
-          Positioned.fill(child: Container(color: _kIce)),
-
-          // ── Wave identik dengan dashboard _HeroHeader ──────────────────
-          // Blok navy solid di atas, ClipPath ice white memotong bawahnya
-          // membentuk kurva U terbalik (quadraticBezier) — sama dengan dashboard.
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Stack(
-              children: [
-                Container(height: 52, color: _kDeepNavy),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: ClipPath(
-                    clipper: _KuesionerWaveClipper(),
-                    child: Container(height: 40, color: _kIce),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // ── Card content — starts below the wave peak ──────────────────
-          Positioned(
-            top: 52,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 96),
-              child: Column(
-                children: [
-                  _selectionCard(
-                    title: 'Mulai Kuesioner Baru',
-                    desc:
-                        'Lakukan analisis kondisi digital terbaru kamu hari ini.',
-                    icon: Icons.assignment_rounded,
-                    accentColor: _kTeal,
-                    onTap: _startNew,
-                    isPrimary: true,
-                  ),
-                  const SizedBox(height: 14),
-                  _selectionCard(
-                    title: 'Lihat Hasil Terakhir',
-                    desc: 'Cek insight dan rekomendasi sebelumnya.',
-                    icon: Icons.history_rounded,
-                    accentColor: _kNavy,
-                    onTap: _viewLatest,
-                    isLoading: _isFetchingLatest,
-                  ),
-                  const SizedBox(height: 14),
-                  _selectionCard(
-                    title: 'Lihat Semua Histori',
-                    desc: 'Akses seluruh riwayat kuesioner dan perkembanganmu.',
-                    icon: Icons.list_alt_rounded,
-                    accentColor: _kPurple,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HistoriScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 14),
-                  _buildAiInfoCard(),
-                ],
+      child: Container(
+        color: _kIce,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 96),
+          child: Column(
+            children: [
+              _selectionCard(
+                title: 'Mulai Kuesioner Baru',
+                desc: 'Lakukan analisis kondisi digital terbaru kamu hari ini.',
+                icon: Icons.assignment_rounded,
+                accentColor: _kTeal,
+                onTap: _startNew,
+                isPrimary: true,
               ),
-            ),
+              const SizedBox(height: 14),
+              _selectionCard(
+                title: 'Lihat Hasil Terakhir',
+                desc: 'Cek insight dan rekomendasi sebelumnya.',
+                icon: Icons.history_rounded,
+                accentColor: _kNavy,
+                onTap: _viewLatest,
+                isLoading: _isFetchingLatest,
+              ),
+              const SizedBox(height: 14),
+              _selectionCard(
+                title: 'Lihat Semua Histori',
+                desc: 'Akses seluruh riwayat kuesioner dan perkembanganmu.',
+                icon: Icons.list_alt_rounded,
+                accentColor: _kPurple,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HistoriScreen(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 14),
+              _buildAiInfoCard(),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
-
-  // ── Card 1 & 2 ─────────────────────────────────────────────────────────────
 
   Widget _selectionCard({
     required String title,
@@ -899,7 +784,6 @@ child: ClipOval(
       child: Container(
         padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
-          // Primary card: dark navy; secondary: white
           color: isPrimary ? _kNavy : Colors.white,
           borderRadius: BorderRadius.circular(28),
           border: Border.all(
@@ -919,7 +803,6 @@ child: ClipOval(
         ),
         child: Row(
           children: [
-            // Icon container
             Container(
               width: 56,
               height: 56,
@@ -936,8 +819,6 @@ child: ClipOval(
               ),
             ),
             const SizedBox(width: 18),
-
-            // Text
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1002,8 +883,6 @@ child: ClipOval(
               ),
             ),
             const SizedBox(width: 12),
-
-            // Arrow / loader
             if (isLoading)
               const SizedBox(
                 width: 22,
@@ -1034,8 +913,6 @@ child: ClipOval(
       ),
     );
   }
-
-  // ── AI Info Card ───────────────────────────────────────────────────────────
 
   Widget _buildAiInfoCard() {
     return Container(
@@ -1166,41 +1043,6 @@ child: ClipOval(
       ),
     );
   }
-}
-
-// ══════════════════════════════════════════════════════════════════════════════
-// WAVE CLIPPER — Copy persis dari dashboard _BottomWaveClipper
-// Menghasilkan kurva U terbalik (busur ke atas) yang sama dengan header dashboard
-// ══════════════════════════════════════════════════════════════════════════════
-
-class _KuesionerWaveClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size s) {
-    final p = Path();
-
-    // Mulai dari kiri bawah
-    p.moveTo(0, s.height);
-
-    // Naik ke kiri atas
-    p.lineTo(0, s.height * 0.5);
-
-    // Kurva quadratic: control point di puncak tengah → bentuk U terbalik
-    p.quadraticBezierTo(
-      s.width * 0.5, // control x — titik tarikan kurva (tengah)
-      0, // control y — puncak lengkungan (atas)
-      s.width, // end x — ujung kanan
-      s.height * 0.5, // end y — kembali ke tengah kanan
-    );
-
-    // Turun ke kanan bawah lalu tutup
-    p.lineTo(s.width, s.height);
-    p.close();
-
-    return p;
-  }
-
-  @override
-  bool shouldReclip(_KuesionerWaveClipper old) => false;
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1913,10 +1755,15 @@ class _SubmittingOverlay extends StatefulWidget {
 
 class _SubmittingOverlayState extends State<_SubmittingOverlay>
     with TickerProviderStateMixin {
-  late final AnimationController _pulseCtrl;
-  late final AnimationController _stepCtrl;
-  late final Animation<double> _pulseAnim;
-
+  late final AnimationController _logoCtrl;
+  late final Animation<double> _logoScale;
+  late final Animation<double> _logoOpacity;
+  late final AnimationController _ring1Ctrl;
+  late final AnimationController _ring2Ctrl;
+  late final AnimationController _glowCtrl;
+  late final Animation<double> _glowScale;
+  late final Animation<double> _glowOpacity;
+  late final AnimationController _dotCtrl;
   int _currentStep = 0;
 
   static const _steps = [
@@ -1935,18 +1782,50 @@ class _SubmittingOverlayState extends State<_SubmittingOverlay>
   @override
   void initState() {
     super.initState();
-    _pulseCtrl = AnimationController(
+
+    _logoCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    _logoScale = Tween<double>(
+      begin: 0.5,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _logoCtrl, curve: Curves.elasticOut));
+    _logoOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _logoCtrl,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+      ),
+    );
+
+    _ring1Ctrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1400),
-    )..repeat(reverse: true);
-    _pulseAnim = Tween<double>(
-      begin: 0.6,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
-    _stepCtrl = AnimationController(
+    )..repeat();
+    _ring2Ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
+      duration: const Duration(milliseconds: 1800),
+    )..repeat();
+
+    _glowCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2500),
+    )..repeat(reverse: true);
+    _glowScale = Tween<double>(
+      begin: 0.8,
+      end: 1.3,
+    ).animate(CurvedAnimation(parent: _glowCtrl, curve: Curves.easeInOut));
+    _glowOpacity = Tween<double>(
+      begin: 0.0,
+      end: 0.6,
+    ).animate(CurvedAnimation(parent: _glowCtrl, curve: Curves.easeInOut));
+
+    _dotCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+
+    _logoCtrl.forward();
     _cycleSteps();
   }
 
@@ -1955,14 +1834,16 @@ class _SubmittingOverlayState extends State<_SubmittingOverlay>
       await Future.delayed(const Duration(milliseconds: 2200));
       if (!mounted) break;
       setState(() => _currentStep = (_currentStep + 1) % _steps.length);
-      _stepCtrl.forward(from: 0);
     }
   }
 
   @override
   void dispose() {
-    _pulseCtrl.dispose();
-    _stepCtrl.dispose();
+    _logoCtrl.dispose();
+    _ring1Ctrl.dispose();
+    _ring2Ctrl.dispose();
+    _glowCtrl.dispose();
+    _dotCtrl.dispose();
     super.dispose();
   }
 
@@ -1976,34 +1857,89 @@ class _SubmittingOverlayState extends State<_SubmittingOverlay>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              AnimatedBuilder(
-                animation: _pulseAnim,
-                builder: (_, __) => Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _kTeal.withValues(alpha: 0.08),
-                    boxShadow: [
-                      BoxShadow(
-                        color: _kTeal.withValues(
-                          alpha: _pulseAnim.value * 0.35,
+              SizedBox(
+                width: 160,
+                height: 160,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    AnimatedBuilder(
+                      animation: _glowCtrl,
+                      builder: (_, __) => Opacity(
+                        opacity: _glowOpacity.value,
+                        child: Transform.scale(
+                          scale: _glowScale.value,
+                          child: Container(
+                            width: 140,
+                            height: 140,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                colors: [Color(0x4022C16E), Colors.transparent],
+                              ),
+                            ),
+                          ),
                         ),
-                        blurRadius: 40,
-                        spreadRadius: 10,
                       ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.psychology_rounded,
-                    color: _kTeal.withValues(alpha: _pulseAnim.value),
-                    size: 48,
-                  ),
+                    ),
+                    AnimatedBuilder(
+                      animation: _ring1Ctrl,
+                      builder: (_, __) => Transform.rotate(
+                        angle: _ring1Ctrl.value * 2 * math.pi,
+                        child: SizedBox(
+                          width: 150,
+                          height: 150,
+                          child: CustomPaint(
+                            painter: _ArcPainter(
+                              color: _kTeal,
+                              strokeWidth: 2,
+                              sweepFraction: 0.6,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    AnimatedBuilder(
+                      animation: _ring2Ctrl,
+                      builder: (_, __) => Transform.rotate(
+                        angle: -_ring2Ctrl.value * 2 * math.pi,
+                        child: SizedBox(
+                          width: 128,
+                          height: 128,
+                          child: CustomPaint(
+                            painter: _ArcPainter(
+                              color: const Color(0xFF168477),
+                              strokeWidth: 2,
+                              sweepFraction: 0.45,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    AnimatedBuilder(
+                      animation: _logoCtrl,
+                      builder: (_, __) => Opacity(
+                        opacity: _logoOpacity.value,
+                        child: Transform.scale(
+                          scale: _logoScale.value,
+                          child: SizedBox(
+                            width: 75,
+                            height: 75,
+                            child: SvgPicture.asset(
+                              'logo/NewLogoEmblem2_fixed.svg',
+                              width: 90,
+                              height: 90,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 36),
+              const SizedBox(height: 32),
               const Text(
-                'Sedang Menganalisis...',
+                'Sedang Menganalisis',
                 style: TextStyle(
                   color: _kIce,
                   fontSize: 20,
@@ -2011,13 +1947,20 @@ class _SubmittingOverlayState extends State<_SubmittingOverlay>
                   letterSpacing: 0.3,
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Mohon tunggu, jangan tutup aplikasi ini',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: _kIce.withValues(alpha: 0.45),
-                  fontSize: 13,
+              const SizedBox(height: 12),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 500),
+                transitionBuilder: (child, anim) =>
+                    FadeTransition(opacity: anim, child: child),
+                child: Text(
+                  _steps[_currentStep].$2,
+                  key: ValueKey(_currentStep),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: _kIce.withValues(alpha: 0.65),
+                    fontSize: 13,
+                    height: 1.5,
+                  ),
                 ),
               ),
               const SizedBox(height: 36),
@@ -2083,15 +2026,6 @@ class _SubmittingOverlayState extends State<_SubmittingOverlay>
                               ),
                             ),
                           ),
-                          if (isActive)
-                            const SizedBox(
-                              width: 14,
-                              height: 14,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: _kTeal,
-                              ),
-                            ),
                         ],
                       ),
                     );
@@ -2106,6 +2040,15 @@ class _SubmittingOverlayState extends State<_SubmittingOverlay>
                   minHeight: 4,
                   backgroundColor: _kTeal.withValues(alpha: 0.1),
                   valueColor: const AlwaysStoppedAnimation(_kTeal),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Mohon tunggu, jangan tutup aplikasi ini',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: _kIce.withValues(alpha: 0.35),
+                  fontSize: 12,
                 ),
               ),
             ],
@@ -2197,184 +2140,5 @@ class _QuestionBlock extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-// ══════════════════════════════════════════════════════════════════��════════════
-// DATA CLASS FOR 5 OPTIONS
-// ═══════════════════════════════════════════════════════════════════════════════
-
-class _OptionData {
-  final String label;
-  final int value;
-
-  const _OptionData({required this.label, required this.value});
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// 5 OPTION PICKER WITH PYRAMID LAYOUT
-// Layout: 1 kiri, 2 kanan, 3 bawah 1, 4 bawah 2, 5 center bawah
-// ═══════════════════════════════════════════════════════════════════════════════
-
-class _FiveOptionPicker extends StatelessWidget {
-  final List<_OptionData> options;
-  final int selectedValue;
-  final String? lowLabel;
-  final String? highLabel;
-  final bool invertColor;
-  final ValueChanged<int> onChanged;
-
-  const _FiveOptionPicker({
-    required this.options,
-    required this.selectedValue,
-    required this.onChanged,
-    this.lowLabel,
-    this.highLabel,
-    this.invertColor = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Labels row
-        if (lowLabel != null || highLabel != null)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  lowLabel ?? '',
-                  style: TextStyle(
-                    color: invertColor ? AppColors.green : AppColors.red,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                Text(
-                  highLabel ?? '',
-                  style: TextStyle(
-                    color: invertColor ? AppColors.red : AppColors.green,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-        // Row 1: Options 1 & 2
-        Row(
-          children: [
-            Expanded(child: _buildOptionButton(options[0], 0)),
-            const SizedBox(width: 10),
-            Expanded(child: _buildOptionButton(options[1], 1)),
-          ],
-        ),
-        const SizedBox(height: 10),
-
-        // Row 2: Options 3 & 4
-        Row(
-          children: [
-            Expanded(child: _buildOptionButton(options[2], 2)),
-            const SizedBox(width: 10),
-            Expanded(child: _buildOptionButton(options[3], 3)),
-          ],
-        ),
-        const SizedBox(height: 10),
-
-        // Row 3: Option 5 (centered)
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.4,
-              child: _buildOptionButton(options[4], 4),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildOptionButton(_OptionData option, int index) {
-    final isSelected = option.value == selectedValue;
-    final color = _getColorForIndex(index);
-
-    return GestureDetector(
-      onTap: () => onChanged(option.value),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutBack,
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? color : color.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isSelected ? color : color.withValues(alpha: 0.3),
-            width: isSelected ? 2 : 1.5,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.35),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
-        ),
-        child: Center(
-          child: Text(
-            option.label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: isSelected ? Colors.white : color,
-              fontSize: 12,
-              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-              height: 1.2,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Color _getColorForIndex(int index) {
-    // 5 options: 0=lowest, 1, 2=middle, 3, 4=highest
-    if (invertColor) {
-      // For stress: low = good (green), high = bad (red)
-      switch (index) {
-        case 0:
-          return AppColors.green;
-        case 1:
-          return AppColors.green.withValues(alpha: 0.8);
-        case 2:
-          return AppColors.amber;
-        case 3:
-          return AppColors.red.withValues(alpha: 0.8);
-        case 4:
-          return AppColors.red;
-        default:
-          return AppColors.amber;
-      }
-    } else {
-      // For happiness: low = bad (red), high = good (green)
-      switch (index) {
-        case 0:
-          return AppColors.red;
-        case 1:
-          return AppColors.red.withValues(alpha: 0.8);
-        case 2:
-          return AppColors.amber;
-        case 3:
-          return AppColors.green.withValues(alpha: 0.8);
-        case 4:
-          return AppColors.green;
-        default:
-          return AppColors.amber;
-      }
-    }
   }
 }
