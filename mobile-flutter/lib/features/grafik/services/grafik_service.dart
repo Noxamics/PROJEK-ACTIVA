@@ -73,12 +73,30 @@ class GrafikService {
         groupedByDate.putIfAbsent(dateStr, () => []).add(Map<String, dynamic>.from(rec as Map));
       }
 
-      // Sort dates ascending
-      final sortedDates = groupedByDate.keys.toList()..sort();
       final dayNames = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+      final now = DateTime.now();
 
-      for (var dateStr in sortedDates) {
-        final dayRecords = groupedByDate[dateStr]!;
+      for (int i = 6; i >= 0; i--) {
+        final targetDate = now.subtract(Duration(days: i));
+        final yearStr = targetDate.year.toString().padLeft(4, '0');
+        final monthStr = targetDate.month.toString().padLeft(2, '0');
+        final dayStr = targetDate.day.toString().padLeft(2, '0');
+        final dateStr = '$yearStr-$monthStr-$dayStr';
+
+        final dayRecords = groupedByDate[dateStr] ?? [];
+        final label = dayNames[targetDate.weekday - 1];
+
+        if (dayRecords.isEmpty) {
+          entries.add(GrafikEntry(
+            label: label,
+            dependenceScore: 0.0,
+            deviceHours: 0.0,
+            socialMediaMins: 0.0,
+            sleepHours: 0.0,
+          ));
+          continue;
+        }
+
         double avgDep = 0;
         double avgDevice = 0;
         double avgSocial = 0;
@@ -95,9 +113,6 @@ class GrafikService {
         avgDevice /= dayRecords.length;
         avgSocial /= dayRecords.length;
         avgSleep /= dayRecords.length;
-
-        final dateTime = DateTime.tryParse(dateStr);
-        final label = dateTime != null ? dayNames[dateTime.weekday - 1] : dateStr;
 
         entries.add(GrafikEntry(
           label: label,
@@ -261,7 +276,7 @@ class GrafikService {
         if (e.type == DioExceptionType.connectionError) {
           return 'Tidak bisa terhubung ke server.';
         }
-        return 'Terjadi kesalahan saat mengambil data.';
+        return 'Error: ${e.message} \nStatus: ${e.response?.statusCode}\nResponse: ${e.response?.data}';
     }
   }
 }

@@ -45,16 +45,21 @@ class _GrafikScreenState extends ConsumerState<GrafikScreen> {
                   color: AppColors.bgLight,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
                 ),
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-                  child: Column(
-                    children: [
-                      _buildPeriodSelector(selectedPeriodIndex),
-                      const SizedBox(height: 32),
-                      _buildContent(grafikState),
-                      const SizedBox(height: 32),
-                    ],
+                child: RefreshIndicator(
+                  color: AppColors.teal,
+                  backgroundColor: AppColors.bgWhite,
+                  onRefresh: () => ref.read(grafikProvider.notifier).fetchGrafikData(grafikState.period),
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+                    child: Column(
+                      children: [
+                        _buildPeriodSelector(selectedPeriodIndex),
+                        const SizedBox(height: 32),
+                        _buildContent(grafikState),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
                   ),
                 ),
               ),

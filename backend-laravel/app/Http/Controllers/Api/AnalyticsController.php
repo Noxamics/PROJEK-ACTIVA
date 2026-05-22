@@ -117,30 +117,44 @@ class AnalyticsController extends Controller
      */
     public function history(Request $request): JsonResponse
     {
-        $days = min((int) $request->get('days', 30), 365); // max 365 hari
+        \Illuminate\Support\Facades\Log::info('Analytics history called', ['user_id' => auth()->id(), 'days' => $request->get('days')]);
+        
+        try {
+            $days = min((int) $request->get('days', 30), 365); // max 365 hari
 
-        $results = MlResult::with('questionnaire')
-            ->where('user_id', auth()->id())
-            ->where('created_at', '>=', now()->subDays($days))
-            ->orderBy('created_at', 'asc')
-            ->get();
+            $results = MlResult::with('questionnaire')
+                ->where('user_id', auth()->id())
+                ->where('created_at', '>=', now()->subDays($days))
+                ->orderBy('created_at', 'asc')
+                ->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'days' => $days,
-                'records' => $results->map(fn($r) => [
-                    'date' => Carbon::parse($r->created_at)->format('Y-m-d'),
-                    'dependence_score' => $r->ml_result['digital_dependence_score'] ?? 0,
-                    'category' => $r->ml_result['category'] ?? 'rendah',
-                    'confidence' => $r->ml_result['confidence'] ?? 0,
-                    'week_group' => $r->week_group,
-                    'device_hours' => $r->questionnaire->device_hours_per_day ?? 0.0,
-                    'social_media_mins' => $r->questionnaire->social_media_mins ?? 0,
-                    'sleep_hours' => $r->questionnaire->sleep_hours ?? 0.0,
-                ]),
-            ],
-        ]);
+            \Illuminate\Support\Facades\Log::info('Analytics history records found', ['count' => $results->count()]);
+
+            $mapped = $results->map(fn($r) => [
+                'date' => Carbon::parse($r->created_at)->format('Y-m-d'),
+                'dependence_score' => $r->ml_result['digital_dependence_score'] ?? 0,
+                'category' => $r->ml_result['category'] ?? 'rendah',
+                'confidence' => $r->ml_result['confidence'] ?? 0,
+                'week_group' => $r->week_group ?? '',
+                'device_hours' => (float)($r->questionnaire?->device_hours_per_day ?? 0),
+                'social_media_mins' => (int)($r->questionnaire?->social_media_mins ?? 0),
+                'sleep_hours' => (float)($r->questionnaire?->sleep_hours ?? 0),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'days' => $days,
+                    'records' => $mapped,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Analytics history error', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     // ─── Private Helpers ─────────────────────────────────────
