@@ -2142,3 +2142,37 @@ class _QuestionBlock extends StatelessWidget {
     );
   }
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CUSTOM PAINTER — ARC PAINTER (for submitting overlay rings)
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _ArcPainter extends CustomPainter {
+  final Color color;
+  final double strokeWidth;
+  final double sweepFraction;
+
+  _ArcPainter({
+    required this.color,
+    required this.strokeWidth,
+    required this.sweepFraction,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    canvas.drawArc(rect, 0, sweepFraction * 2 * math.pi, false, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _ArcPainter oldDelegate) =>
+      color != oldDelegate.color ||
+      strokeWidth != oldDelegate.strokeWidth ||
+      sweepFraction != oldDelegate.sweepFraction;
+}
