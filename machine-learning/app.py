@@ -273,6 +273,26 @@ def predict():
                 str(data['education_level']).strip().lower(), 'Bachelor'
             )
 
+        # ── Fix daily_role ──
+        role_map = {
+            'full-time'         : 'Full-time Employee',
+            'full time'         : 'Full-time Employee',
+            'full-time employee': 'Full-time Employee',
+            'part-time'         : 'Part-time/Shift',
+            'part time'         : 'Part-time/Shift',
+            'part-time/shift'   : 'Part-time/Shift',
+            'student'           : 'Student',
+            'caregiver/home'    : 'Caregiver/Home',
+            'caregiver'         : 'Caregiver/Home',
+            'home'              : 'Caregiver/Home',
+            'unemployed'        : 'Unemployed_Looking',
+            'unemployed_looking': 'Unemployed_Looking',
+        }
+        if 'daily_role' in data:
+            data['daily_role'] = role_map.get(
+                str(data['daily_role']).strip().lower(), 'Student'
+            )
+
         # ── Hapus field yang tidak dipakai model ──
         for field in ['questionnaire_id', 'date_of_birth', 'age',
                       'study_minutes', 'physical_activity_days']:

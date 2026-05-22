@@ -241,7 +241,16 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
     final email = user?.email ?? 'pengguna@email.com';
     final initials = user?.initials ?? '?';
     final age = user?.age.toString() ?? '-';
-    final edu = user?.educationLevel ?? '-';
+    
+    final eduToIndo = {
+      'High School': 'SMA/SMK/Sederajat',
+      'Bachelor': 'Sarjana',
+      'Master': 'Magister',
+      'PhD': 'Doktor',
+    };
+    final eduRaw = user?.educationLevel;
+    final edu = (eduRaw != null) ? (eduToIndo[eduRaw] ?? eduRaw) : '-';
+
     final region = user?.region ?? '-';
 
     return Padding(

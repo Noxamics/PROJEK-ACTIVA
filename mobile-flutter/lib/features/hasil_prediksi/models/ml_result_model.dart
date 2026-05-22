@@ -33,6 +33,8 @@ class MlResultModel {
   final int highRiskFlag; // ← 0 atau 1 (baru)
   final String weekGroup;
   final DateTime createdAt;
+  final double sleepHours;
+  final double screenTime;
 
   const MlResultModel({
     required this.id,
@@ -49,6 +51,8 @@ class MlResultModel {
     required this.highRiskFlag,
     required this.weekGroup,
     required this.createdAt,
+    this.sleepHours = 0.0,
+    this.screenTime = 0.0,
   });
 
   // ── Computed ───────────────────────────────────────────────────────────────
@@ -181,6 +185,10 @@ class MlResultModel {
         ?? mlResult?['created_at'] 
         ?? (json['questionnaire'] as Map?)?['created_at'];
 
+    final qData = json['questionnaire'] as Map<String, dynamic>?;
+    final sleepHours = _toDouble(qData?['sleep_hours'] ?? json['sleep_hours']);
+    final screenTime = _toDouble(qData?['device_hours_per_day'] ?? json['device_hours_per_day']);
+
     return MlResultModel(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       userId: json['user_id']?.toString() ?? json['userId']?.toString() ?? '',
@@ -198,6 +206,8 @@ class MlResultModel {
       createdAt: rawCreatedAt != null
           ? DateTime.tryParse(rawCreatedAt.toString())?.toLocal() ?? DateTime.now()
           : DateTime.now(),
+      sleepHours: sleepHours,
+      screenTime: screenTime,
     );
   }
 
@@ -233,5 +243,7 @@ class MlResultModel {
     },
     'week_group': weekGroup,
     'created_at': createdAt.toIso8601String(),
+    'sleep_hours': sleepHours,
+    'device_hours_per_day': screenTime,
   };
 }
