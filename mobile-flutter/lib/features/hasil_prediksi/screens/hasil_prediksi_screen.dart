@@ -1371,58 +1371,7 @@ class _DarkCtaButtons extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 10),
-        // Secondary CTA
-        Container(
-          width: double.infinity,
-          height: 50,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            color: _white,
-            border: Border.all(
-              color: theme.accent.withValues(alpha: .50),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: theme.glow.withValues(alpha: .10 * glow),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: .05),
-                blurRadius: 6,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(18),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const KuesionerScreen()),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.refresh_rounded, color: theme.accentDim, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Ulangi Analisis',
-                    style: TextStyle(
-                      color: theme.accentDim,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: .2,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+
       ],
     );
   }
