@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
@@ -17,6 +18,7 @@ import '../../laporan_perkembangan/providers/laporan_provider.dart';
 import '../models/analytics_model.dart';
 import '../../laporan_perkembangan/models/laporan_model.dart';
 import '../../grafik/screens/grafik_screen.dart';
+import '../../grafik/providers/grafik_provider.dart';
 import '../../profil/screens/profil_screen.dart';
 
 // Warna background konten (putih/light) — dipakai oleh wave clipper
@@ -32,24 +34,7 @@ class DashboardScreen extends ConsumerStatefulWidget {
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   int _currentNavIndex = 0;
 
-  // Habit tracker state — "Tidur sebelum 23.00" diganti "Tidur melebihi 7-8 jam"
-  List<HabitItem> _habits = [
-    const HabitItem(id: '1', label: 'Tidur melebihi 7-8 jam', completed: true),
-    const HabitItem(id: '2', label: 'Screen time < 6 jam', completed: true),
-    const HabitItem(id: '3', label: 'Istirahat media sosial', completed: false),
-    const HabitItem(id: '4', label: 'Aktivitas fisik', completed: true),
-  ];
 
-  void _toggleHabit(String id) {
-    setState(() {
-      _habits = _habits.map((h) {
-        if (h.id == id) {
-          return h.copyWith(completed: !h.completed);
-        }
-        return h;
-      }).toList();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,8 +42,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final user = ref.watch(currentUserProvider);
     final analytics = dashState.analytics;
 
-    final historiCount = ref.watch(historiProvider).items.length;
+    final historiState = ref.watch(historiProvider);
+    final historiItems = historiState.items;
+    final hasHistory = historiItems.isNotEmpty;
+    final latestResult = hasHistory ? historiItems.first : null;
+    final historiCount = historiItems.length;
+
     final laporanState = ref.watch(laporanProvider);
+
+    // Rata-rata statistik mingguan (7 data terbaru)
+    final weeklyStats   = ref.watch(weeklyStatsProvider);
+    final hasWeeklyData = ref.watch(hasWeeklyDataProvider);
+
+    // Distribusi kategori dependensi keseluruhan
+    final dependencyDistribution = ref.watch(dependencyDistributionProvider);
 
     // Auto-fetch laporan jika data cukup
     if (historiCount >= 14 &&
@@ -100,17 +97,46 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           _buildLoadingShimmer()
                         else ...[
                           // 1. Dependency Score Card
-                          DependencyScoreCard(
-                            score: analytics?.avgDependenceInt ?? 72,
-                            insight:
-                                'Screen time malam kamu meningkat minggu ini.',
+                          Stack(
+                            children: [
+                              ImageFiltered(
+                                imageFilter: !hasHistory
+                                    ? ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0)
+                                    : ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
+                                child: DependencyScoreCard(
+                                  score: latestResult?.dependenceInt ?? 0,
+                                  insight: latestResult?.summary ?? 'Silakan isi kuesioner untuk melihat insight kamu.',
+                                ),
+                              ),
+                              if (!hasHistory)
+                                Positioned.fill(
+                                  child: Center(
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withValues(alpha: 0.6),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: const Text(
+                                        'Belum Ada Data',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                           const SizedBox(height: 16),
 
-                          // 2. Quick Stats (Screen Time & Sleep Duration)
+                          // 2. Quick Stats – rata-rata 7 data terbaru
                           QuickStatsGrid(
-                            screenTime: analytics?.screenTimeHours ?? 8.2,
-                            sleepDuration: analytics?.sleepHours ?? 5.4,
+                            screenTime: weeklyStats.screenTime,
+                            sleepDuration: weeklyStats.sleepHours,
+                            hasWeeklyData: hasWeeklyData,
+                            dataCount: weeklyStats.dataCount,
                           ),
                           const SizedBox(height: 16),
 
@@ -126,24 +152,46 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           const SizedBox(height: 16),
 
                           // 5. Weekly Insight Card
-                          WeeklyInsightCard(
-                            insight:
-                                'Ketergantungan digital kamu membaik 8% dibanding minggu lalu.',
-                            onViewDetails: () => _showInsightDetail(context),
-                          ),
+                          _buildWeeklyInsightCard(context),
                           const SizedBox(height: 16),
 
                           // 6. Progress Performance Chart (Donut / Kategori Dependensi)
-                          DependencyDonutChart(
-                            countLow: analytics?.countLow ?? 2,
-                            countMedium: analytics?.countMedium ?? 4,
-                            countHigh: analytics?.countHigh ?? 1,
-                            totalSurveys: analytics?.totalSurveysWeek ?? 7,
-                          ),
+                          if (dependencyDistribution.total > 0)
+                            DependencyDonutChart(
+                              countLow: dependencyDistribution.low,
+                              countMedium: dependencyDistribution.medium,
+                              countHigh: dependencyDistribution.high,
+                              totalSurveys: dependencyDistribution.total,
+                            )
+                          else
+                            const SizedBox(),
                           const SizedBox(height: 16),
 
                           // 7. Habit Tracker
-                          HabitTracker(habits: _habits, onToggle: _toggleHabit),
+                          HabitTracker(
+                            habits: [
+                              HabitItem(
+                                id: '1', 
+                                label: 'Tidur melebihi 7 jam', 
+                                completed: latestResult != null && latestResult.sleepHours >= 7,
+                              ),
+                              HabitItem(
+                                id: '2', 
+                                label: 'Screen time < 6 jam', 
+                                completed: latestResult != null && latestResult.screenTime > 0 && latestResult.screenTime < 6,
+                              ),
+                              HabitItem(
+                                id: '3', 
+                                label: 'Tingkat Ketergantungan Rendah', 
+                                completed: latestResult != null && latestResult.digitalDependenceScore < 50,
+                              ),
+                              HabitItem(
+                                id: '4', 
+                                label: 'Kualitas Tidur Terjaga', 
+                                completed: latestResult != null && latestResult.sleepHours >= 6 && latestResult.sleepHours <= 9,
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 16),
                         ],
                       ],
@@ -216,74 +264,257 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
+  // ── Weekly Insight Card (data dari laporanProvider) ───────────────────────
+
+  Widget _buildWeeklyInsightCard(BuildContext context) {
+    final laporanState = ref.watch(laporanProvider);
+    final data = laporanState.data;
+
+    // Susun teks insight dari data real, atau fallback jika belum ada
+    String insightText;
+    if (data != null) {
+      final absPct = data.scorePct.abs().toStringAsFixed(1);
+      if (data.status == 'membaik') {
+        insightText = 'Ketergantungan digital kamu membaik $absPct% dibanding periode sebelumnya.';
+      } else if (data.status == 'memburuk') {
+        insightText = 'Ketergantungan digital kamu meningkat $absPct% dibanding periode sebelumnya.';
+      } else {
+        insightText = 'Ketergantungan digital kamu relatif stabil dibanding periode sebelumnya.';
+      }
+    } else {
+      insightText = 'Isi kuesioner minimal 14 kali untuk melihat insight mingguan.';
+    }
+
+    return WeeklyInsightCard(
+      insight: insightText,
+      onViewDetails: () => _showInsightDetail(context, data),
+    );
+  }
+
   // ── Bottom Sheet — Insight Detail ──────────────────────────────────────────
 
-  void _showInsightDetail(BuildContext context) {
+  void _showInsightDetail(BuildContext context, dynamic data) {
+    // Susun isi detail dari data laporan real
+    final List<Map<String, dynamic>> detailItems;
+    if (data != null) {
+      detailItems = [
+        {
+          'icon': Icons.speed_rounded,
+          'color': AppColors.teal,
+          'label': 'Skor Dependensi',
+          'value': data.insights.digitalDependence,
+        },
+        {
+          'icon': Icons.timer_rounded,
+          'color': AppColors.blue,
+          'label': 'Waktu Layar',
+          'value': data.insights.screenTime,
+        },
+        {
+          'icon': Icons.share_rounded,
+          'color': AppColors.purple,
+          'label': 'Media Sosial',
+          'value': data.insights.socialMedia,
+        },
+        {
+          'icon': Icons.bedtime_rounded,
+          'color': const Color(0xFF6366F1),
+          'label': 'Kualitas Tidur',
+          'value': data.insights.sleep,
+        },
+        {
+          'icon': Icons.psychology_rounded,
+          'color': AppColors.amber,
+          'label': 'Tingkat Stres',
+          'value': data.insights.stress,
+        },
+      ];
+    } else {
+      detailItems = [];
+    }
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: AppColors.bgLight,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.textDisabled.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Insight Mingguan',
-              style: TextStyle(
-                color: AppColors.textDark,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Analisis mingguan menunjukkan:\n\n'
-              '- Ketergantungan digital menurun 8%\n'
-              '- Screen time rata-rata: 7.5 jam/hari\n'
-              '- Waktu tidur membaik 15 menit\n'
-              '- Penggunaan sosial media berkurang 12%\n\n'
-              'Pertahankan kebiasaan positif ini!',
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 14,
-                height: 1.6,
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.blue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.92,
+        expand: false,
+        builder: (_, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: AppColors.bgLight,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          child: Column(
+            children: [
+              // Handle bar
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 8),
+                child: Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.textDisabled.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-                child: const Text('Tutup'),
               ),
-            ),
-            const SizedBox(height: 12),
-          ],
+              // Judul
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.teal.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.insights_rounded,
+                        color: AppColors.teal,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Insight Mingguan',
+                      style: TextStyle(
+                        color: AppColors.textDark,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Konten scrollable
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+                  children: [
+                    if (detailItems.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: AppColors.bgWhite,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text(
+                          'Isi kuesioner minimal 14 kali untuk melihat insight detail mingguan Anda.',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 14,
+                            height: 1.6,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                    else
+                      ...detailItems.map(
+                        (item) => Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.bgWhite,
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.03),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: (item['color'] as Color).withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  item['icon'] as IconData,
+                                  color: item['color'] as Color,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item['label'] as String,
+                                      style: const TextStyle(
+                                        color: AppColors.textMuted,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      item['value'] as String,
+                                      style: const TextStyle(
+                                        color: AppColors.textDark,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
+              // Tombol — mengarahkan ke halaman Laporan
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(ctx); // tutup bottom sheet dulu
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const LaporanPerkembanganScreen(),
+                        ),
+                      ).then((_) => setState(() => _currentNavIndex = 0));
+                    },
+                    icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                    label: const Text('Lihat Laporan Lengkap'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.teal,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

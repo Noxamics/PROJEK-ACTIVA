@@ -59,7 +59,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
   }
 
   // ── Fetch analytics ────────────────────────────────────────────────────────
-  Future<void> fetchAnalytics({bool useMock = true}) async {
+  Future<void> fetchAnalytics({bool useMock = false}) async {
     state = state.copyWith(status: DashboardStatus.loading, errorMessage: null);
     try {
       // Ganti getMockAnalytics() → getAnalytics() saat backend sudah siap
