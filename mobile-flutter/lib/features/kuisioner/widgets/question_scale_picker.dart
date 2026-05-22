@@ -1,26 +1,23 @@
 //lib/features/kuisioner/widgets/question_scale_picker.dart
 
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
 
-/// Widget skala angka untuk pertanyaan kondisi mental.
-/// Menerima value bertipe num (int atau double).
-/// onChanged mengembalikan int.
-///
-/// [invertColor] = false (default):
-///   nilai rendah = merah, nilai tinggi = hijau
-///   → dipakai untuk happiness (tinggi = bagus)
-///
-/// [invertColor] = true:
-///   nilai rendah = hijau, nilai tinggi = merah
-///   → dipakai untuk anxiety, depresi, stres (tinggi = buruk)
+// ─────────────────────────────────────────────────────────────────────────────
+// PREMIUM MONOCHROME SCALE PICKER — Activa
+// Renders a 1–N tap-to-select row.
+// All colours are navy/gray; no red/green/rainbow.
+// ─────────────────────────────────────────────────────────────────────────────
+
 class QuestionScalePicker extends StatelessWidget {
   final num value;
   final int min;
   final int max;
   final String? lowLabel;
   final String? highLabel;
+
+  /// Kept for API compatibility — no longer changes colours in monochrome mode.
   final bool invertColor;
+
   final ValueChanged<int> onChanged;
 
   const QuestionScalePicker({
@@ -34,37 +31,44 @@ class QuestionScalePicker extends StatelessWidget {
     this.invertColor = false,
   });
 
+  // ── Design tokens ──────────────────────────────────────────────────────────
+  static const Color _navy = Color(0xFF1E3A5F);
+  static const Color _navyLight = Color(0xFF2D5186);
+  static const Color _softGray = Color(0xFFE5E7EB);
+  static const Color _darkGray = Color(0xFF374151);
+  static const Color _textMuted = Color(0xFF9CA3AF);
+
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [_buildLabels(), const SizedBox(height: 12), _buildScaleRow()],
+      children: [
+        if (lowLabel != null || highLabel != null) ...[
+          _buildLabels(),
+          const SizedBox(height: 12),
+        ],
+        _buildScaleRow(),
+      ],
     );
   }
 
   Widget _buildLabels() {
-    if (lowLabel == null && highLabel == null) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            lowLabel ?? '',
-            style: TextStyle(
-              color: invertColor ? AppColors.green : AppColors.red,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          Text(
-            highLabel ?? '',
-            style: TextStyle(
-              color: invertColor ? AppColors.red : AppColors.green,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
+        children: [_labelText(lowLabel ?? ''), _labelText(highLabel ?? '')],
+      ),
+    );
+  }
+
+  Widget _labelText(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        color: _textMuted,
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.1,
       ),
     );
   }
@@ -73,10 +77,10 @@ class QuestionScalePicker extends StatelessWidget {
     final selectedInt = value.round();
     final total = max - min + 1;
 
-    final children = List.generate(total, (i) {
-      final number = min + i;
-      final isSelected = number == selectedInt;
-      final color = _colorForValue(number);
+    return Row(
+      children: List.generate(total, (i) {
+        final number = min + i;
+        final isSelected = number == selectedInt;
 
       return Expanded(
         child: GestureDetector(
@@ -93,15 +97,15 @@ class QuestionScalePicker extends StatelessWidget {
                 color: isSelected ? color : color.withValues(alpha: 0.3),
                 width: isSelected ? 2.5 : 1.5,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: isSelected
-                      ? color.withValues(alpha: 0.4)
-                      : color.withValues(alpha: 0.0),
-                  blurRadius: 10,
-                  offset: isSelected ? const Offset(0, 4) : Offset.zero,
-                ),
-              ],
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: color.withValues(alpha: 0.4),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : null,
             ),
             child: Center(
               child: Text(
@@ -114,34 +118,8 @@ class QuestionScalePicker extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      );
-    });
-
-    return Row(children: children);
-  }
-
-  // ── Warna berdasarkan posisi & mode ───────────────────────────────────────
-  Color _colorForValue(int val) {
-    final total = max - min + 1;
-    final position = val - min; // 0-based
-
-    final lowEnd = (total * 0.33).floor();
-    final highEnd = (total * 0.67).floor();
-
-    final isLow = position < lowEnd;
-    final isHigh = position >= highEnd;
-
-    if (invertColor) {
-      // Untuk stress/anxiety: rendah = hijau, tinggi = merah
-      if (isLow) return AppColors.green;
-      if (isHigh) return AppColors.red;
-      return AppColors.amber;
-    } else {
-      // Untuk happiness: rendah = merah, tinggi = hijau
-      if (isLow) return AppColors.red;
-      if (isHigh) return AppColors.green;
-      return AppColors.amber;
-    }
+        );
+      }),
+    );
   }
 }

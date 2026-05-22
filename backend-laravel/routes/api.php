@@ -10,74 +10,23 @@ use App\Http\Controllers\Api\LaporanController;
 use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\AnnouncementController;
 
-/*
-|══════════════════════════════════════════════════════════════
-| routes/api.php  —  LENGKAP (Member 1 — Backend Lead)
-|══════════════════════════════════════════════════════════════
-|
-| PUBLIC (tanpa JWT)
-| ├── POST  /api/auth/register
-| ├── POST  /api/auth/login
-| ├── POST  /api/auth/forgot-password
-| ├── POST  /api/auth/verify-otp
-| ├── POST  /api/auth/reset-password
-| └── POST  /api/admin/login
-|
-| USER PROTECTED (JWT user biasa)
-| Auth ──────────────────────────────────────────────────────
-| ├── GET   /api/auth/me
-| ├── POST  /api/auth/logout
-| ├── POST  /api/auth/refresh
-| ├── PUT   /api/auth/profile
-| ├── POST  /api/auth/change-password
-| ├── POST  /api/auth/forgot-password (public)
-| ├── POST  /api/auth/verify-otp (public)
-| └── POST  /api/auth/reset-password (public)
-|
-| Survey ─────────────────────────────────────────────────────
-| ├── GET   /api/surveys
-| ├── POST  /api/surveys        <- trigger ML otomatis
-| ├── GET   /api/surveys/latest
-| ├── GET   /api/surveys/{id}
-| └── DELETE /api/surveys/{id}
-|
-| Prediksi ───────────────────────────────────────────────────
-| ├── GET   /api/prediksi
-| ├── GET   /api/prediksi/latest
-| ├── GET   /api/prediksi/summary
-| ├── GET   /api/prediksi/{id}
-| └── POST  /api/prediksi/retry/{questionnaireId}
-|
-| Analytics ──────────────────────────────────────────────────
-| ├── GET   /api/analytics/insight
-| ├── GET   /api/analytics/comparison
-| └── GET   /api/analytics/history?days=30
-|
-| ADMIN PROTECTED (JWT admin)
-| ├── GET   /api/admin/dashboard
-| ├── GET   /api/admin/users
-| ├── GET   /api/admin/users/{id}
-| └── GET   /api/admin/report/export
-|══════════════════════════════════════════════════════════════
-*/
-// PUBLIC
+// ── PUBLIC ────────────────────────────────────────────────────────────────
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
     Route::post('forgot-password', [PasswordResetController::class, 'forgotPassword']);
     Route::post('verify-otp', [PasswordResetController::class, 'verifyOtp']);
     Route::post('reset-password', [PasswordResetController::class, 'resetPassword']);
-    Route::get('/surveys', [SurveyController::class, 'index']);
+    // HAPUS: Route::get('/surveys', ...) yang ada di sini sebelumnya
 });
 
 Route::get('announcements', [AnnouncementController::class, 'index']);
 
-// Admin Public Endpoints (OTP & Login)
 Route::post('admin/login', [AdminController::class, 'login']);
 Route::post('admin/request-otp', [AdminController::class, 'requestOtp']);
 Route::post('admin/verify-otp', [AdminController::class, 'verifyOtp']);
 
-// USER PROTECTED
+// ── USER PROTECTED ────────────────────────────────────────────────────────
 Route::middleware('jwt.auth')->group(function () {
 
     Route::prefix('auth')->group(function () {
@@ -104,10 +53,9 @@ Route::middleware('jwt.auth')->group(function () {
 
     Route::get('/laporan', [LaporanController::class, 'getLaporan']);
     Route::get('/export', [ExportController::class, 'export']);
-
 });
 
-// ADMIN PROTECTED
+// ── ADMIN PROTECTED ───────────────────────────────────────────────────────
 Route::middleware('jwt.admin')->prefix('admin-panel')->group(function () {
     Route::get('dashboard', [AdminController::class, 'dashboard']);
     Route::get('users', [AdminController::class, 'users']);
@@ -115,7 +63,7 @@ Route::middleware('jwt.admin')->prefix('admin-panel')->group(function () {
     Route::get('report/export', [AdminController::class, 'exportReport']);
 });
 
-// FALLBACK
+// ── FALLBACK ──────────────────────────────────────────────────────────────
 Route::fallback(fn() => response()->json([
     'success' => false,
     'message' => 'Endpoint tidak ditemukan',

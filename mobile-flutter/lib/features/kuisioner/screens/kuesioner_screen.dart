@@ -6,7 +6,6 @@ import '../../../core/theme/app_colors.dart';
 import '../providers/questionnaire_provider.dart';
 import '../widgets/question_option_card.dart';
 import '../widgets/question_slider.dart';
-import '../widgets/question_scale_picker.dart';
 import '../../hasil_prediksi/screens/hasil_prediksi_screen.dart';
 import '../../hasil_prediksi/providers/result_provider.dart';
 
@@ -19,6 +18,14 @@ import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
 // false = kirim ke Laravel → data masuk MongoDB
 const bool _useMockSurvey = false;
 
+// ── Palette constants ─────────────────────────────────────────────────────────
+const _kNavy = Color(0xFF1E3A5F);
+const _kDeepNavy = Color(0xFF0B1F3A);
+const _kTeal = Color(0xFF0D9488);
+const _kIce = Color(0xFFF0F9FF);
+const _kPurple = Color(0xFF7C83FD);
+const _kCyan = Color(0xFF67E8F9);
+
 class KuesionerScreen extends ConsumerStatefulWidget {
   const KuesionerScreen({super.key});
 
@@ -30,6 +37,7 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
   late final PageController _pageController;
   bool _showSelection = true;
   bool _isFetchingLatest = false;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -103,7 +111,6 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
 
     if (result != null && mounted) {
       ref.read(resultProvider.notifier).setResult(result);
-
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => HasilPrediksiScreen(result: result)),
@@ -185,25 +192,27 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
       return;
     }
 
+    setState(() => _isSubmitting = true);
+
     final success = await ref
         .read(questionnaireProvider.notifier)
         .submit(useMock: _useMockSurvey);
 
-    if (success && mounted) {
-      final result = ref.read(questionnaireProvider).result;
+    if (!mounted) return;
+    setState(() => _isSubmitting = false);
 
+    if (success) {
+      final result = ref.read(questionnaireProvider).result;
       if (result != null) {
         ref.read(resultProvider.notifier).setResult(result);
       }
-
       ref.read(questionnaireProvider.notifier).reset(keepResult: true);
       setState(() => _showSelection = true);
-
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => HasilPrediksiScreen(result: result)),
       );
-    } else if (!success && mounted) {
+    } else {
       final error =
           ref.read(questionnaireProvider).errorMessage ??
           'Gagal memproses data';
@@ -221,57 +230,57 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
 
     final state = ref.watch(questionnaireProvider);
 
-    return Scaffold(
-      backgroundColor: AppColors.bgLight,
-      body: Stack(
-        children: [
-          // Background decorations
-          _buildBackgroundDecorations(),
-
-          SafeArea(
-            child: Column(
-              children: [
-                // Topbar Container
-                _buildTopbarContainer(state),
-
-                // Content Container
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.bgLight,
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(28),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 20,
-                          offset: const Offset(0, -5),
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: AppColors.bgLight,
+          body: Stack(
+            children: [
+              _buildBackgroundDecorations(),
+              SafeArea(
+                child: Column(
+                  children: [
+                    _buildTopbarContainer(state),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.bgLight,
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(28),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 20,
+                              offset: const Offset(0, -5),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(28),
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(28),
+                          ),
+                          child: PageView(
+                            controller: _pageController,
+                            physics: const NeverScrollableScrollPhysics(),
+                            children: [
+                              _PagePenggunaanDigital(),
+                              _PageAktivitasTidur(),
+                              _PageKondisiMental(),
+                            ],
+                          ),
+                        ),
                       ),
-                      child: PageView(
-                        controller: _pageController,
-                        physics: const NeverScrollableScrollPhysics(),
-                        children: [
-                          _PagePenggunaanDigital(),
-                          _PageAktivitasTidur(),
-                          _PageKondisiMental(),
-                        ],
-                      ),
                     ),
-                  ),
+                    _buildBottomBar(state),
+                  ],
                 ),
-                _buildBottomBar(state),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        if (_isSubmitting) const _SubmittingOverlay(),
+      ],
     );
   }
 
@@ -280,7 +289,6 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
   Widget _buildBackgroundDecorations() {
     return Stack(
       children: [
-        // Gradient background
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -293,7 +301,6 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
             ),
           ),
         ),
-        // Decorative circles
         Positioned(
           top: -60,
           right: -40,
@@ -347,7 +354,6 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       child: Column(
         children: [
-          // Header row
           Row(
             children: [
               GestureDetector(
@@ -414,8 +420,6 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
             ],
           ),
           const SizedBox(height: 24),
-
-          // Progress bar with glow
           Stack(
             children: [
               Container(
@@ -455,8 +459,6 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
             ],
           ),
           const SizedBox(height: 24),
-
-          // Step indicator
           _buildStepIndicator(state),
         ],
       ),
@@ -491,7 +493,7 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
                     color: isActive
                         ? AppColors.teal
                         : isCompleted
-                        ? const Color(0xFF5EEAD4) // Light teal
+                        ? const Color(0xFF5EEAD4)
                         : Colors.white.withValues(alpha: 0.2),
                     boxShadow: [
                       BoxShadow(
@@ -522,9 +524,9 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: isActive
-                        ? const Color(0xFF5EEAD4) // Light teal
+                        ? const Color(0xFF5EEAD4)
                         : isCompleted
-                        ? const Color(0xFF0F766E) // Dark teal
+                        ? const Color(0xFF0F766E)
                         : Colors.white.withValues(alpha: 0.5),
                     fontSize: 10,
                     fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
@@ -549,217 +551,549 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
     );
   }
 
-  // ── Selection View ─────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════════════════════════
+  // SELECTION VIEW — Redesigned premium wellness landing
+  // ══════════════════════════════════════════════════════════════════════════════
 
   Widget _buildSelectionView() {
     return Scaffold(
-      backgroundColor: AppColors.bgDark,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 20, 20),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.15),
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.arrow_back_rounded,
-                        color: Colors.white,
-                        size: 22,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Kuesioner Analisis',
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Pilih opsi di bawah untuk lanjut',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: AppColors.bgLight,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-                ),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _selectionCard(
-                        title: 'Mulai Kuesioner Baru',
-                        desc: 'Lakukan analisis kondisi terbaru kamu hari ini.',
-                        icon: Icons.assignment_rounded,
-                        color: AppColors.teal,
-                        onTap: _startNew,
-                      ),
-                      const SizedBox(height: 20),
-                      _selectionCard(
-                        title: 'Lihat Hasil Terakhir',
-                        desc:
-                            'Cek rangkuman dan rekomendasi kuesioner sebelumnya.',
-                        icon: Icons.history_rounded,
-                        color: AppColors.blue,
-                        onTap: _viewLatest,
-                        isLoading: _isFetchingLatest,
-                      ),
-                      const SizedBox(height: 40),
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: AppColors.teal.withValues(alpha: 0.05),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: AppColors.teal.withValues(alpha: 0.1),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.info_outline_rounded,
-                              color: AppColors.teal,
-                              size: 24,
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Text(
-                                'Analisis ini membantu kami memberikan rekomendasi gaya hidup digital yang lebih baik.',
-                                style: TextStyle(
-                                  color: AppColors.textDark.withValues(
-                                    alpha: 0.7,
-                                  ),
-                                  fontSize: 13,
-                                  height: 1.5,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            BottomNav(
+      backgroundColor: _kDeepNavy,
+      body: Stack(
+        children: [
+          // ── Full column layout ──────────────────────────────────────────
+          Column(
+            children: [
+              // Dark header area (expands to fill above the wave)
+              Expanded(child: _buildSelectionHeader()),
+
+              // Wave transition + white content area
+              _buildWaveContentArea(),
+            ],
+          ),
+
+          // ── Bottom nav sits on top ──────────────────────────────────────
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: BottomNav(
               currentIndex: 1,
               navTheme: NavTheme.light,
               onTap: _onNavTap,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+
+  // ── Header (dark navy area) ────────────────────────────────────────────────
+
+  Widget _buildSelectionHeader() {
+    return SafeArea(
+      bottom: false,
+      child: Stack(
+        children: [
+          // Decorative glow orbs
+          Positioned(
+            top: -30,
+            left: -30,
+            child: Container(
+              width: 160,
+              height: 160,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _kTeal.withValues(alpha: 0.15),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 60,
+            right: -20,
+            child: Container(
+              width: 110,
+              height: 110,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _kPurple.withValues(alpha: 0.15),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 60,
+            left: 80,
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _kCyan.withValues(alpha: 0.12),
+              ),
+            ),
+          ),
+
+          // Particle dots
+          ..._buildParticles(),
+
+          // Main header content
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Back button
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: _kCyan.withValues(alpha: 0.3)),
+                    ),
+                    child: const Icon(
+                      Icons.arrow_back_rounded,
+                      color: _kCyan,
+                      size: 22,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 28),
+
+                // Mascot + title row
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Label chip
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _kCyan.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(50),
+                              border: Border.all(
+                                color: _kCyan.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: _kCyan,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                const Text(
+                                  'Activa AI',
+                                  style: TextStyle(
+                                    color: _kCyan,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+
+                          // Title
+                          RichText(
+                            text: const TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: 'Kuesioner\n',
+                                  style: TextStyle(
+                                    color: _kIce,
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.w800,
+                                    height: 1.1,
+                                    letterSpacing: -0.8,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: 'Analisis',
+                                  style: TextStyle(
+                                    color: _kCyan,
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.w800,
+                                    height: 1.1,
+                                    letterSpacing: -0.8,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+
+                          Text(
+                            'Kenali pola digitalmu hari ini',
+                            style: TextStyle(
+                              color: _kIce.withValues(alpha: 0.55),
+                              fontSize: 14,
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Floating mascot
+                    _buildMascot(),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildParticles() {
+    final specs = [
+      (30.0, 180.0, 4.0, _kCyan),
+      (80.0, 210.0, 3.0, _kPurple),
+      (280.0, 100.0, 5.0, _kCyan),
+      (310.0, 170.0, 3.0, _kTeal),
+      (50.0, 280.0, 4.0, _kPurple),
+      (200.0, 150.0, 2.0, _kCyan),
+      (340.0, 240.0, 3.0, _kPurple),
+    ];
+    return specs
+        .map(
+          (s) => Positioned(
+            left: s.$1,
+            top: s.$2,
+            child: Container(
+              width: s.$3,
+              height: s.$3,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: (s.$4 as Color).withValues(alpha: 0.7),
+              ),
+            ),
+          ),
+        )
+        .toList();
+  }
+
+  Widget _buildMascot() {
+    return Container(
+      width: 72,
+      height: 72,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [_kTeal, _kPurple],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: _kTeal.withValues(alpha: 0.45),
+            blurRadius: 24,
+            spreadRadius: 4,
+          ),
+        ],
+      ),
+      child: const Center(child: Text('🤖', style: TextStyle(fontSize: 32))),
+    );
+  }
+
+  // ── Wave + white content area ──────────────────────────────────────────────
+
+  Widget _buildWaveContentArea() {
+    return SizedBox(
+      // Enough height for the wave + cards + bottom nav space
+      height: 420,
+      child: Stack(
+        children: [
+          // ── Ice white background fills the bottom ──────────────────────
+          Positioned(
+            // The wave peak sits ~50px from the top; fill from there down
+            top: 50,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(color: _kIce),
+          ),
+
+          // ── Smooth inverted-U wave: navy → ice ─────────────────────────
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ClipPath(
+              clipper: _TopWaveClipper(),
+              child: Container(height: 80, color: _kDeepNavy),
+            ),
+          ),
+
+          // ── Bottom thin wave overlay (ice) ─────────────────────────────
+          Positioned(
+            top: 40,
+            left: 0,
+            right: 0,
+            child: ClipPath(
+              clipper: _BottomWaveClipper(),
+              child: Container(height: 40, color: _kIce),
+            ),
+          ),
+
+          // ── Card content ───────────────────────────────────────────────
+          Positioned(
+            top: 72,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 96),
+              child: Column(
+                children: [
+                  _selectionCard(
+                    title: 'Mulai Kuesioner Baru',
+                    desc:
+                        'Lakukan analisis kondisi digital terbaru kamu hari ini.',
+                    icon: Icons.assignment_rounded,
+                    accentColor: _kTeal,
+                    onTap: _startNew,
+                    isPrimary: true,
+                  ),
+                  const SizedBox(height: 14),
+                  _selectionCard(
+                    title: 'Lihat Hasil Terakhir',
+                    desc: 'Cek insight dan rekomendasi sebelumnya.',
+                    icon: Icons.history_rounded,
+                    accentColor: _kNavy,
+                    onTap: _viewLatest,
+                    isLoading: _isFetchingLatest,
+                  ),
+                  const SizedBox(height: 14),
+                  _buildAiInfoCard(),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Card 1 & 2 ─────────────────────────────────────────────────────────────
 
   Widget _selectionCard({
     required String title,
     required String desc,
     required IconData icon,
-    required Color color,
+    required Color accentColor,
     required VoidCallback onTap,
+    bool isPrimary = false,
     bool isLoading = false,
   }) {
     return GestureDetector(
       onTap: isLoading ? null : onTap,
       child: Container(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
-          color: AppColors.bgWhite,
-          borderRadius: BorderRadius.circular(24),
+          // Primary card: dark navy; secondary: white
+          color: isPrimary ? _kNavy : Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(
+            color: isPrimary
+                ? _kCyan.withValues(alpha: 0.2)
+                : Colors.black.withValues(alpha: 0.05),
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 15,
-              offset: const Offset(0, 4),
+              color: isPrimary
+                  ? _kTeal.withValues(alpha: 0.18)
+                  : Colors.black.withValues(alpha: 0.06),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
         child: Row(
           children: [
+            // Icon container
             Container(
-              padding: const EdgeInsets.all(16),
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
+                color: isPrimary
+                    ? _kTeal.withValues(alpha: 0.2)
+                    : accentColor.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: Icon(icon, color: color, size: 32),
+              child: Icon(
+                icon,
+                color: isPrimary ? _kCyan : accentColor,
+                size: 28,
+              ),
             ),
-            const SizedBox(width: 20),
+            const SizedBox(width: 18),
+
+            // Text
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (isPrimary) ...[
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _kTeal.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 5,
+                            height: 5,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _kCyan,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          const Text(
+                            'Tersedia Sekarang',
+                            style: TextStyle(
+                              color: _kCyan,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   Text(
                     title,
-                    style: const TextStyle(
-                      color: AppColors.textDark,
-                      fontSize: 18,
+                    style: TextStyle(
+                      color: isPrimary ? _kIce : _kDeepNavy,
+                      fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: -0.4,
+                      letterSpacing: -0.3,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   Text(
                     desc,
-                    style: const TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 13,
-                      height: 1.4,
+                    style: TextStyle(
+                      color: isPrimary
+                          ? _kIce.withValues(alpha: 0.55)
+                          : Colors.black.withValues(alpha: 0.45),
+                      fontSize: 12,
+                      height: 1.45,
                     ),
                   ),
                 ],
               ),
             ),
+            const SizedBox(width: 12),
+
+            // Arrow / loader
             if (isLoading)
               const SizedBox(
-                width: 24,
-                height: 24,
+                width: 22,
+                height: 22,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
                   color: AppColors.textMuted,
                 ),
               )
             else
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: Colors.grey.shade300,
-                size: 16,
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: isPrimary
+                      ? _kTeal.withValues(alpha: 0.25)
+                      : _kDeepNavy.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.arrow_forward_rounded,
+                  color: isPrimary ? _kCyan : _kDeepNavy.withValues(alpha: 0.4),
+                  size: 18,
+                ),
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  // ── AI Info Card ───────────────────────────────────────────────────────────
+
+  Widget _buildAiInfoCard() {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: _kTeal.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: _kTeal.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: _kTeal.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Center(
+              child: Text('🧠', style: TextStyle(fontSize: 18)),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Activa AI Insight',
+                  style: TextStyle(
+                    color: _kTeal,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Analisis ini membantu Activa memahami pola digitalmu dan memberikan insight yang lebih personal.',
+                  style: TextStyle(
+                    color: _kDeepNavy.withValues(alpha: 0.65),
+                    fontSize: 12,
+                    height: 1.55,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -842,10 +1176,60 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
+// WAVE CLIPPERS
+// ══════════════════════════════════════════════════════════════════════════════
+
+/// Clips the dark navy top section into a smooth inverted-U wave at the bottom.
+/// The navy sits ABOVE the wave; ice white shows through below.
+class _TopWaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size s) {
+    final p = Path();
+    p.lineTo(0, s.height * 0.4);
+    p.quadraticBezierTo(
+      s.width * 0.25,
+      s.height, // left control
+      s.width * 0.5,
+      s.height * 0.55, // peak midpoint
+    );
+    p.quadraticBezierTo(
+      s.width * 0.75,
+      s.height * 0.1, // right control
+      s.width,
+      s.height * 0.4, // right edge
+    );
+    p.lineTo(s.width, 0);
+    p.close();
+    return p;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+/// Smooth inverted-U wave that lifts the ice white section upward,
+/// layered just below the _TopWaveClipper for a soft dual-wave look.
+class _BottomWaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size s) {
+    final p = Path();
+    p.moveTo(0, s.height * 0.5);
+    // Inverted-U: starts mid-left, arches up to centre, comes back down mid-right
+    p.quadraticBezierTo(s.width * 0.5, 0, s.width, s.height * 0.5);
+    p.lineTo(s.width, s.height);
+    p.lineTo(0, s.height);
+    p.close();
+    return p;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // HALAMAN 1 — PENGGUNAAN DIGITAL
-// Q1–Q5: Semua pilihan (option card)
-// ═══════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
 
 class _PagePenggunaanDigital extends ConsumerWidget {
   @override
@@ -857,213 +1241,195 @@ class _PagePenggunaanDigital extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
       child: Column(
         children: [
-          // Q1 — Lama pakai perangkat
           _QuestionBlock(
             number: 1,
             question:
                 'Berapa lama kamu menggunakan perangkat digital hari ini?',
             hint: 'Total semua perangkat (HP, laptop, tablet, dll)',
-            child: Column(
-              children: [
-                QuestionOptionCard(
+            child: FiveOptionGridPicker(
+              options: const [
+                GridOptionData(
                   label: 'Sangat Sedikit',
-                  subtitle: 'Kurang dari 2 jam',
-                  isSelected: form.deviceHoursPerDay == 1.5,
-                  onTap: () => notifier.setDeviceHours(1.5),
+                  description: 'Kurang dari 2 jam total penggunaan perangkat.',
+                  value: 1.5,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Sedikit',
-                  subtitle: 'Sekitar 2-4 jam',
-                  isSelected: form.deviceHoursPerDay == 3.0,
-                  onTap: () => notifier.setDeviceHours(3.0),
+                  description: 'Sekitar 2–4 jam penggunaan perangkat.',
+                  value: 3.0,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Sedang',
-                  subtitle: 'Sekitar 4-7 jam',
-                  isSelected: form.deviceHoursPerDay == 5.5,
-                  onTap: () => notifier.setDeviceHours(5.5),
+                  description: 'Sekitar 4–7 jam penggunaan perangkat.',
+                  value: 5.5,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Lama',
-                  subtitle: 'Sekitar 7-10 jam',
-                  isSelected: form.deviceHoursPerDay == 8.5,
-                  onTap: () => notifier.setDeviceHours(8.5),
+                  description: 'Sekitar 7–10 jam penggunaan perangkat.',
+                  value: 8.5,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Sangat Lama',
-                  subtitle: 'Lebih dari 10 jam',
-                  isSelected: form.deviceHoursPerDay == 12.0,
-                  onTap: () => notifier.setDeviceHours(12.0),
+                  description: 'Lebih dari 10 jam penggunaan perangkat.',
+                  value: 12.0,
                 ),
               ],
+              selectedValue: form.deviceHoursPerDay,
+              onChanged: (v) => notifier.setDeviceHours(v as double),
             ),
           ),
           const SizedBox(height: 28),
 
-          // Q2 — Buka HP
           _QuestionBlock(
             number: 2,
             question: 'Seberapa sering kamu membuka HP hari ini?',
             hint: 'Estimasi berapa kali kamu cek / unlock HP',
-            child: Column(
-              children: [
-                QuestionOptionCard(
+            child: FiveOptionGridPicker(
+              options: const [
+                GridOptionData(
                   label: 'Jarang',
-                  subtitle: 'Kurang dari 20 kali',
-                  isSelected: form.phoneUnlocksPerDay == 10,
-                  onTap: () => notifier.setPhoneUnlocks(10),
+                  description: 'Kurang dari 20 kali membuka HP hari ini.',
+                  value: 10,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Kadang-kadang',
-                  subtitle: 'Sekitar 20-50 kali',
-                  isSelected: form.phoneUnlocksPerDay == 35,
-                  onTap: () => notifier.setPhoneUnlocks(35),
+                  description: 'Sekitar 20–50 kali membuka HP.',
+                  value: 35,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Cukup Sering',
-                  subtitle: 'Sekitar 50-100 kali',
-                  isSelected: form.phoneUnlocksPerDay == 75,
-                  onTap: () => notifier.setPhoneUnlocks(75),
+                  description: 'Sekitar 50–100 kali membuka HP.',
+                  value: 75,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Sering',
-                  subtitle: 'Sekitar 100-200 kali',
-                  isSelected: form.phoneUnlocksPerDay == 150,
-                  onTap: () => notifier.setPhoneUnlocks(150),
+                  description: 'Sekitar 100–200 kali membuka HP.',
+                  value: 150,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Sangat Sering',
-                  subtitle: 'Lebih dari 200 kali',
-                  isSelected: form.phoneUnlocksPerDay == 250,
-                  onTap: () => notifier.setPhoneUnlocks(250),
+                  description: 'Lebih dari 200 kali membuka HP.',
+                  value: 250,
                 ),
               ],
+              selectedValue: form.phoneUnlocksPerDay,
+              onChanged: (v) => notifier.setPhoneUnlocks(v as int),
             ),
           ),
           const SizedBox(height: 28),
 
-          // Q3 — Notifikasi
           _QuestionBlock(
             number: 3,
             question: 'Berapa banyak notifikasi yang kamu terima hari ini?',
             hint: 'Gabungan semua aplikasi: WA, IG, email, dll',
-            child: Column(
-              children: [
-                QuestionOptionCard(
+            child: FiveOptionGridPicker(
+              options: const [
+                GridOptionData(
                   label: 'Hampir Tidak Ada',
-                  subtitle: 'Kurang dari 50 notifikasi',
-                  isSelected: form.notificationsPerDay == 30,
-                  onTap: () => notifier.setNotifications(30),
+                  description: 'Kurang dari 50 notifikasi sepanjang hari.',
+                  value: 30,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Sedikit',
-                  subtitle: 'Sekitar 50-200 notifikasi',
-                  isSelected: form.notificationsPerDay == 100,
-                  onTap: () => notifier.setNotifications(100),
+                  description: 'Sekitar 50–200 notifikasi hari ini.',
+                  value: 100,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Lumayan',
-                  subtitle: 'Sekitar 200-500 notifikasi',
-                  isSelected: form.notificationsPerDay == 300,
-                  onTap: () => notifier.setNotifications(300),
+                  description: 'Sekitar 200–500 notifikasi hari ini.',
+                  value: 300,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Banyak',
-                  subtitle: 'Sekitar 500-1000 notifikasi',
-                  isSelected: form.notificationsPerDay == 700,
-                  onTap: () => notifier.setNotifications(700),
+                  description: 'Sekitar 500–1000 notifikasi hari ini.',
+                  value: 700,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Sangat Banyak',
-                  subtitle: 'Lebih dari 1000 notifikasi',
-                  isSelected: form.notificationsPerDay == 1100,
-                  onTap: () => notifier.setNotifications(1100),
+                  description: 'Lebih dari 1000 notifikasi hari ini.',
+                  value: 1100,
                 ),
               ],
+              selectedValue: form.notificationsPerDay,
+              onChanged: (v) => notifier.setNotifications(v as int),
             ),
           ),
           const SizedBox(height: 28),
 
-          // Q4 — Sosmed
           _QuestionBlock(
             number: 4,
             question: 'Berapa lama kamu menggunakan media sosial hari ini?',
             hint: 'Instagram, TikTok, Twitter, YouTube, dll',
-            child: Column(
-              children: [
-                QuestionOptionCard(
+            child: FiveOptionGridPicker(
+              options: const [
+                GridOptionData(
                   label: 'Tidak Pakai',
-                  subtitle: 'Hampir tidak pernah',
-                  isSelected: form.socialMediaMinutes == 0,
-                  onTap: () => notifier.setSocialMediaMinutes(0),
+                  description: 'Hampir tidak pernah membuka media sosial.',
+                  value: 0,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Kurang dari 1 Jam',
-                  subtitle: 'Sekitar 30 menit',
-                  isSelected: form.socialMediaMinutes == 30,
-                  onTap: () => notifier.setSocialMediaMinutes(30),
+                  description: 'Sekitar 30 menit di media sosial.',
+                  value: 30,
                 ),
-                QuestionOptionCard(
-                  label: '1-3 Jam',
-                  subtitle: 'Sekitar 2 jam per hari',
-                  isSelected: form.socialMediaMinutes == 120,
-                  onTap: () => notifier.setSocialMediaMinutes(120),
+                GridOptionData(
+                  label: '1–3 Jam',
+                  description: 'Sekitar 2 jam per hari di media sosial.',
+                  value: 120,
                 ),
-                QuestionOptionCard(
-                  label: '3-5 Jam',
-                  subtitle: 'Sekitar 4 jam per hari',
-                  isSelected: form.socialMediaMinutes == 240,
-                  onTap: () => notifier.setSocialMediaMinutes(240),
+                GridOptionData(
+                  label: '3–5 Jam',
+                  description: 'Sekitar 4 jam per hari di media sosial.',
+                  value: 240,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Lebih dari 5 Jam',
-                  subtitle: 'Sangat banyak waktu di sosmed',
-                  isSelected: form.socialMediaMinutes == 400,
-                  onTap: () => notifier.setSocialMediaMinutes(400),
+                  description: 'Sangat banyak waktu dihabiskan di sosmed.',
+                  value: 400,
                 ),
               ],
+              selectedValue: form.socialMediaMinutes,
+              onChanged: (v) => notifier.setSocialMediaMinutes(v as int),
             ),
           ),
           const SizedBox(height: 28),
 
-          // Q5 — Belajar/Kerja produktif
           _QuestionBlock(
             number: 5,
             question: 'Seberapa produktif kamu belajar atau bekerja hari ini?',
             hint: 'Waktu fokus tanpa distraksi',
-            child: Column(
-              children: [
-                QuestionOptionCard(
+            child: FiveOptionGridPicker(
+              options: const [
+                GridOptionData(
                   label: 'Hampir Tidak Ada',
-                  subtitle: 'Kurang dari 30 menit',
-                  isSelected: form.studyMinutes == 10,
-                  onTap: () => notifier.setStudyMinutes(10),
+                  description: 'Kurang dari 30 menit waktu fokus hari ini.',
+                  value: 10,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Sedikit',
-                  subtitle: 'Sekitar 30 menit - 1 jam',
-                  isSelected: form.studyMinutes == 60,
-                  onTap: () => notifier.setStudyMinutes(60),
+                  description: 'Sekitar 30 menit hingga 1 jam waktu fokus.',
+                  value: 60,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Cukup',
-                  subtitle: 'Sekitar 1-3 jam',
-                  isSelected: form.studyMinutes == 150,
-                  onTap: () => notifier.setStudyMinutes(150),
+                  description:
+                      'Sekitar 1–3 jam waktu belajar atau kerja fokus.',
+                  value: 150,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Produktif',
-                  subtitle: 'Sekitar 3-5 jam',
-                  isSelected: form.studyMinutes == 300,
-                  onTap: () => notifier.setStudyMinutes(300),
+                  description:
+                      'Sekitar 3–5 jam waktu belajar atau kerja fokus.',
+                  value: 300,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Sangat Produktif',
-                  subtitle: 'Lebih dari 5 jam fokus',
-                  isSelected: form.studyMinutes == 400,
-                  onTap: () => notifier.setStudyMinutes(400),
+                  description: 'Lebih dari 5 jam waktu fokus penuh hari ini.',
+                  value: 400,
                 ),
               ],
+              selectedValue: form.studyMinutes,
+              onChanged: (v) => notifier.setStudyMinutes(v as int),
             ),
           ),
           const SizedBox(height: 20),
@@ -1073,12 +1439,9 @@ class _PagePenggunaanDigital extends ConsumerWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
 // HALAMAN 2 — AKTIVITAS & TIDUR
-// Q6: slider hari olahraga
-// Q7: slider jam tidur
-// Q8: pilihan kualitas tidur
-// ═══════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
 
 class _PageAktivitasTidur extends ConsumerWidget {
   @override
@@ -1090,7 +1453,6 @@ class _PageAktivitasTidur extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
       child: Column(
         children: [
-          // Q6 — Jam tidur (diutamakan dulu sesuai gambar)
           _QuestionBlock(
             number: 6,
             question: 'Berapa jam kamu tidur per malam?',
@@ -1111,17 +1473,11 @@ class _PageAktivitasTidur extends ConsumerWidget {
                   onChanged: (v) => notifier.setSleepHours(v),
                 ),
                 const SizedBox(height: 16),
-                _buildInfoCard(
-                  icon: Icons.info_outline_rounded,
-                  color: AppColors.teal,
-                  text: 'Rata-rata pengguna seusia Anda tidur 7.2 jam.',
-                ),
               ],
             ),
           ),
           const SizedBox(height: 32),
 
-          // Q7 — Hari olahraga
           _QuestionBlock(
             number: 7,
             question: 'Berapa hari kamu berolahraga minggu ini?',
@@ -1154,44 +1510,41 @@ class _PageAktivitasTidur extends ConsumerWidget {
           ),
           const SizedBox(height: 32),
 
-          // Q8 — Kualitas tidur (pilihan)
           _QuestionBlock(
             number: 8,
             question: 'Bagaimana kualitas tidurmu secara umum?',
             hint: 'Pilih yang paling menggambarkan tidurmu',
-            child: Column(
-              children: [
-                QuestionOptionCard(
+            child: FiveOptionGridPicker(
+              options: const [
+                GridOptionData(
                   label: 'Sangat Buruk',
-                  subtitle: 'Sering terbangun, tidak segar',
-                  isSelected: form.sleepQuality == 1.0,
-                  onTap: () => notifier.setSleepQuality(1.0),
+                  description:
+                      'Sering terbangun dan tidak merasa segar pagi ini.',
+                  value: 1.0,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Buruk',
-                  subtitle: 'Kadang terbangun, kurang segar',
-                  isSelected: form.sleepQuality == 2.0,
-                  onTap: () => notifier.setSleepQuality(2.0),
+                  description: 'Kadang terbangun, kurang segar saat bangun.',
+                  value: 2.0,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Cukup',
-                  subtitle: 'Tidur cukup tapi tidak optimal',
-                  isSelected: form.sleepQuality == 3.0,
-                  onTap: () => notifier.setSleepQuality(3.0),
+                  description: 'Tidur cukup namun belum terasa optimal.',
+                  value: 3.0,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Baik',
-                  subtitle: 'Tidur nyenyak, terasa segar',
-                  isSelected: form.sleepQuality == 4.0,
-                  onTap: () => notifier.setSleepQuality(4.0),
+                  description: 'Tidur nyenyak dan merasa segar saat bangun.',
+                  value: 4.0,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Sangat Baik',
-                  subtitle: 'Tidur sangat nyenyak & berkualitas',
-                  isSelected: form.sleepQuality == 5.0,
-                  onTap: () => notifier.setSleepQuality(5.0),
+                  description: 'Tidur sangat nyenyak dan berkualitas tinggi.',
+                  value: 5.0,
                 ),
               ],
+              selectedValue: form.sleepQuality,
+              onChanged: (v) => notifier.setSleepQuality(v as double),
             ),
           ),
           const SizedBox(height: 20),
@@ -1247,13 +1600,9 @@ class _PageAktivitasTidur extends ConsumerWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
 // HALAMAN 3 — KONDISI MENTAL
-// Q9: Anxiety 0–27
-// Q10: Depresi  0–27
-// Q11: Stres    1–10
-// Q12: Happiness 0–10
-// ═══════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
 
 class _PageKondisiMental extends ConsumerWidget {
   @override
@@ -1268,153 +1617,174 @@ class _PageKondisiMental extends ConsumerWidget {
           _buildDisclaimer(),
           const SizedBox(height: 32),
 
-          // Q9 — Anxiety (pilihan ganda, nilai ML: 1/7/14/21/27)
           _QuestionBlock(
             number: 9,
             question:
                 'Seberapa sering kamu merasa cemas atau gelisah hari ini?',
             hint: 'Contoh: rasa takut, gugup, atau tidak bisa rileks',
-            child: Column(
-              children: [
-                QuestionOptionCard(
+            child: FiveOptionGridPicker(
+              options: const [
+                GridOptionData(
                   label: 'Sangat Jarang',
-                  subtitle: 'Hampir tidak pernah merasa cemas',
-                  isSelected: form.anxietyScore == 1.0,
-                  onTap: () => notifier.setAnxietyScore(1.0),
+                  description: 'Hampir tidak pernah merasa cemas.',
+                  value: 1.0,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Jarang',
-                  subtitle: 'Sesekali muncul rasa cemas',
-                  isSelected: form.anxietyScore == 7.0,
-                  onTap: () => notifier.setAnxietyScore(7.0),
+                  description: 'Sesekali muncul rasa cemas.',
+                  value: 7.0,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Sedang',
-                  subtitle: 'Kadang-kadang merasa cemas',
-                  isSelected: form.anxietyScore == 14.0,
-                  onTap: () => notifier.setAnxietyScore(14.0),
+                  description: 'Kadang-kadang merasa cemas.',
+                  value: 14.0,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Sering',
-                  subtitle: 'Cukup sering merasa cemas atau gelisah',
-                  isSelected: form.anxietyScore == 21.0,
-                  onTap: () => notifier.setAnxietyScore(21.0),
+                  description: 'Cukup sering merasa cemas atau gelisah.',
+                  value: 21.0,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Sangat Sering',
-                  subtitle: 'Hampir setiap saat merasa cemas',
-                  isSelected: form.anxietyScore == 27.0,
-                  onTap: () => notifier.setAnxietyScore(27.0),
+                  description: 'Hampir setiap saat merasa cemas.',
+                  value: 27.0,
                 ),
               ],
+              selectedValue: form.anxietyScore,
+              onChanged: (v) => notifier.setAnxietyScore(v as double),
             ),
           ),
           const SizedBox(height: 32),
 
-          // Q10 — Depresi (pilihan ganda, nilai ML: 1/7/14/21/27)
           _QuestionBlock(
             number: 10,
             question:
                 'Seberapa sering kamu merasa sedih atau tidak bersemangat hari ini?',
             hint: 'Pilih yang paling menggambarkan kondisimu',
-            child: Column(
-              children: [
-                QuestionOptionCard(
+            child: FiveOptionGridPicker(
+              options: const [
+                GridOptionData(
                   label: 'Sangat Jarang',
-                  subtitle: 'Hampir tidak pernah merasa sedih',
-                  isSelected: form.depressionScore == 1.0,
-                  onTap: () => notifier.setDepressionScore(1.0),
+                  description: 'Hampir tidak pernah merasa sedih.',
+                  value: 1.0,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Jarang',
-                  subtitle: 'Sesekali merasa kurang bersemangat',
-                  isSelected: form.depressionScore == 7.0,
-                  onTap: () => notifier.setDepressionScore(7.0),
+                  description: 'Sesekali merasa kurang bersemangat.',
+                  value: 7.0,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Sedang',
-                  subtitle: 'Kadang-kadang merasa sedih atau lesu',
-                  isSelected: form.depressionScore == 14.0,
-                  onTap: () => notifier.setDepressionScore(14.0),
+                  description: 'Kadang-kadang merasa sedih atau lesu.',
+                  value: 14.0,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Sering',
-                  subtitle: 'Cukup sering merasa sedih atau tidak berenergi',
-                  isSelected: form.depressionScore == 21.0,
-                  onTap: () => notifier.setDepressionScore(21.0),
+                  description:
+                      'Cukup sering merasa sedih atau tidak berenergi.',
+                  value: 21.0,
                 ),
-                QuestionOptionCard(
+                GridOptionData(
                   label: 'Sangat Sering',
-                  subtitle: 'Hampir setiap saat merasa sedih atau putus asa',
-                  isSelected: form.depressionScore == 27.0,
-                  onTap: () => notifier.setDepressionScore(27.0),
+                  description:
+                      'Hampir setiap saat merasa sedih atau putus asa.',
+                  value: 27.0,
                 ),
               ],
+              selectedValue: form.depressionScore,
+              onChanged: (v) => notifier.setDepressionScore(v as double),
             ),
           ),
           const SizedBox(height: 28),
 
-          // Q11 — Stres (Scale Picker 1-10)
           _QuestionBlock(
             number: 11,
             question: 'Seberapa tinggi tingkat stresmu minggu ini?',
             hint: 'Pilih yang paling menggambarkan tingkat stresmu',
             icon: Icons.psychology_rounded,
-            child: Column(
-              children: [
-                _FiveOptionPicker(
-                  options: const [
-                    _OptionData(label: 'Sangat Rendah', value: 1),
-                    _OptionData(label: 'Rendah', value: 3),
-                    _OptionData(label: 'Sedang', value: 5),
-                    _OptionData(label: 'Tinggi', value: 7),
-                    _OptionData(label: 'Sangat Tinggi', value: 10),
-                  ],
-                  selectedValue: form.stressLevel.round(),
-                  lowLabel: 'Tenang',
-                  highLabel: 'Sangat Stres',
-                  invertColor: true, // tinggi = buruk (merah)
-                  onChanged: (v) => notifier.setStressLevel(v.toDouble()),
+            child: FiveOptionGridPicker(
+              options: const [
+                GridOptionData(
+                  label: 'Sangat Rendah',
+                  description: 'Merasa tenang dan hampir tidak ada tekanan.',
+                  value: 1.0,
                 ),
-                if (form.stressLevel >= 7) ...[
-                  const SizedBox(height: 16),
-                  _buildWarningCard(
-                    'Tingkat stresmu berada di atas rata-rata. Cobalah untuk mengambil jeda sejenak.',
-                  ),
-                ],
+                GridOptionData(
+                  label: 'Rendah',
+                  description:
+                      'Sedikit tekanan namun masih terkendali dengan baik.',
+                  value: 3.0,
+                ),
+                GridOptionData(
+                  label: 'Sedang',
+                  description:
+                      'Ada tekanan yang terasa namun masih bisa diatasi.',
+                  value: 5.0,
+                ),
+                GridOptionData(
+                  label: 'Tinggi',
+                  description: 'Merasa cukup tertekan dan sulit untuk rileks.',
+                  value: 7.0,
+                ),
+                GridOptionData(
+                  label: 'Sangat Tinggi',
+                  description:
+                      'Tekanan sangat berat dan mengganggu aktivitas sehari-hari.',
+                  value: 10.0,
+                ),
               ],
+              selectedValue: form.stressLevel,
+              onChanged: (v) => notifier.setStressLevel(v as double),
             ),
           ),
           const SizedBox(height: 28),
 
-          // Q12 — Happiness (Scale Picker 1-10)
           _QuestionBlock(
             number: 12,
             question: 'Seberapa bahagia perasaanmu?',
             hint: 'Pilih yang menggambarkan suasana hatimu',
             icon: Icons.sentiment_satisfied_alt_rounded,
-            child: _FiveOptionPicker(
+            child: FiveOptionGridPicker(
               options: const [
-                _OptionData(label: 'Sangat Sedih', value: 1),
-                _OptionData(label: 'Sedih', value: 3),
-                _OptionData(label: 'Biasa', value: 5),
-                _OptionData(label: 'Bahagia', value: 7),
-                _OptionData(label: 'Sangat Bahagia', value: 10),
+                GridOptionData(
+                  label: 'Sangat Sedih',
+                  description:
+                      'Merasa sangat tidak bahagia atau hampa hari ini.',
+                  value: 1.0,
+                ),
+                GridOptionData(
+                  label: 'Sedih',
+                  description:
+                      'Suasana hati kurang baik dan kurang bersemangat.',
+                  value: 3.0,
+                ),
+                GridOptionData(
+                  label: 'Biasa',
+                  description:
+                      'Perasaan netral, tidak sedih namun tidak gembira.',
+                  value: 5.0,
+                ),
+                GridOptionData(
+                  label: 'Bahagia',
+                  description: 'Merasa cukup bahagia dan bersemangat hari ini.',
+                  value: 7.0,
+                ),
+                GridOptionData(
+                  label: 'Sangat Bahagia',
+                  description:
+                      'Merasa sangat gembira dan penuh energi positif.',
+                  value: 10.0,
+                ),
               ],
-              selectedValue: form.happinessScore.round(),
-              lowLabel: 'Sedih',
-              highLabel: 'Sangat Bahagia',
-              invertColor: false, // tinggi = bagus (hijau)
-              onChanged: (v) => notifier.setHappinessScore(v.toDouble()),
+              selectedValue: form.happinessScore,
+              onChanged: (v) => notifier.setHappinessScore(v as double),
             ),
           ),
           const SizedBox(height: 24),
 
-          // Motivational quote card
           _buildQuoteCard(),
           const SizedBox(height: 24),
 
-          // Privacy note
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -1487,38 +1857,6 @@ class _PageKondisiMental extends ConsumerWidget {
     );
   }
 
-  Widget _buildWarningCard(String text) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.red.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.red.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.warning_amber_rounded,
-            color: AppColors.red.withValues(alpha: 0.8),
-            size: 24,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                color: AppColors.red.withValues(alpha: 0.9),
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                height: 1.4,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildQuoteCard() {
     return Container(
       height: 160,
@@ -1543,7 +1881,6 @@ class _PageKondisiMental extends ConsumerWidget {
       ),
       child: Stack(
         children: [
-          // Background pattern
           Positioned(
             right: -20,
             bottom: -20,
@@ -1553,7 +1890,6 @@ class _PageKondisiMental extends ConsumerWidget {
               color: Colors.white.withValues(alpha: 0.2),
             ),
           ),
-          // Content
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -1588,9 +1924,225 @@ class _PageKondisiMental extends ConsumerWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
+// SUBMITTING OVERLAY
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _SubmittingOverlay extends StatefulWidget {
+  const _SubmittingOverlay();
+
+  @override
+  State<_SubmittingOverlay> createState() => _SubmittingOverlayState();
+}
+
+class _SubmittingOverlayState extends State<_SubmittingOverlay>
+    with TickerProviderStateMixin {
+  late final AnimationController _pulseCtrl;
+  late final AnimationController _stepCtrl;
+  late final Animation<double> _pulseAnim;
+
+  int _currentStep = 0;
+
+  static const _steps = [
+    (Icons.upload_rounded, 'Mengirim data kuesioner ke server...'),
+    (
+      Icons.psychology_rounded,
+      'Model AI sedang menganalisis pola digitalmu...',
+    ),
+    (Icons.auto_graph_rounded, 'Menghitung skor ketergantungan digital...'),
+    (
+      Icons.check_circle_outline_rounded,
+      'Menyiapkan hasil & rekomendasi untukmu...',
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat(reverse: true);
+    _pulseAnim = Tween<double>(
+      begin: 0.6,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
+    _stepCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _cycleSteps();
+  }
+
+  void _cycleSteps() async {
+    while (mounted) {
+      await Future.delayed(const Duration(milliseconds: 2200));
+      if (!mounted) break;
+      setState(() => _currentStep = (_currentStep + 1) % _steps.length);
+      _stepCtrl.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulseCtrl.dispose();
+    _stepCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: _kDeepNavy.withValues(alpha: 0.97),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedBuilder(
+                animation: _pulseAnim,
+                builder: (_, __) => Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _kTeal.withValues(alpha: 0.08),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _kTeal.withValues(
+                          alpha: _pulseAnim.value * 0.35,
+                        ),
+                        blurRadius: 40,
+                        spreadRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.psychology_rounded,
+                    color: _kTeal.withValues(alpha: _pulseAnim.value),
+                    size: 48,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 36),
+              const Text(
+                'Sedang Menganalisis...',
+                style: TextStyle(
+                  color: _kIce,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.3,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Mohon tunggu, jangan tutup aplikasi ini',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: _kIce.withValues(alpha: 0.45),
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 36),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 18,
+                ),
+                decoration: BoxDecoration(
+                  color: _kNavy.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: _kIce.withValues(alpha: 0.08)),
+                ),
+                child: Column(
+                  children: List.generate(_steps.length, (i) {
+                    final isDone = i < _currentStep;
+                    final isActive = i == _currentStep;
+                    final color = isDone || isActive
+                        ? _kTeal
+                        : _kIce.withValues(alpha: 0.2);
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Row(
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: (isDone || isActive)
+                                  ? _kTeal.withValues(alpha: 0.15)
+                                  : Colors.transparent,
+                              border: Border.all(
+                                color: color,
+                                width: isActive ? 2 : 1.5,
+                              ),
+                            ),
+                            child: isDone
+                                ? const Icon(
+                                    Icons.check_rounded,
+                                    color: _kTeal,
+                                    size: 16,
+                                  )
+                                : Icon(_steps[i].$1, color: color, size: 16),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              _steps[i].$2,
+                              style: TextStyle(
+                                color: isActive
+                                    ? _kIce
+                                    : isDone
+                                    ? _kTeal.withValues(alpha: 0.7)
+                                    : _kIce.withValues(alpha: 0.3),
+                                fontSize: 13,
+                                fontWeight: isActive
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                              ),
+                            ),
+                          ),
+                          if (isActive)
+                            const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: _kTeal,
+                              ),
+                            ),
+                        ],
+                      ),
+                    );
+                  }),
+                ),
+              ),
+              const SizedBox(height: 28),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
+                  value: (_currentStep + 1) / _steps.length,
+                  minHeight: 4,
+                  backgroundColor: _kTeal.withValues(alpha: 0.1),
+                  valueColor: const AlwaysStoppedAnimation(_kTeal),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // REUSABLE — QUESTION BLOCK
-// ═══════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
 
 class _QuestionBlock extends StatelessWidget {
   final int number;
@@ -1787,15 +2339,15 @@ class _FiveOptionPicker extends StatelessWidget {
             color: isSelected ? color : color.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1.5,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: isSelected
-                  ? color.withValues(alpha: 0.35)
-                  : color.withValues(alpha: 0.0),
-              blurRadius: 10,
-              offset: isSelected ? const Offset(0, 4) : Offset.zero,
-            ),
-          ],
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.35),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
         ),
         child: Center(
           child: Text(
