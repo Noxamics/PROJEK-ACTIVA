@@ -226,15 +226,15 @@ class _GrafikScreenState extends ConsumerState<GrafikScreen> {
           decoration: BoxDecoration(
             color: isSelected ? AppColors.bgDark : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: AppColors.bgDark.withValues(alpha: 0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
+            boxShadow: [
+              BoxShadow(
+                color: isSelected
+                    ? AppColors.bgDark.withValues(alpha: 0.2)
+                    : AppColors.bgDark.withValues(alpha: 0.0),
+                blurRadius: 8,
+                offset: isSelected ? const Offset(0, 2) : Offset.zero,
+              ),
+            ],
           ),
           child: Text(
             _periodLabels[i],

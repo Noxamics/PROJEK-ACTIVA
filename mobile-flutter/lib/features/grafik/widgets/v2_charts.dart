@@ -348,7 +348,7 @@ class _GenericBarChartState extends State<GenericBarChart> {
                                   heightFactor: hFactor,
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 400),
-                                    curve: Curves.easeOutBack,
+                                    curve: Curves.easeOutCubic,
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                         colors: [widget.color, widget.color.withValues(alpha: 0.8)],
@@ -357,12 +357,13 @@ class _GenericBarChartState extends State<GenericBarChart> {
                                       ),
                                       borderRadius: BorderRadius.circular(8),
                                       boxShadow: [
-                                        if (isSelected)
-                                          BoxShadow(
-                                            color: widget.color.withValues(alpha: 0.3),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 4),
-                                          ),
+                                        BoxShadow(
+                                          color: isSelected
+                                              ? widget.color.withValues(alpha: 0.3)
+                                              : widget.color.withValues(alpha: 0.0),
+                                          blurRadius: 8,
+                                          offset: isSelected ? const Offset(0, 4) : Offset.zero,
+                                        ),
                                       ],
                                     ),
                                   ),

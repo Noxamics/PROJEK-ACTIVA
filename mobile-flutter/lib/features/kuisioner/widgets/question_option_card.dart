@@ -114,15 +114,15 @@ class QuestionOptionCard extends StatelessWidget {
                   color: isSelected ? AppColors.teal : AppColors.textDisabled,
                   width: 2,
                 ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: AppColors.teal.withValues(alpha: 0.3),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : null,
+                boxShadow: [
+                  BoxShadow(
+                    color: isSelected
+                        ? AppColors.teal.withValues(alpha: 0.3)
+                        : AppColors.teal.withValues(alpha: 0.0),
+                    blurRadius: 6,
+                    offset: isSelected ? const Offset(0, 2) : Offset.zero,
+                  ),
+                ],
               ),
               child: isSelected
                   ? const Icon(

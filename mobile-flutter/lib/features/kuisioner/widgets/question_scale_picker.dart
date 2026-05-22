@@ -93,15 +93,15 @@ class QuestionScalePicker extends StatelessWidget {
                 color: isSelected ? color : color.withValues(alpha: 0.3),
                 width: isSelected ? 2.5 : 1.5,
               ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: color.withValues(alpha: 0.4),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                  : null,
+              boxShadow: [
+                BoxShadow(
+                  color: isSelected
+                      ? color.withValues(alpha: 0.4)
+                      : color.withValues(alpha: 0.0),
+                  blurRadius: 10,
+                  offset: isSelected ? const Offset(0, 4) : Offset.zero,
+                ),
+              ],
             ),
             child: Center(
               child: Text(

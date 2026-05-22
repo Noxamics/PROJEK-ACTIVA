@@ -493,15 +493,15 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
                         : isCompleted
                         ? const Color(0xFF5EEAD4) // Light teal
                         : Colors.white.withValues(alpha: 0.2),
-                    boxShadow: isActive
-                        ? [
-                            BoxShadow(
-                              color: AppColors.teal.withValues(alpha: 0.5),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ]
-                        : null,
+                    boxShadow: [
+                      BoxShadow(
+                        color: isActive
+                            ? AppColors.teal.withValues(alpha: 0.5)
+                            : AppColors.teal.withValues(alpha: 0.0),
+                        blurRadius: 12,
+                        offset: isActive ? const Offset(0, 4) : Offset.zero,
+                      ),
+                    ],
                   ),
                   child: Center(
                     child: Text(
@@ -1787,15 +1787,15 @@ class _FiveOptionPicker extends StatelessWidget {
             color: isSelected ? color : color.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1.5,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.35),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
+          boxShadow: [
+            BoxShadow(
+              color: isSelected
+                  ? color.withValues(alpha: 0.35)
+                  : color.withValues(alpha: 0.0),
+              blurRadius: 10,
+              offset: isSelected ? const Offset(0, 4) : Offset.zero,
+            ),
+          ],
         ),
         child: Center(
           child: Text(
