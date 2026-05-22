@@ -558,28 +558,29 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
   Widget _buildSelectionView() {
     return Scaffold(
       backgroundColor: _kDeepNavy,
-      body: Stack(
+      body: Column(
         children: [
-          // ── Full column layout ──────────────────────────────────────────
-          Column(
-            children: [
-              // Dark header area (expands to fill above the wave)
-              Expanded(child: _buildSelectionHeader()),
+          // ── Dark navy header — compact, like dashboard topbar ───────────
+          _buildSelectionHeader(),
 
-              // Wave transition + white content area
-              _buildWaveContentArea(),
-            ],
-          ),
+          // ── Wave + white card area — fills remaining space ──────────────
+          Expanded(
+            child: Stack(
+              children: [
+                _buildWaveContentArea(),
 
-          // ── Bottom nav sits on top ──────────────────────────────────────
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: BottomNav(
-              currentIndex: 1,
-              navTheme: NavTheme.light,
-              onTap: _onNavTap,
+                // Bottom nav pinned at the very bottom
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: BottomNav(
+                    currentIndex: 1,
+                    navTheme: NavTheme.light,
+                    onTap: _onNavTap,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -590,204 +591,174 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
   // ── Header (dark navy area) ────────────────────────────────────────────────
 
   Widget _buildSelectionHeader() {
+    // Compact header — hanya wraps kontennya, tidak Expanded
     return SafeArea(
       bottom: false,
-      child: Stack(
-        children: [
-          // Decorative glow orbs
-          Positioned(
-            top: -30,
-            left: -30,
-            child: Container(
-              width: 160,
-              height: 160,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: _kTeal.withValues(alpha: 0.15),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 60,
-            right: -20,
-            child: Container(
-              width: 110,
-              height: 110,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: _kPurple.withValues(alpha: 0.15),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 60,
-            left: 80,
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: _kCyan.withValues(alpha: 0.12),
-              ),
-            ),
-          ),
-
-          // Particle dots
-          ..._buildParticles(),
-
-          // Main header content
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Back button
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: _kCyan.withValues(alpha: 0.3)),
-                    ),
-                    child: const Icon(
-                      Icons.arrow_back_rounded,
-                      color: _kCyan,
-                      size: 22,
-                    ),
+      child: ClipRect(
+        child: SizedBox(
+          // Tinggi fixed mirip dashboard topbar: cukup untuk back btn + title
+          height: 160,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // Glow orb kiri atas
+              Positioned(
+                top: -40,
+                left: -40,
+                child: Container(
+                  width: 140,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _kTeal.withValues(alpha: 0.18),
                   ),
                 ),
-                const SizedBox(height: 28),
+              ),
+              // Glow orb kanan
+              Positioned(
+                top: 10,
+                right: -20,
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _kPurple.withValues(alpha: 0.18),
+                  ),
+                ),
+              ),
+              // Partikel kecil
+              Positioned(top: 20, left: 120, child: _dot(4, _kCyan)),
+              Positioned(top: 55, left: 60, child: _dot(3, _kPurple)),
+              Positioned(top: 30, right: 110, child: _dot(3, _kCyan)),
+              Positioned(top: 100, right: 60, child: _dot(2, _kPurple)),
 
-                // Mascot + title row
-                Row(
+              // Konten utama
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Label chip
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 5,
-                            ),
+                    // Baris: back button + label chip + mascot
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            width: 40,
+                            height: 40,
                             decoration: BoxDecoration(
-                              color: _kCyan.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(50),
+                              color: Colors.white.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: _kCyan.withValues(alpha: 0.3),
                               ),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 6,
-                                  height: 6,
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: _kCyan,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                const Text(
-                                  'Activa AI',
-                                  style: TextStyle(
-                                    color: _kCyan,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 1.2,
-                                  ),
-                                ),
-                              ],
+                            child: const Icon(
+                              Icons.arrow_back_rounded,
+                              color: _kCyan,
+                              size: 20,
                             ),
                           ),
-                          const SizedBox(height: 14),
-
-                          // Title
-                          RichText(
-                            text: const TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: 'Kuesioner\n',
-                                  style: TextStyle(
-                                    color: _kIce,
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.w800,
-                                    height: 1.1,
-                                    letterSpacing: -0.8,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: 'Analisis',
-                                  style: TextStyle(
-                                    color: _kCyan,
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.w800,
-                                    height: 1.1,
-                                    letterSpacing: -0.8,
-                                  ),
-                                ),
-                              ],
+                        ),
+                        const SizedBox(width: 12),
+                        // Label chip
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _kCyan.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(50),
+                            border: Border.all(
+                              color: _kCyan.withValues(alpha: 0.3),
                             ),
                           ),
-                          const SizedBox(height: 10),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 5,
+                                height: 5,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: _kCyan,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                              const Text(
+                                'Activa AI',
+                                style: TextStyle(
+                                  color: _kCyan,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 1.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Spacer(),
+                        // Mascot
+                        _buildMascot(),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
 
-                          Text(
-                            'Kenali pola digitalmu hari ini',
+                    // Title + subtitle
+                    RichText(
+                      text: const TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Kuesioner ',
                             style: TextStyle(
-                              color: _kIce.withValues(alpha: 0.55),
-                              fontSize: 14,
-                              height: 1.5,
+                              color: _kIce,
+                              fontSize: 26,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.6,
+                            ),
+                          ),
+                          TextSpan(
+                            text: 'Analisis',
+                            style: TextStyle(
+                              color: _kCyan,
+                              fontSize: 26,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.6,
                             ),
                           ),
                         ],
                       ),
                     ),
-
-                    // Floating mascot
-                    _buildMascot(),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Kenali pola digitalmu hari ini',
+                      style: TextStyle(
+                        color: _kIce.withValues(alpha: 0.5),
+                        fontSize: 13,
+                      ),
+                    ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  List<Widget> _buildParticles() {
-    final specs = [
-      (30.0, 180.0, 4.0, _kCyan),
-      (80.0, 210.0, 3.0, _kPurple),
-      (280.0, 100.0, 5.0, _kCyan),
-      (310.0, 170.0, 3.0, _kTeal),
-      (50.0, 280.0, 4.0, _kPurple),
-      (200.0, 150.0, 2.0, _kCyan),
-      (340.0, 240.0, 3.0, _kPurple),
-    ];
-    return specs
-        .map(
-          (s) => Positioned(
-            left: s.$1,
-            top: s.$2,
-            child: Container(
-              width: s.$3,
-              height: s.$3,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: (s.$4 as Color).withValues(alpha: 0.7),
-              ),
-            ),
-          ),
-        )
-        .toList();
-  }
+  Widget _dot(double size, Color color) => Container(
+    width: size,
+    height: size,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: color.withValues(alpha: 0.7),
+    ),
+  );
 
   Widget _buildMascot() {
     return Container(
@@ -815,46 +786,38 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
   // ── Wave + white content area ──────────────────────────────────────────────
 
   Widget _buildWaveContentArea() {
-    return SizedBox(
-      // Enough height for the wave + cards + bottom nav space
-      height: 420,
+    return SizedBox.expand(
       child: Stack(
         children: [
-          // ── Ice white background fills the bottom ──────────────────────
-          Positioned(
-            // The wave peak sits ~50px from the top; fill from there down
-            top: 50,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(color: _kIce),
-          ),
+          // ── Ice white background — fills entire area ───────────────────
+          Positioned.fill(child: Container(color: _kIce)),
 
-          // ── Smooth inverted-U wave: navy → ice ─────────────────────────
+          // ── Wave identik dengan dashboard _HeroHeader ──────────────────
+          // Blok navy solid di atas, ClipPath ice white memotong bawahnya
+          // membentuk kurva U terbalik (quadraticBezier) — sama dengan dashboard.
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            child: ClipPath(
-              clipper: _TopWaveClipper(),
-              child: Container(height: 80, color: _kDeepNavy),
+            child: Stack(
+              children: [
+                Container(height: 52, color: _kDeepNavy),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: ClipPath(
+                    clipper: _KuesionerWaveClipper(),
+                    child: Container(height: 40, color: _kIce),
+                  ),
+                ),
+              ],
             ),
           ),
 
-          // ── Bottom thin wave overlay (ice) ─────────────────────────────
+          // ── Card content — starts below the wave peak ──────────────────
           Positioned(
-            top: 40,
-            left: 0,
-            right: 0,
-            child: ClipPath(
-              clipper: _BottomWaveClipper(),
-              child: Container(height: 40, color: _kIce),
-            ),
-          ),
-
-          // ── Card content ───────────────────────────────────────────────
-          Positioned(
-            top: 72,
+            top: 52,
             left: 0,
             right: 0,
             bottom: 0,
@@ -1177,54 +1140,38 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// WAVE CLIPPERS
+// WAVE CLIPPER — Copy persis dari dashboard _BottomWaveClipper
+// Menghasilkan kurva U terbalik (busur ke atas) yang sama dengan header dashboard
 // ══════════════════════════════════════════════════════════════════════════════
 
-/// Clips the dark navy top section into a smooth inverted-U wave at the bottom.
-/// The navy sits ABOVE the wave; ice white shows through below.
-class _TopWaveClipper extends CustomClipper<Path> {
+class _KuesionerWaveClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size s) {
     final p = Path();
-    p.lineTo(0, s.height * 0.4);
-    p.quadraticBezierTo(
-      s.width * 0.25,
-      s.height, // left control
-      s.width * 0.5,
-      s.height * 0.55, // peak midpoint
-    );
-    p.quadraticBezierTo(
-      s.width * 0.75,
-      s.height * 0.1, // right control
-      s.width,
-      s.height * 0.4, // right edge
-    );
-    p.lineTo(s.width, 0);
-    p.close();
-    return p;
-  }
 
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
-}
+    // Mulai dari kiri bawah
+    p.moveTo(0, s.height);
 
-/// Smooth inverted-U wave that lifts the ice white section upward,
-/// layered just below the _TopWaveClipper for a soft dual-wave look.
-class _BottomWaveClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size s) {
-    final p = Path();
-    p.moveTo(0, s.height * 0.5);
-    // Inverted-U: starts mid-left, arches up to centre, comes back down mid-right
-    p.quadraticBezierTo(s.width * 0.5, 0, s.width, s.height * 0.5);
+    // Naik ke kiri atas
+    p.lineTo(0, s.height * 0.5);
+
+    // Kurva quadratic: control point di puncak tengah → bentuk U terbalik
+    p.quadraticBezierTo(
+      s.width * 0.5, // control x — titik tarikan kurva (tengah)
+      0, // control y — puncak lengkungan (atas)
+      s.width, // end x — ujung kanan
+      s.height * 0.5, // end y — kembali ke tengah kanan
+    );
+
+    // Turun ke kanan bawah lalu tutup
     p.lineTo(s.width, s.height);
-    p.lineTo(0, s.height);
     p.close();
+
     return p;
   }
 
   @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+  bool shouldReclip(_KuesionerWaveClipper old) => false;
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
