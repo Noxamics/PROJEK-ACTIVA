@@ -164,9 +164,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     return Scaffold(
       backgroundColor: const Color(0xFF0B1F3A),
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
             _buildHeroSection(),
+
             Expanded(
               child: _buildFormCard(isLoading: isLoading, errorMsg: errorMsg),
             ),
@@ -195,46 +197,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   Color(0xFF0D3352),
                 ],
                 stops: [0.0, 0.6, 1.0],
-              ),
-            ),
-          ),
-
-          // Organic wave shape 1
-          Positioned(
-            bottom: -12,
-            left: -20,
-            child: Container(
-              width: MediaQuery.of(context).size.width + 40,
-              height: 160,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0x2E0D9488), Color(0x1F7C83FD)],
-                ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(80),
-                  topRight: Radius.circular(60),
-                  bottomLeft: Radius.circular(50),
-                  bottomRight: Radius.circular(90),
-                ),
-              ),
-            ),
-          ),
-
-          // Organic wave shape 2
-          Positioned(
-            bottom: -22,
-            left: 0,
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: 130,
-              decoration: BoxDecoration(
-                color: const Color(0xFF0D3352).withValues(alpha: 0.6),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(60),
-                  topRight: Radius.circular(80),
-                  bottomLeft: Radius.circular(40),
-                  bottomRight: Radius.circular(60),
-                ),
               ),
             ),
           ),
@@ -280,6 +242,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 const SizedBox(height: 55),
                 _buildHeroText(),
               ],
+            ),
+          ),
+
+          // ── Wave transition ──
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: ClipPath(
+              clipper: _AuthWaveClipper(),
+              child: Container(height: 40, color: const Color(0xFFF0F9FF)),
             ),
           ),
         ],
@@ -387,7 +360,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             ),
             // Maskot image asset
             Image.asset(
-              'assets/images/Maskot.png',
+              'assets/images/maskot.png',
               width: 120,
               height: 120,
               fit: BoxFit.contain,
@@ -463,20 +436,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   // ── Form Card ──────────────────────────────────────────────────────────────
 
   Widget _buildFormCard({required bool isLoading, required String? errorMsg}) {
-    return Transform.translate(
-      offset: const Offset(0, -32),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFFF0F9FF),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x380B1F3A),
-              blurRadius: 40,
-              offset: Offset(0, -8),
-            ),
-          ],
-        ),
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFFF0F9FF),
+      ),
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           child: Padding(
@@ -724,8 +687,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             ),
           ),
         ),
-      ), // Container
-    ); // Transform.translate
+      );
   }
 
   Widget _buildFieldLabel(String label) {
@@ -983,4 +945,23 @@ class _AnimatedParticleState extends State<_AnimatedParticle>
       },
     );
   }
+}
+
+class _AuthWaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size s) {
+    final p = Path();
+    p.moveTo(0, s.height);
+    p.lineTo(0, s.height * 0.5);
+    p.quadraticBezierTo(
+      s.width * 0.5, 0,
+      s.width, s.height * 0.5,
+    );
+    p.lineTo(s.width, s.height);
+    p.close();
+    return p;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }

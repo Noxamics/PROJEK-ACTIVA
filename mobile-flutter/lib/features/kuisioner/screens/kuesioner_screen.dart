@@ -13,6 +13,7 @@ import '../../../shared/widgets/bottom_nav.dart';
 import '../../profil/screens/profil_screen.dart';
 import '../../grafik/screens/grafik_screen.dart';
 import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
+import '../../histori/screens/histori_screen.dart';
 
 // true  = hitung lokal (backend belum siap)
 // false = kirim ke Laravel → data masuk MongoDB
@@ -784,7 +785,7 @@ child: ClipOval(
   child: Transform.scale(
     scale: 0.8, // sesuaikan nilai ini, 1.0 = ukuran normal
     child: Image.asset(
-      'Assets/images/maskot.png',
+      'assets/images/maskot.png',
       width: 72,
       height: 72,
       fit: BoxFit.cover,
@@ -854,6 +855,21 @@ child: ClipOval(
                     accentColor: _kNavy,
                     onTap: _viewLatest,
                     isLoading: _isFetchingLatest,
+                  ),
+                  const SizedBox(height: 14),
+                  _selectionCard(
+                    title: 'Lihat Semua Histori',
+                    desc: 'Akses seluruh riwayat kuesioner dan perkembanganmu.',
+                    icon: Icons.list_alt_rounded,
+                    accentColor: _kPurple,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HistoriScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 14),
                   _buildAiInfoCard(),
