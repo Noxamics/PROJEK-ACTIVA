@@ -285,13 +285,13 @@
 <script>
 const CLIENT_ID = '{{ env("GOOGLE_CLIENT_ID") }}';
 const CSRF      = document.querySelector('meta[name="csrf-token"]').content;
-let   gOK       = @json(session('reg_google_verified', false));
+let   gOK       = json(session('reg_google_verified', false));
 
-@if(session('reg_google_verified') && session('reg_google_email'))
+if(session('reg_google_verified') && session('reg_google_email'))
 document.addEventListener('DOMContentLoaded', () => {
     showVerified('{{ session("reg_google_email") }}', '{{ session("reg_google_name","") }}', null);
 });
-@endif
+
 
 function initGoogle() {
     if (!CLIENT_ID || typeof google === 'undefined') { showFail(); return; }

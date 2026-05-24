@@ -1245,15 +1245,15 @@ class _PremiumFieldState extends State<_PremiumField> {
             color: widget.readOnly ? const Color(0xFFF8FFFE) : _kWhite,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: borderColor, width: focused ? 1.5 : 1),
-            boxShadow: focused
-                ? [
-                    BoxShadow(
-                      color: _kTeal.withOpacity(0.12),
-                      blurRadius: 12,
-                      offset: const Offset(0, 3),
-                    ),
-                  ]
-                : [],
+            boxShadow: [
+              BoxShadow(
+                color: focused
+                    ? _kTeal.withOpacity(0.12)
+                    : _kTeal.withOpacity(0.0),
+                blurRadius: 12,
+                offset: focused ? const Offset(0, 3) : Offset.zero,
+              ),
+            ],
           ),
           child: TextFormField(
             controller: widget.controller,

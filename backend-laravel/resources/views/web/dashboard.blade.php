@@ -37,7 +37,7 @@
                     </svg>
                     <div class="score-gauge-text">
                         @if($score !== null)
-                            <div class="score-value" style="color:{{ $scoreColor }}">{{ round($score) }}</div>
+                            <div class="score-value" @style="color: {{ $scoreColor }}">{{ round($score) }}</div>
                             <div class="score-label" style="color:var(--text-secondary);">dari 100</div>
                         @else
                             <div style="font-size:2.5rem;">🔒</div>

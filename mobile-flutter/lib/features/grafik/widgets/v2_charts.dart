@@ -176,6 +176,21 @@ class _LineChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (values.isEmpty) return;
 
+    if (values.length < 2) {
+      final x = size.width / 2;
+      final y = size.height - (values[0] / maxValue * size.height).clamp(0.0, size.height);
+      
+      final highlightPaint = Paint()..color = color.withValues(alpha: 0.2);
+      canvas.drawCircle(Offset(x, y), 10, highlightPaint);
+      
+      final outerDotPaint = Paint()..color = color;
+      canvas.drawCircle(Offset(x, y), 6, outerDotPaint);
+      
+      final innerDotPaint = Paint()..color = Colors.white;
+      canvas.drawCircle(Offset(x, y), 3, innerDotPaint);
+      return;
+    }
+
     final stepX = size.width / (values.length - 1);
 
     // Draw grid lines
@@ -305,11 +320,6 @@ class _GenericBarChartState extends State<GenericBarChart> {
 
   @override
   Widget build(BuildContext context) {
-    // Validasi _selectedIndex: pastikan tidak out of bounds
-    if (_selectedIndex != null && _selectedIndex! >= widget.values.length) {
-      _selectedIndex = null;
-    }
-
     final displayIndex =
         _selectedIndex ??
         (widget.values.isNotEmpty ? widget.values.length - 1 : null);
@@ -351,40 +361,26 @@ class _GenericBarChartState extends State<GenericBarChart> {
                                 // Active bar
                                 FractionallySizedBox(
                                   heightFactor: hFactor,
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      // Shadow container (non-animated, only shown when selected)
-                                      if (isSelected)
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(8),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: widget.color.withValues(alpha: 0.3),
-                                                blurRadius: 8,
-                                                offset: const Offset(0, 4),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      // Animated gradient bar
-                                      AnimatedContainer(
-                                        duration: const Duration(milliseconds: 400),
-                                        curve: Curves.easeOutBack,
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: [
-                                              widget.color,
-                                              widget.color.withValues(alpha: 0.8),
-                                            ],
-                                            begin: Alignment.topCenter,
-                                            end: Alignment.bottomCenter,
-                                          ),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 400),
+                                    curve: Curves.easeOutCubic,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [widget.color, widget.color.withValues(alpha: 0.8)],
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
                                       ),
-                                    ],
+                                      borderRadius: BorderRadius.circular(8),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: isSelected
+                                              ? widget.color.withValues(alpha: 0.3)
+                                              : widget.color.withValues(alpha: 0.0),
+                                          blurRadius: 8,
+                                          offset: isSelected ? const Offset(0, 4) : Offset.zero,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                                 if (isSelected)

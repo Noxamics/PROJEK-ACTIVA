@@ -1,96 +1,84 @@
 // lib/features/grafik/providers/grafik_provider.dart
+//
+// Provider yang meng-expose GrafikData ke GrafikScreen.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/network/api_client.dart';
-import '../../../core/network/api_endpoints.dart';
 import '../faker/grafik_faker.dart';
+import '../services/grafik_service.dart';
 
 // ── State ─────────────────────────────────────────────────────────────────────
 
-enum GrafikStatus { loading, success, error }
-
 class GrafikState {
-  final GrafikData? data;
+  final GrafikData data;
   final GrafikPeriod period;
-  final GrafikStatus status;
+  final bool isLoading;
   final String? errorMessage;
 
   const GrafikState({
-    this.data,
-    this.period = GrafikPeriod.week,
-    this.status = GrafikStatus.loading,
+    required this.data,
+    required this.period,
+    required this.isLoading,
     this.errorMessage,
   });
 
   GrafikState copyWith({
     GrafikData? data,
     GrafikPeriod? period,
-    GrafikStatus? status,
+    bool? isLoading,
     String? errorMessage,
+    bool clearError = false,
   }) {
     return GrafikState(
-      data:         data         ?? this.data,
-      period:       period       ?? this.period,
-      status:       status       ?? this.status,
-      errorMessage: errorMessage ?? this.errorMessage,
+      data: data ?? this.data,
+      period: period ?? this.period,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 }
 
 // ── Notifier ──────────────────────────────────────────────────────────────────
 
-class GrafikNotifier extends AsyncNotifier<GrafikState> {
+class GrafikNotifier extends Notifier<GrafikState> {
   @override
-  Future<GrafikState> build() async {
-    return _fetchAndBuild(GrafikPeriod.week);
+  GrafikState build() {
+    // Mulai mengambil data secara asynchronous saat inisialisasi
+    Future.microtask(() => fetchGrafikData(GrafikPeriod.week));
+
+    return const GrafikState(
+      data: GrafikData(
+        entries: [],
+        kategori: GrafikKategori(low: 0, medium: 0, high: 0),
+      ),
+      period: GrafikPeriod.week,
+      isLoading: true,
+    );
   }
 
-  /// Ganti periode dan fetch ulang data dari API.
-  Future<void> setPeriod(GrafikPeriod period) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _fetchAndBuild(period));
-  }
+  /// Fetch data grafik dari API berdasarkan periode
+  Future<void> fetchGrafikData(GrafikPeriod period) async {
+    state = state.copyWith(isLoading: true, clearError: true, period: period);
 
-  Future<GrafikState> _fetchAndBuild(GrafikPeriod period) async {
     try {
-      final data = await _fetchGrafik(period);
-      return GrafikState(
-        data:   data,
-        period: period,
-        status: GrafikStatus.success,
-      );
+      final service = ref.read(grafikServiceProvider);
+      final data = await service.getGrafikData(period);
+      state = state.copyWith(isLoading: false, data: data);
     } catch (e) {
-      return GrafikState(
-        period:       period,
-        status:       GrafikStatus.error,
+      state = state.copyWith(
+        isLoading: false,
         errorMessage: e.toString(),
       );
     }
   }
 
-  // ── API Call ──────────────────────────────────────────────────────────────
-
-  Future<GrafikData> _fetchGrafik(GrafikPeriod period) async {
-    // ApiClient sudah handle token otomatis via _AuthInterceptor
-    final client = ref.read(apiClientProvider);
-
-    final response = await client.get(
-      ApiEndpoints.analyticsGrafik,
-      queryParams: {'period': period.apiParam},
-    );
-
-    final body = response.data as Map<String, dynamic>;
-
-    if (body['success'] != true) {
-      throw Exception(body['message'] ?? 'Respons API tidak valid');
-    }
-
-    return GrafikData.fromJson(body['data'] as Map<String, dynamic>);
+  /// Ganti periode dan ambil data baru.
+  void setPeriod(GrafikPeriod period) {
+    fetchGrafikData(period);
   }
 }
 
 // ── Provider ──────────────────────────────────────────────────────────────────
 
-final grafikProvider = AsyncNotifierProvider<GrafikNotifier, GrafikState>(
+final grafikProvider = NotifierProvider<GrafikNotifier, GrafikState>(
   GrafikNotifier.new,
 );

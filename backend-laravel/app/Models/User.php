@@ -28,6 +28,7 @@ class User extends Authenticatable implements JWTSubject
 
     protected $casts = [
         'tgl_lahir'          => 'datetime',
+        'date_of_birth'      => 'datetime',
         'age'                => 'integer',
         'created_at'         => 'datetime',
         'updated_at'         => 'datetime',
