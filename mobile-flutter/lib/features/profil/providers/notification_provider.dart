@@ -5,7 +5,7 @@ import '../../../core/services/notification_service.dart';
 class NotificationNotifier extends StateNotifier<bool> {
   final LocalStorage _storage;
 
-  NotificationNotifier(this._storage) : super(true) {
+  NotificationNotifier(this._storage) : super(false) {
     _init();
   }
 

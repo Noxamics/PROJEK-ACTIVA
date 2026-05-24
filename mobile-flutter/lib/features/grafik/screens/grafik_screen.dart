@@ -7,9 +7,33 @@ import '../../../shared/widgets/bottom_nav.dart';
 import '../../kuisioner/screens/kuesioner_screen.dart';
 import '../../profil/screens/profil_screen.dart';
 import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
+import '../../profil/widgets/floating_particles.dart';
 import '../faker/grafik_faker.dart';
 import '../providers/grafik_provider.dart';
 import '../widgets/v2_charts.dart';
+
+// Warna background konten — dipakai oleh wave clipper
+const Color _kIce = AppColors.bgLight;
+
+// ══════════════════════════════════════════════════════════════════════════════
+// WAVE CLIPPER — Unified, identik dengan dashboard & layar lainnya
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _WaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final p = Path();
+    p.moveTo(0, size.height * 0.5);
+    p.quadraticBezierTo(size.width * 0.5, 0, size.width, size.height * 0.5);
+    p.lineTo(size.width, size.height);
+    p.lineTo(0, size.height);
+    p.close();
+    return p;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
 
 class GrafikScreen extends ConsumerStatefulWidget {
   const GrafikScreen({super.key});
@@ -34,43 +58,46 @@ class _GrafikScreenState extends ConsumerState<GrafikScreen> {
     final selectedPeriodIndex = _periodMap.indexOf(grafikState.period);
 
     return Scaffold(
-      backgroundColor: AppColors.bgDark,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: AppColors.bgLight,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-                ),
-                child: RefreshIndicator(
-                  color: AppColors.teal,
-                  backgroundColor: AppColors.bgWhite,
-                  onRefresh: () => ref.read(grafikProvider.notifier).fetchGrafikData(grafikState.period),
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-                    child: Column(
-                      children: [
-                        _buildPeriodSelector(selectedPeriodIndex),
-                        const SizedBox(height: 32),
-                        _buildContent(grafikState),
-                        const SizedBox(height: 32),
-                      ],
-                    ),
+      backgroundColor: _kIce,
+      body: Column(
+        children: [
+          // ── Hero Header with wave ──
+          SafeArea(
+            bottom: false,
+            child: _buildHeroHeader(),
+          ),
+
+          // ── Content area ──
+          Expanded(
+            child: Container(
+              color: _kIce,
+              child: RefreshIndicator(
+                color: AppColors.teal,
+                backgroundColor: AppColors.bgWhite,
+                onRefresh: () => ref.read(grafikProvider.notifier).fetchGrafikData(grafikState.period),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+                  child: Column(
+                    children: [
+                      _buildPeriodSelector(selectedPeriodIndex),
+                      const SizedBox(height: 32),
+                      _buildContent(grafikState),
+                      const SizedBox(height: 32),
+                    ],
                   ),
                 ),
               ),
             ),
-            BottomNav(
-              currentIndex: 3,
-              navTheme: NavTheme.light,
-              onTap: (i) => _onNavTap(context, i),
-            ),
-          ],
-        ),
+          ),
+
+          // ── Bottom Nav ──
+          BottomNav(
+            currentIndex: 3,
+            navTheme: NavTheme.light,
+            onTap: (i) => _onNavTap(context, i),
+          ),
+        ],
       ),
     );
   }
@@ -233,18 +260,6 @@ class _GrafikScreenState extends ConsumerState<GrafikScreen> {
             maxValue: 12,
           ),
         ),
-        const SizedBox(height: 20),
-
-        // 5. Kategori Dependensi
-        _card(
-          title: 'Kategori Dependensi',
-          subtitle: 'Distribusi tingkat dependensi selama periode ini',
-          child: DonutChartWidget(
-            low: data.kategori.low,
-            medium: data.kategori.medium,
-            high: data.kategori.high,
-          ),
-        ),
       ],
     );
   }
@@ -276,32 +291,86 @@ class _GrafikScreenState extends ConsumerState<GrafikScreen> {
     }
   }
 
-  Widget _buildHeader() {
-    return const Padding(
-      padding: EdgeInsets.fromLTRB(24, 20, 24, 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Visualisasi Data',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
+  Widget _buildHeroHeader() {
+    return Stack(
+      children: [
+        // ── Background gelap beserta konten header ─────────────────────
+        Container(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 72),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.bgDark,
+                AppColors.bgDark.withValues(alpha: 0.95),
+              ],
             ),
           ),
-          SizedBox(height: 6),
-          Text(
-            'Analisis aktivitas digital harianmu',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+          child: Row(
+            children: [
+              // Header icon
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.teal.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: AppColors.teal.withValues(alpha: 0.25),
+                  ),
+                ),
+                child: const Icon(
+                  Icons.bar_chart_rounded,
+                  color: AppColors.teal,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Visualisasi Data',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Analisis aktivitas digital harianmu',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.55),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+
+        // ── Floating particles ──
+        const Positioned.fill(
+          child: FloatingParticles(count: 12, color: AppColors.teal),
+        ),
+
+        // ── Wave putih melengkung ke atas — unified _WaveClipper ───────
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: -1,
+          child: ClipPath(
+            clipper: _WaveClipper(),
+            child: Container(height: 60, color: _kIce),
+          ),
+        ),
+      ],
     );
   }
 

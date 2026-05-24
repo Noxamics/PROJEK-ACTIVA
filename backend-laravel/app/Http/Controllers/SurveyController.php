@@ -94,13 +94,13 @@ class SurveyController extends Controller
 
             Log::info('STEP 5: ML gagal');
 
+            // Hapus kuesioner yang sempat tersimpan agar tidak mengotori histori kuesioner
+            $questionnaire->delete();
+
             return response()->json([
                 'success' => false,
                 'message' => $mlResult['error'] ?? 'Prediksi ML gagal',
-                'data' => [
-                    'questionnaire' => $this->formatQuestionnaire($questionnaire),
-                    'ml_result' => null,
-                ],
+                'data' => null,
             ], 207);
         }
 

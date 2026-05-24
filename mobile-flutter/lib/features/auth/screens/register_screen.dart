@@ -681,8 +681,8 @@ class _HeroHeader extends StatelessWidget {
                         // Mascot
                         Image.asset(
                           step == 0
-                              ? 'assets/images/maskot3.png'
-                              : 'assets/images/maskot4.png',
+                              ? 'assets/images/Maskot3.png'
+                              : 'assets/images/Maskot4.png',
                           height: 100,
                           errorBuilder: (_, __, ___) =>
                               const SizedBox(width: 80),

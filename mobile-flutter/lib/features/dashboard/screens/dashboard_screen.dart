@@ -17,6 +17,7 @@ import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
 import '../../laporan_perkembangan/providers/laporan_provider.dart';
 import '../../grafik/screens/grafik_screen.dart';
 import '../../profil/screens/profil_screen.dart';
+import '../../profil/widgets/floating_particles.dart';
 
 // Warna background konten (putih/light) — dipakai oleh wave clipper
 const Color _kIce = AppColors.bgLight;
@@ -158,7 +159,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
                           StreakCard(
                             streakDays: ref.watch(streakProvider).count,
-                            subtitle: 'Kebiasaan sehatmu mulai terbentuk.',
+                            lastFilledDaysAgo: ref.watch(streakProvider).lastFilledDaysAgo,
+                            subtitle: 'Kamu rutin memantau kesehatan digitalmu',
                           ),
                           const SizedBox(height: 16),
 
@@ -183,7 +185,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             habits: [
                               HabitItem(
                                 id: '1',
-                                label: 'Tidur melebihi 7 jam',
+                                label: 'Tidur minimal 7 jam',
                                 completed:
                                     latestResult != null &&
                                     latestResult.sleepHours >= 7,
@@ -714,6 +716,11 @@ class _HeroHeader extends StatelessWidget {
               ),
             ],
           ),
+        ),
+
+        // ── Floating particles ──
+        const Positioned.fill(
+          child: FloatingParticles(count: 12, color: AppColors.teal),
         ),
 
         // ── Wave putih melengkung ke atas — unified _WaveClipper ───────
