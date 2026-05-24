@@ -92,10 +92,10 @@ class LocalStorage {
     await prefs.setBool(_keyNotificationEnabled, enabled);
   }
 
-  /// Ambil status notifikasi (default true jika belum diset).
+  /// Ambil status notifikasi (default false jika belum diset).
   Future<bool> getNotificationSetting() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_keyNotificationEnabled) ?? true;
+    return prefs.getBool(_keyNotificationEnabled) ?? false;
   }
 
   // ── Clear All ──────────────────────────────────────────────────────────────

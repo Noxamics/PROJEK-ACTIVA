@@ -360,7 +360,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             ),
             // Maskot image asset
             Image.asset(
-              'assets/images/maskot.png',
+              'assets/images/Maskot.png',
               width: 120,
               height: 120,
               fit: BoxFit.contain,

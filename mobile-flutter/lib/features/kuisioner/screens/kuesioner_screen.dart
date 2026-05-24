@@ -15,6 +15,7 @@ import '../../grafik/screens/grafik_screen.dart';
 import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
 import '../../histori/screens/histori_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../profil/widgets/floating_particles.dart';
 
 // true  = hitung lokal (backend belum siap)
 // false = kirim ke Laravel → data masuk MongoDB
@@ -444,11 +445,16 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
           ),
         ),
 
+        // ── Floating particles ──
+        const Positioned.fill(
+          child: FloatingParticles(count: 12, color: AppColors.teal),
+        ),
+
         // ── Wave putih melengkung ke atas — unified clipper ────────────
         Positioned(
           left: 0,
           right: 0,
-          bottom: 0,
+          bottom: -1,
           child: ClipPath(
             clipper: _WaveClipper(),
             child: Container(height: 60, color: AppColors.bgLight),
@@ -584,7 +590,7 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
         children: [
           // ── Background gelap beserta konten header ─────────────────────
           Container(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 52),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 72),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -660,11 +666,16 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
             ),
           ),
 
+          // ── Floating particles ──
+          const Positioned.fill(
+            child: FloatingParticles(count: 12, color: _kTeal),
+          ),
+
           // ── Wave putih — unified clipper ───────────────────────────────
           Positioned(
             left: 0,
             right: 0,
-            bottom: 0,
+            bottom: -1,
             child: ClipPath(
               clipper: _WaveClipper(),
               child: Container(height: 60, color: _kIce),
@@ -708,7 +719,7 @@ child: ClipOval(
   child: Transform.scale(
     scale: 0.8, // sesuaikan nilai ini, 1.0 = ukuran normal
     child: Image.asset(
-      'assets/images/maskot.png',
+      'assets/images/Maskot.png',
       width: 72,
       height: 72,
       fit: BoxFit.cover,

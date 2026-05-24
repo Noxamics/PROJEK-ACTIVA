@@ -10,6 +10,7 @@ import '../../histori/providers/histori_provider.dart';
 import '../../kuisioner/screens/kuesioner_screen.dart';
 import '../../profil/screens/profil_screen.dart';
 import '../../grafik/screens/grafik_screen.dart';
+import '../../profil/widgets/floating_particles.dart';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // WAVE CLIPPER — Unified, dipakai di semua layar
@@ -373,11 +374,16 @@ class _HeroHeader extends StatelessWidget {
           ),
         ),
 
+        // ── Floating particles ──
+        const Positioned.fill(
+          child: FloatingParticles(count: 12, color: AppColors.teal),
+        ),
+
         // ── Wave putih — unified _WaveClipper ────────────────────────
         Positioned(
           left: 0,
           right: 0,
-          bottom: 0,
+          bottom: -1,
           child: ClipPath(
             clipper: _WaveClipper(),
             child: Container(height: 60, color: AppColors.bgLight),
@@ -708,7 +714,7 @@ class _InsightSection extends StatelessWidget {
             (e) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
               // ── CHANGED: index 0 & 1 pakai dark style ──
-              child: _InsightCard(def: e.value, isDark: e.key < 2),
+              child: _InsightCard(def: e.value),
             ),
           )
           .toList(),

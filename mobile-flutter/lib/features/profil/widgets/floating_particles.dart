@@ -10,11 +10,13 @@ import 'package:flutter/material.dart';
 class FloatingParticles extends StatefulWidget {
   final int count;
   final Color color;
+  final double? height;
 
   const FloatingParticles({
     super.key,
     this.count = 16,
     this.color = const Color(0xFF00E5C8),
+    this.height,
   });
 
   @override
@@ -46,31 +48,37 @@ class _FloatingParticlesState extends State<FloatingParticles>
 
   @override
   Widget build(BuildContext context) {
-    // Only render in the top dark section (hero area, ~40% of screen)
     return IgnorePointer(
-      child: SizedBox.expand(
-        child: AnimatedBuilder(
-          animation: _ctrl,
-          builder: (context, _) {
-            final size = MediaQuery.of(context).size;
-            final heroH = size.height * 0.42;
-            return ClipRect(
-              child: SizedBox(
-                width: size.width,
-                height: heroH,
-                child: CustomPaint(
-                  painter: _ParticlePainter(
-                    particles: _particles,
-                    progress: _ctrl.value,
-                    color: widget.color,
-                    width: size.width,
-                    height: heroH,
+      child: AnimatedBuilder(
+        animation: _ctrl,
+        builder: (context, _) {
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth == double.infinity
+                  ? MediaQuery.of(context).size.width
+                  : constraints.maxWidth;
+              final height = widget.height ??
+                  (constraints.maxHeight == double.infinity || constraints.maxHeight == 0
+                      ? MediaQuery.of(context).size.height * 0.42
+                      : constraints.maxHeight);
+              return ClipRect(
+                child: SizedBox(
+                  width: width,
+                  height: height,
+                  child: CustomPaint(
+                    painter: _ParticlePainter(
+                      particles: _particles,
+                      progress: _ctrl.value,
+                      color: widget.color,
+                      width: width,
+                      height: height,
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
-        ),
+              );
+            },
+          );
+        },
       ),
     );
   }
