@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/histori_provider.dart';
 import '../models/analisis_data.dart';
+import '../../grafik/screens/grafik_screen.dart';
+import '../../profil/screens/profil_screen.dart';
+import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Design Tokens

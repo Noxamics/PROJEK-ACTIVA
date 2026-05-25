@@ -89,7 +89,7 @@ class SettingItemToggle extends StatelessWidget {
     return Switch(
       value: value,
       onChanged: onChanged,
-      activeColor: AppColors.teal,
+      activeThumbColor: AppColors.teal,
       activeTrackColor: AppColors.teal.withValues(alpha: 0.2),
       inactiveThumbColor: Colors.white,
       inactiveTrackColor: Colors.grey.shade200,

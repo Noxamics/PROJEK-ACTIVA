@@ -1,0 +1,413 @@
+/* ═══════════════════════════════════════════════════════════════
+   ACTIVA — Profile Page Styles  (light bg, side-by-side layout)
+   ═══════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+/* ── Page override ── */
+body.page-profil {
+  background: #F8FAFC;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* Decorative glow blobs fixed to page (behind everything) */
+body.page-profil::before,
+body.page-profil::after {
+  content: '';
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(90px);
+}
+body.page-profil::before {
+  width: 520px; height: 520px;
+  background: radial-gradient(circle, rgba(13,148,136,.13), transparent 70%);
+  top: -160px; right: -120px;
+}
+body.page-profil::after {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(59,130,246,.09), transparent 70%);
+  bottom: -100px; left: -100px;
+}
+
+/* Extra blobs via pseudo on wrapper */
+.profil-page-glow {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+}
+.profil-page-glow span {
+  position: absolute; border-radius: 50%; filter: blur(80px);
+}
+.profil-page-glow .g1 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(139,92,246,.07), transparent 70%);
+  top: 40%; left: 30%;
+}
+.profil-page-glow .g2 {
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(245,158,11,.07), transparent 70%);
+  top: 60%; right: 10%;
+}
+
+/* ── Outer wrapper ── */
+.profil-wrapper {
+  max-width: 920px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* ═══════════════════════════════════════
+   SIDE-BY-SIDE LAYOUT
+   ═══════════════════════════════════════ */
+.profil-layout {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  gap: 44px;
+  align-items: stretch; /* hero & right column same height */
+}
+
+/* Right column: center its content vertically */
+.profil-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  animation: slideUp .5s cubic-bezier(.16,1,.3,1) .12s both;
+}
+
+/* ═══════════════════════════════════════
+   LEFT — HERO CARD
+   ═══════════════════════════════════════ */
+.profil-hero {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  padding: 48px 32px 40px;
+  text-align: center;
+  background: linear-gradient(160deg, #0F2744 0%, #0B1A2E 55%, #0D2240 100%);
+  border: 1px solid rgba(13,148,136,.18);
+  box-shadow: 0 8px 40px rgba(13,148,136,.1), 0 2px 12px rgba(0,0,0,.08);
+  animation: slideUp .5s cubic-bezier(.16,1,.3,1) .05s both;
+  /* fill full grid-cell height, center content */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Background layers */
+.profil-hero-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(13,148,136,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(13,148,136,.05) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+.hero-orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(55px); animation: orbFloat 8s ease-in-out infinite;
+}
+.hero-orb-1 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, #0D9488, transparent 70%);
+  top: -100px; left: 50%; transform: translateX(-50%);
+  opacity: .22;
+}
+.hero-orb-2 {
+  width: 180px; height: 180px;
+  background: radial-gradient(circle, #3B82F6, transparent 70%);
+  bottom: -60px; right: -30px;
+  opacity: .14; animation-delay: 3s;
+}
+.hero-orb-3 {
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, #8B5CF6, transparent 70%);
+  bottom: -40px; left: -30px;
+  opacity: .1; animation-delay: 5s;
+}
+
+.hero-ring {
+  position: absolute; border-radius: 50%;
+  border: 1px solid rgba(13,148,136,.12);
+  pointer-events: none;
+  animation: ringPulse 6s ease-in-out infinite;
+}
+.hero-ring-1 { width: 380px; height: 380px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+.hero-ring-2 { width: 260px; height: 260px; top: 50%; left: 50%; transform: translate(-50%,-50%); border-color: rgba(20,184,166,.16); animation-delay: 2s; }
+.hero-ring-3 { width: 150px; height: 150px; top: 50%; left: 50%; transform: translate(-50%,-50%); border-color: rgba(20,184,166,.22); animation-delay: 4s; }
+
+.hero-particles { position: absolute; inset: 0; }
+.hero-dot {
+  position: absolute; border-radius: 50%;
+  background: rgba(13,148,136,.55);
+  animation: dotTwinkle 4s ease-in-out infinite;
+}
+
+/* Avatar */
+.profil-avatar-wrap {
+  position: relative; display: inline-block;
+  margin-bottom: 20px; z-index: 2;
+}
+.profil-avatar-glow {
+  position: absolute; inset: -18px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(13,148,136,.38), transparent 70%);
+  animation: glowPulse 3s ease-in-out infinite;
+}
+.profil-avatar-ring {
+  position: absolute; inset: -6px; border-radius: 50%;
+  border: 2.5px solid transparent;
+  background: linear-gradient(135deg,#0D9488,#14B8A6,#3B82F6,#0D9488) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  animation: ringRotate 6s linear infinite;
+}
+.profil-avatar {
+  width: 96px; height: 96px; border-radius: 50%;
+  background: linear-gradient(135deg, #0D9488, #14B8A6);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Sora', sans-serif;
+  font-size: 2rem; font-weight: 800; color: #fff;
+  position: relative; z-index: 1;
+  box-shadow: 0 0 32px rgba(13,148,136,.55);
+}
+
+/* Text */
+.profil-name {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.5rem; font-weight: 800;
+  color: #fff; letter-spacing: -.02em;
+  margin-bottom: 4px; position: relative; z-index: 2;
+}
+.profil-email {
+  font-size: .8125rem; color: #94A3B8; font-weight: 500;
+  margin-bottom: 18px; position: relative; z-index: 2;
+}
+
+/* Role badge */
+.profil-role-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 18px;
+  background: rgba(13,148,136,.12);
+  border: 1px solid rgba(13,148,136,.32);
+  border-radius: 100px;
+  color: #14B8A6; font-size: .8rem; font-weight: 600;
+  margin-bottom: 22px; position: relative; z-index: 2;
+  box-shadow: 0 0 14px rgba(13,148,136,.16);
+}
+
+/* Tags */
+.profil-tags {
+  display: flex; gap: 8px;
+  justify-content: center; flex-wrap: wrap;
+  position: relative; z-index: 2;
+}
+.profil-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 13px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 100px;
+  color: #CBD5E1; font-size: .75rem; font-weight: 500;
+  backdrop-filter: blur(4px); transition: all .2s;
+}
+.profil-tag:hover { background: rgba(13,148,136,.12); border-color: rgba(13,148,136,.28); color: #fff; }
+.profil-tag svg { opacity: .7; flex-shrink: 0; }
+
+/* Maskot */
+.profil-maskot {
+  position: absolute; bottom: 12px; right: 16px;
+  width: 72px; opacity: .75;
+  filter: drop-shadow(0 4px 18px rgba(13,148,136,.45));
+  animation: mascotFloat 5s ease-in-out infinite;
+  z-index: 3; pointer-events: none;
+}
+
+/* ═══════════════════════════════════════
+   RIGHT — SETTINGS COLUMN
+   ═══════════════════════════════════════ */
+/* (declared in layout section above) */
+
+.profil-section-title {
+  font-size: .6875rem; font-weight: 700;
+  color: #94A3B8; letter-spacing: .12em;
+  text-transform: uppercase;
+  padding-left: 4px; margin-bottom: 10px;
+}
+
+.profil-card {
+  background: #fff;
+  border: 1px solid rgba(226,232,240,.8);
+  border-radius: 20px; overflow: hidden;
+  box-shadow: 0 2px 16px rgba(0,0,0,.04);
+}
+
+.profil-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 17px 18px;
+  border-bottom: 1px solid #F1F5F9;
+  cursor: pointer; transition: background .18s;
+  text-decoration: none; background: none; width: 100%; border-left: none; border-right: none; border-top: none;
+  text-align: left;
+}
+.profil-item:last-child { border-bottom: none; }
+.profil-item:hover { background: #F8FAFC; }
+
+.profil-item-icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.profil-item-icon.teal { background: rgba(13,148,136,.08); }
+.profil-item-icon.blue { background: rgba(59,130,246,.08); }
+.profil-item-icon.red  { background: rgba(239,68,68,.07); }
+
+.profil-item-body { flex: 1; min-width: 0; }
+.profil-item-label { font-weight: 700; color: #1E293B; font-size: .9375rem; line-height: 1.3; }
+.profil-item-label.danger { color: #EF4444; }
+.profil-item-desc { font-size: .8125rem; color: #94A3B8; margin-top: 2px; }
+.profil-item-chevron { color: #CBD5E1; flex-shrink: 0; }
+
+/* ═══════════════════════════════════════
+   MODAL
+   ═══════════════════════════════════════ */
+.profil-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,28,50,.6);
+  backdrop-filter: blur(8px);
+  z-index: 9000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.profil-modal-box {
+  background: #fff;
+  border: 1px solid rgba(226,232,240,.8);
+  border-radius: 24px;
+  box-shadow: 0 24px 80px rgba(0,0,0,.15);
+  width: 100%; max-width: 480px;
+  max-height: 90vh; overflow-y: auto;
+  animation: modalIn .3s cubic-bezier(.16,1,.3,1);
+}
+.profil-modal-header {
+  padding: 24px 24px 16px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid #F1F5F9;
+}
+.profil-modal-header h3 {
+  font-family: 'Sora', sans-serif;
+  color: #0F172A; font-size: 1.125rem; font-weight: 700;
+}
+.profil-modal-close {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: #F1F5F9; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #94A3B8; transition: all .2s;
+}
+.profil-modal-close:hover { background: rgba(239,68,68,.08); color: #EF4444; }
+.profil-modal-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+.profil-modal-footer { padding: 0 24px 24px; display: flex; gap: 12px; justify-content: flex-end; }
+
+.profil-form-group { display: flex; flex-direction: column; gap: 6px; }
+.profil-form-label { font-size: .8125rem; font-weight: 600; color: #64748B; }
+.profil-form-input {
+  width: 100%; padding: 13px 16px;
+  background: #F8FAFC; border: 1.5px solid #E2E8F0;
+  border-radius: 12px; color: #0F172A;
+  font-size: .9375rem; font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  outline: none; transition: all .2s;
+}
+.profil-form-input:focus { border-color: #0D9488; background: #fff; box-shadow: 0 0 0 4px rgba(13,148,136,.08); }
+.profil-form-input::placeholder { color: #CBD5E1; }
+.profil-form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+  padding-right: 40px; cursor: pointer;
+}
+
+.btn-profil-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #0D9488, #14B8A6);
+  color: #fff; font-weight: 700; font-size: .9375rem;
+  border-radius: 12px; border: none; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(13,148,136,.25);
+  font-family: 'DM Sans', sans-serif; transition: all .25s;
+}
+.btn-profil-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(13,148,136,.35); }
+
+.btn-profil-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 20px;
+  background: #F8FAFC; color: #64748B;
+  font-weight: 600; font-size: .9375rem;
+  border-radius: 12px; border: 1px solid #E2E8F0; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; transition: all .2s;
+}
+.btn-profil-ghost:hover { background: #F1F5F9; color: #475569; }
+
+/* ═══════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════ */
+@keyframes orbFloat {
+  0%,100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(-18px); }
+}
+@keyframes orbFloat2 {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-14px); }
+}
+@keyframes ringPulse {
+  0%,100% { opacity:.55; transform:translate(-50%,-50%) scale(1); }
+  50%     { opacity:1;   transform:translate(-50%,-50%) scale(1.05); }
+}
+@keyframes ringRotate { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+@keyframes glowPulse {
+  0%,100% { opacity:.6; transform:scale(1); }
+  50%     { opacity:1;  transform:scale(1.12); }
+}
+@keyframes dotTwinkle {
+  0%,100% { opacity:.25; transform:scale(1); }
+  50%     { opacity:1;   transform:scale(1.6); }
+}
+@keyframes mascotFloat {
+  0%,100% { transform:translateY(0); }
+  50%     { transform:translateY(-8px); }
+}
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.95) translateY(14px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(22px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════ */
+
+/* Tablet — hero sedikit lebih kecil */
+@media (max-width: 860px) {
+  .profil-layout { grid-template-columns: 280px 1fr; gap: 18px; }
+  .profil-hero { padding: 40px 24px 36px; }
+  .profil-avatar { width: 84px; height: 84px; font-size: 1.75rem; }
+  .profil-name { font-size: 1.3rem; }
+}
+
+/* Mobile — stack vertikal */
+@media (max-width: 640px) {
+  .profil-layout { grid-template-columns: 1fr; align-items: start; }
+  .profil-hero { padding: 44px 28px 40px; border-radius: 20px; }
+  .profil-name { font-size: 1.375rem; }
+  .profil-avatar { width: 86px; height: 86px; font-size: 1.75rem; }
+  .profil-maskot { width: 60px; bottom: 10px; right: 12px; }
+  .hero-ring-1 { width: 260px; height: 260px; }
+  .hero-ring-2 { width: 180px; height: 180px; }
+  .hero-ring-3 { width: 110px; height: 110px; }
+  .profil-modal-header, .profil-modal-body, .profil-modal-footer { padding-left: 18px; padding-right: 18px; }
+}

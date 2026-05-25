@@ -1,0 +1,525 @@
+/* ============================================================
+   GRAFIK PAGE — Luminous White × Digital Glow Theme
+   Dominan putih, aksen glow: ungu · biru · hijau teal
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+/* ── CSS Variables — grafik-specific (prefixed --g- to avoid conflict) ── */
+:root {
+  --g-off-white: #F8FAFF;
+  --g-border: rgba(139, 92, 246, 0.12);
+
+  --g-purple: #8B5CF6;
+  --g-purple-light: #C4B5FD;
+  --g-purple-glow: rgba(139, 92, 246, 0.25);
+
+  --g-blue: #3B82F6;
+  --g-blue-glow: rgba(59, 130, 246, 0.22);
+
+  --g-teal: #0D9488;
+  --g-teal-glow: rgba(13, 148, 136, 0.22);
+
+  --g-text: #1E1B4B;
+
+  --g-radius: 20px;
+  --g-radius-sm: 12px;
+  --g-shadow: 0 4px 24px rgba(99, 102, 241, 0.10);
+  --g-shadow-lg: 0 8px 40px rgba(99, 102, 241, 0.15);
+  --g-shadow-card: 0 2px 16px rgba(139, 92, 246, 0.08), 0 1px 4px rgba(0,0,0,0.04);
+}
+
+/* ── Page Body ─────────────────────────────────────────────── */
+body {
+  background: var(--g-off-white);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--g-text);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ── Decorative Background ─────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 800px 600px at 0% 0%, rgba(139, 92, 246, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 600px 500px at 100% 20%, rgba(59, 130, 246, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 500px 400px at 80% 90%, rgba(13, 148, 136, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 400px 300px at 10% 80%, rgba(139, 92, 246, 0.04) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Floating decorative circles */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle 2px at 15% 25%, rgba(139, 92, 246, 0.35) 0%, transparent 100%),
+    radial-gradient(circle 3px at 85% 15%, rgba(59, 130, 246, 0.3) 0%, transparent 100%),
+    radial-gradient(circle 2px at 75% 70%, rgba(13, 148, 136, 0.35) 0%, transparent 100%),
+    radial-gradient(circle 1.5px at 30% 80%, rgba(139, 92, 246, 0.25) 0%, transparent 100%),
+    radial-gradient(circle 2px at 92% 55%, rgba(59, 130, 246, 0.25) 0%, transparent 100%),
+    radial-gradient(circle 2.5px at 5% 60%, rgba(13, 148, 136, 0.2) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Decorative floating orbs */
+.grafik-orbs {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.grafik-orbs::before,
+.grafik-orbs::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.5;
+  animation: orb-float 12s ease-in-out infinite alternate;
+}
+
+.grafik-orbs::before {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.18), transparent 70%);
+  top: -80px; right: 10%;
+  animation-delay: -3s;
+}
+
+.grafik-orbs::after {
+  width: 250px; height: 250px;
+  background: radial-gradient(circle, rgba(13, 148, 136, 0.15), transparent 70%);
+  bottom: 5%; left: -50px;
+  animation-delay: -6s;
+}
+
+@keyframes orb-float {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(20px, -30px) scale(1.05); }
+  100% { transform: translate(-10px, 20px) scale(0.95); }
+}
+
+/* ── Layout Wrapper ────────────────────────────────────────── */
+.grafik-wrapper,
+.container,
+main > .container,
+.page-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Page Header ───────────────────────────────────────────── */
+.page-header {
+  margin: 32px 0 24px;
+  position: relative;
+}
+
+.page-header h1 {
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #1E1B4B 0%, #6D28D9 50%, #0D9488 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-header h1::before {
+  content: '✦';
+  font-size: 1rem;
+  -webkit-text-fill-color: var(--g-purple);
+  animation: sparkle 3s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  50% { opacity: 0.6; transform: scale(1.2) rotate(180deg); }
+}
+
+.page-header p {
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* ── Period Selector ───────────────────────────────────────── */
+.period-sel {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.period-btn {
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--text-muted);
+  background: var(--bg-white);
+  border: 1.5px solid var(--g-border);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.06);
+  letter-spacing: 0.01em;
+}
+
+.period-btn:hover {
+  border-color: var(--g-purple-light);
+  color: var(--g-purple);
+  background: rgba(139, 92, 246, 0.05);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.12);
+}
+
+.period-btn.active {
+  background: linear-gradient(135deg, var(--g-purple) 0%, var(--g-blue) 100%);
+  color: var(--bg-white);
+  border-color: transparent;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.35), 0 0 0 4px rgba(139, 92, 246, 0.1);
+  transform: translateY(-1px);
+}
+
+/* ── Cards ─────────────────────────────────────────────────── */
+.card {
+  background: var(--bg-white);
+  border-radius: var(--g-radius);
+  border: 1.5px solid var(--g-border);
+  box-shadow: var(--g-shadow-card);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--g-purple), var(--g-blue), var(--teal));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--g-shadow-lg);
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.card-p {
+  padding: 24px;
+}
+
+.card-p-lg {
+  padding: 40px 32px;
+}
+
+/* ── Card: Score trend (full width) ───────────────────────── */
+.card[style*="grid-column:1/-1"],
+.card[style*="grid-column: 1 / -1"] {
+  background: linear-gradient(135deg, #FAFBFF 0%, rgba(139, 92, 246, 0.03) 50%, rgba(13, 148, 136, 0.03) 100%);
+}
+
+/* ── Chart Container ────────────────────────────────────────── */
+.chart-wrap {
+  position: relative;
+  height: 200px;
+}
+
+/* Full-width chart taller */
+.card[style*="grid-column"] .chart-wrap {
+  height: 240px;
+}
+
+/* ── Card Headings ─────────────────────────────────────────── */
+.card h3 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--g-text);
+  letter-spacing: -0.01em;
+}
+
+.card p[style*="text-muted"],
+.card > p {
+  color: var(--text-muted) !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500;
+}
+
+/* ── Grid Layout Override ───────────────────────────────────── */
+div[style*="display:grid"] {
+  gap: 20px !important;
+}
+
+/* ── Chart Type Color Dots (decorative) ─────────────────────── */
+.card-p h3::before {
+  content: '●';
+  font-size: 0.5rem;
+  margin-right: 6px;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+/* Unique dot color per card via nth-child */
+div[style*="display:grid"] > .card:nth-child(1) h3::before { color: var(--teal); }
+div[style*="display:grid"] > .card:nth-child(2) h3::before { color: var(--g-blue); }
+div[style*="display:grid"] > .card:nth-child(3) h3::before { color: var(--g-purple); }
+div[style*="display:grid"] > .card:nth-child(4) h3::before { color: var(--amber); }
+div[style*="display:grid"] > .card:nth-child(5) h3::before { color: var(--green); }
+
+/* ── Maskot / AI Insight ─────────────────────────────────────── */
+.ai-insight-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.06) 0%, rgba(13, 148, 136, 0.06) 100%);
+  border: 1.5px solid rgba(139, 92, 246, 0.15);
+  border-radius: var(--g-radius);
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+  animation: anim-fade 0.5s ease both;
+}
+
+.ai-insight-bar::after {
+  content: '';
+  position: absolute;
+  right: -20px; top: -20px;
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.1), transparent 70%);
+  pointer-events: none;
+}
+
+.ai-insight-bar img.maskot {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 8px rgba(139, 92, 246, 0.3));
+  animation: maskot-bounce 3s ease-in-out infinite;
+}
+
+@keyframes maskot-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.ai-insight-text {
+  flex: 1;
+}
+
+.ai-insight-text .label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--g-purple);
+  margin-bottom: 3px;
+}
+
+.ai-insight-text .msg {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--g-text);
+  line-height: 1.4;
+}
+
+/* ── Empty State ─────────────────────────────────────────────── */
+.card[style*="text-align:center"] {
+  padding: 60px 32px !important;
+  background: linear-gradient(135deg, #FAFBFF 0%, rgba(139, 92, 246, 0.04) 100%);
+}
+
+.card[style*="text-align:center"] h3 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.375rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--g-purple), var(--g-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Animations ─────────────────────────────────────────────── */
+.anim-fade {
+  animation: anim-fade 0.5s ease both;
+}
+
+.anim-up {
+  animation: anim-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.d1 { animation-delay: 0.05s; }
+.d2 { animation-delay: 0.12s; }
+.d3 { animation-delay: 0.18s; }
+.d4 { animation-delay: 0.24s; }
+.d5 { animation-delay: 0.30s; }
+
+@keyframes anim-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes anim-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Decorative Ring Ornaments ──────────────────────────────── */
+.grafik-ring {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.grafik-ring-1 {
+  width: 500px; height: 500px;
+  top: -180px; right: -160px;
+  border: 1.5px solid rgba(139, 92, 246, 0.08);
+  animation: ring-rotate 30s linear infinite;
+}
+
+.grafik-ring-2 {
+  width: 380px; height: 380px;
+  top: -100px; right: -80px;
+  border: 1px solid rgba(59, 130, 246, 0.08);
+  animation: ring-rotate 20s linear infinite reverse;
+}
+
+.grafik-ring-3 {
+  width: 260px; height: 260px;
+  bottom: 10%; left: -100px;
+  border: 1.5px solid rgba(13, 148, 136, 0.08);
+  animation: ring-rotate 25s linear infinite;
+}
+
+@keyframes ring-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Score trend line glow effect ───────────────────────────── */
+canvas {
+  border-radius: 8px;
+}
+
+/* ── Summary stats row below header ────────────────────────── */
+.stat-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.stat-chip {
+  flex: 1;
+  min-width: 80px;
+  background: var(--bg-white);
+  border: 1.5px solid var(--g-border);
+  border-radius: var(--g-radius-sm);
+  padding: 14px 16px;
+  text-align: center;
+  box-shadow: var(--g-shadow-card);
+  animation: anim-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stat-chip .sc-val {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+
+.stat-chip .sc-lbl {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.sc-low  .sc-val { color: var(--green); }
+.sc-med  .sc-val { color: var(--amber); }
+.sc-high .sc-val { color: var(--red); }
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  div[style*="display:grid"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .card[style*="grid-column:1/-1"] {
+    grid-column: auto !important;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .chart-wrap {
+    height: 170px;
+  }
+
+  .stat-row {
+    gap: 8px;
+  }
+}
+
+/* ── Noise texture overlay ───────────────────────────────────── */
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.6;
+  z-index: 0;
+}
+
+.card canvas,
+.card h3,
+.card p,
+.chart-wrap {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Glow Accent Line under active card ─────────────────────── */
+.card:hover::after {
+  opacity: 0;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--g-purple-light), var(--teal-light));
+  border-radius: 10px;
+}

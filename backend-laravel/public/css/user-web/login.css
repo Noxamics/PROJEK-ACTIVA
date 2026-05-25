@@ -1,0 +1,548 @@
+/* =====================================================
+   ACTIVA — Login Page CSS
+   Tema: Dark Navy + Teal (sama dengan halaman register)
+   Path: public/css/user-web/login.css
+   ===================================================== */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --navy:          #0d2137;
+    --navy-mid:      #0f2d47;
+    --teal:          #14B8A6;
+    --teal-dark:     #0F766E;
+    --surface:       #ffffff;
+    --text-primary:  #0d2137;
+    --text-sec:      #4b6278;
+    --text-hint:     #8fa8bb;
+    --border-input:  #d0e8de;
+    --input-bg:      #f2faf6;
+    --dark-text-sec: rgba(255,255,255,.60);
+    --radius-sm:  8px;
+    --radius-md:  12px;
+    --radius-lg:  18px;
+    --radius-xl:  24px;
+    --shadow-teal: 0 4px 18px rgba(26,188,140,.28);
+}
+
+/* ══════════════════════════════════════════════════
+   BASE
+══════════════════════════════════════════════════ */
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: stretch;
+    background: var(--navy);
+    overflow-x: hidden;
+}
+
+/* ══════════════════════════════════════════════════
+   KIRI — dark branding panel
+══════════════════════════════════════════════════ */
+.auth-left {
+    flex: 0 0 42%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 44px;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    background: linear-gradient(160deg, #0d2137 0%, #0f3249 50%, #0a3d2e 100%);
+}
+
+/* ── Lingkaran dekorasi #1 — kiri atas besar ── */
+.auth-left::before {
+    content: '';
+    position: absolute;
+    top: -120px;
+    left: -120px;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(26,188,140,.18) 0%, transparent 68%);
+    pointer-events: none;
+    animation: pulseGlow 5s ease-in-out infinite;
+}
+
+/* ── Lingkaran dekorasi #2 — kanan bawah ── */
+.auth-left::after {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    right: -80px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(26,188,140,.14) 0%, transparent 68%);
+    pointer-events: none;
+    animation: pulseGlow 5s ease-in-out infinite 2s;
+}
+
+/* ── Lingkaran dekorasi #3 — solid kecil kanan tengah (seperti gambar referensi) ── */
+.deco-circle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+}
+.deco-circle-1 {
+    width: 90px; height: 90px;
+    right: -30px; top: 45%;
+    background: rgba(26,188,140,.18);
+    border: 2px solid rgba(26,188,140,.25);
+    animation: pulseGlow 4s ease-in-out infinite 1s;
+}
+.deco-circle-2 {
+    width: 50px; height: 50px;
+    left: 20px; bottom: 80px;
+    background: rgba(26,188,140,.12);
+    border: 2px solid rgba(26,188,140,.20);
+    animation: pulseGlow 4s ease-in-out infinite 0.5s;
+}
+.deco-circle-3 {
+    width: 30px; height: 30px;
+    right: 40px; bottom: 120px;
+    background: rgba(255,255,255,.06);
+    border: 1.5px solid rgba(255,255,255,.12);
+    animation: pulseGlow 6s ease-in-out infinite 3s;
+}
+
+@keyframes pulseGlow {
+    0%, 100% { transform: scale(1);    opacity: .8; }
+    50%       { transform: scale(1.07); opacity: 1; }
+}
+
+/* ══════════════════════════════════════════════════
+   KANAN — form putih, tepi kiri melengkung (desktop)
+══════════════════════════════════════════════════ */
+.auth-right-wrap {
+    flex: 0 0 58%;
+    position: relative;
+    display: flex;
+    align-items: stretch;
+}
+
+/*
+   Teknik kurva desktop:
+   - .auth-right punya background putih
+   - Kita pakai clip-path ellipse di sisi kiri agar melengkung ke dalam
+   - Ditambah SVG overlay yang mengisi gap antara dark bg dan putih
+*/
+.auth-right {
+    flex: 1;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 48px 48px 80px;
+    position: relative;
+
+    /* Kurva melengkung ke kiri — clip-path bikin sisi kiri cekung */
+    clip-path: ellipse(100% 50% at 100% 50%);
+
+    /* Fallback: kalau clip-path tidak smooth gunakan ini */
+    /* border-radius: 0 0 0 0; */
+}
+
+/* SVG kurva — diletakkan absolut menempel di kiri .auth-right-wrap */
+.curve-svg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 90px;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+    display: block;
+}
+
+/* ══════════════════════════════════════════════════
+   FORM CONTAINER
+══════════════════════════════════════════════════ */
+.auth-form-container {
+    width: 100%;
+    max-width: 400px;
+    animation: fadeUp .45s cubic-bezier(.22,.68,0,1.1) both;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════════════
+   BRANDING — konten sisi kiri
+══════════════════════════════════════════════════ */
+.auth-brand {
+    position: relative;
+    z-index: 1;
+    text-align: left;
+    max-width: 360px;
+    width: 100%;
+}
+
+/* Logo */
+.logo-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 36px;
+}
+.logo-emblem {
+    width: 36px; height: 36px;
+    object-fit: contain; flex-shrink: 0;
+}
+.logo-emblem-fallback {
+    width: 36px; height: 36px;
+    background: var(--teal);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.logo-name {
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -.01em;
+    line-height: 1;
+}
+.logo-sub {
+    font-size: .6rem;
+    font-weight: 600;
+    color: rgba(255,255,255,.50);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-top: 2px;
+}
+
+/* Step bar */
+.step-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+.step-dot {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .75rem; font-weight: 700;
+}
+.step-dot.active   { background: var(--teal); color: #fff; box-shadow: 0 0 0 3px rgba(26,188,140,.25); }
+.step-dot.inactive { background: rgba(255,255,255,.15); color: rgba(255,255,255,.45); }
+.step-line  { width: 20px; height: 2px; background: rgba(255,255,255,.2); border-radius: 2px; }
+.step-label { font-size: .7rem; color: rgba(255,255,255,.45); font-weight: 600; margin-left: 4px; }
+
+/* Heading gelap */
+.brand-heading { margin-bottom: 20px; }
+.brand-heading h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -.02em;
+    line-height: 1.2;
+    margin-bottom: 12px;
+}
+.brand-heading p {
+    font-size: .875rem;
+    color: var(--dark-text-sec);
+    line-height: 1.65;
+}
+
+/* Maskot */
+.mascot-wrap {
+    position: absolute;
+    top: 0px;
+    right: -10px;
+    pointer-events: none;
+    z-index: 3;
+}
+.mascot-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(26,188,140,.22) 0%, transparent 70%);
+    filter: blur(14px);
+    animation: pulseGlow 4s ease-in-out infinite;
+}
+.mascot-wrap img {
+    width: 120px; height: 120px;
+    object-fit: contain;
+    position: relative; z-index: 2;
+    filter:
+        drop-shadow(0 0 10px rgba(26,188,140,.45))
+        drop-shadow(0 0 26px rgba(26,188,140,.20));
+    animation: float 3.5s ease-in-out infinite;
+}
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-10px); }
+}
+
+/* Tags */
+.tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 32px;
+}
+.tag {
+    background: rgba(255,255,255,.10);
+    color: rgba(255,255,255,.85);
+    font-size: .72rem;
+    font-weight: 700;
+    padding: 6px 13px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,.14);
+    letter-spacing: .02em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.tag i { color: var(--teal); font-size: .7rem; }
+
+/* ══════════════════════════════════════════════════
+   FORM — konten sisi kanan
+══════════════════════════════════════════════════ */
+.form-logo-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+.form-logo-emblem { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
+.form-logo-name   { font-size: 1rem; font-weight: 800; color: var(--text-primary); line-height: 1; }
+.form-logo-sub    { font-size: .58rem; font-weight: 600; color: var(--teal-dark); text-transform: uppercase; letter-spacing: .08em; margin-top: 2px; }
+
+.form-heading { margin-bottom: 28px; }
+.form-heading h1 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -.02em;
+    margin-bottom: 6px;
+}
+.form-heading p { font-size: .875rem; color: var(--text-sec); line-height: 1.55; }
+
+/* Alerts */
+.alert {
+    padding: 11px 14px;
+    border-radius: var(--radius-md);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    font-size: .8125rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+.alert-success {
+    background: rgba(26,188,140,.08);
+    border: 1px solid rgba(26,188,140,.25);
+    color: var(--teal-dark);
+}
+.alert-error {
+    background: rgba(239,68,68,.07);
+    border: 1px solid rgba(239,68,68,.20);
+    color: #b91c1c;
+}
+.alert svg { flex-shrink: 0; margin-top: 1px; }
+
+/* Reset banner */
+.reset-banner {
+    background: rgba(26,188,140,.07);
+    border: 1.5px solid rgba(26,188,140,.25);
+    border-radius: var(--radius-lg);
+    padding: 18px 16px;
+    text-align: center;
+    margin-bottom: 22px;
+    animation: bannerIn .5s ease both;
+}
+.reset-banner-icon {
+    width: 48px; height: 48px;
+    margin: 0 auto 12px;
+    background: rgba(26,188,140,.12);
+    border: 2px solid rgba(26,188,140,.25);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+}
+@keyframes bannerIn {
+    from { opacity:0; transform:translateY(-8px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+
+/* Form fields */
+.form-body  { display: flex; flex-direction: column; gap: 18px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: .8125rem; font-weight: 600; color: var(--text-sec); }
+
+.input-wrap { position: relative; display: flex; align-items: center; }
+.input-icon {
+    position: absolute;
+    left: 13px;
+    color: var(--text-hint);
+    pointer-events: none;
+    width: 17px; height: 17px;
+}
+.form-input {
+    width: 100%;
+    height: 46px;
+    padding: 0 14px 0 40px;
+    background: var(--input-bg);
+    border: 1.5px solid var(--border-input);
+    border-radius: var(--radius-md);
+    font-size: .9rem;
+    font-family: inherit;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color .2s, background .2s, box-shadow .2s;
+}
+.form-input::placeholder { color: var(--text-hint); }
+.form-input:focus {
+    border-color: var(--teal);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(26,188,140,.12);
+}
+
+.forgot-row { display: flex; justify-content: flex-end; margin-top: -6px; }
+.forgot-row a {
+    font-size: .8125rem;
+    font-weight: 600;
+    color: var(--teal-dark);
+    text-decoration: none;
+    transition: color .2s;
+}
+.forgot-row a:hover { color: var(--teal); }
+
+.btn-primary {
+    width: 100%;
+    height: 48px;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: .9375rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    letter-spacing: .01em;
+    box-shadow: var(--shadow-teal);
+    transition: transform .15s, box-shadow .15s;
+}
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(26,188,140,.42);
+}
+.btn-primary:active { transform: translateY(0); }
+
+.form-footer {
+    text-align: center;
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.form-footer p { font-size: .875rem; color: var(--text-sec); }
+.form-footer a { color: var(--teal-dark); font-weight: 700; text-decoration: none; transition: color .2s; }
+.form-footer a:hover { color: var(--teal); }
+.form-footer .back-link { font-size: .8rem; color: var(--text-hint); font-weight: 600; transition: color .2s; }
+.form-footer .back-link:hover { color: var(--teal-dark); }
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE — MOBILE
+   Teknik: dark jadi header atas, form putih naik
+   dengan border-radius besar agar melengkung dalam
+══════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+        background: #f4f9f7;
+        min-height: 100vh;
+    }
+
+    /* Header gelap di atas */
+    .auth-left {
+        flex: 0 0 auto;
+        width: 100%;
+        padding: 32px 24px 100px;   /* padding bawah besar biar form bisa overlap lebih tinggi */
+        justify-content: flex-start;
+        align-items: flex-start;
+        overflow: visible;
+    }
+
+    /* Sesuaikan dekorasi lingkaran di mobile */
+    .auth-left::before {
+        width: 240px; height: 240px;
+        top: -80px; left: -80px;
+    }
+    .auth-left::after {
+        width: 180px; height: 180px;
+        bottom: 0px; right: -60px;
+        display: block; /* tetap tampil di mobile */
+    }
+    .deco-circle-1 {
+        right: 16px; top: auto; bottom: 50px;
+        width: 70px; height: 70px;
+    }
+    .deco-circle-2 { display: none; }
+    .deco-circle-3 { display: none; }
+
+    /* Maskot di pojok kanan atas mobile */
+    .mascot-wrap {
+        top: 20px;
+        right: 16px;
+    }
+    .mascot-wrap img { width: 90px; height: 90px; }
+
+    .brand-heading h2 { font-size: 1.55rem; }
+    .brand-heading p  { font-size: .825rem; }
+    .tags { margin-top: 18px; }
+
+    /* ─── KURVA MOBILE ───
+       Form putih naik overlap dengan margin-top negatif besar.
+       border-radius atas sangat besar → efek melengkung dalam seperti referensi.
+       Tambahkan padding-bottom agar sisi kiri tetap terisi.
+    ─────────────────────── */
+    .auth-right-wrap {
+        flex: 1 1 auto;
+        width: 100%;
+        margin-top: -60px;        /* overlap ke area gelap */
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Sembunyikan SVG kurva desktop di mobile */
+    .curve-svg { display: none; }
+
+    .auth-right {
+        /* Radius kiri atas & kanan atas besar = kurva melengkung dalam */
+        border-radius: 50px 50px 0 0;
+        padding: 36px 24px 48px;
+        clip-path: none;           /* reset clip-path desktop */
+        box-shadow: 0 -6px 30px rgba(13,33,55,.18);
+        background: var(--surface);
+        min-height: 100%;
+    }
+
+    .auth-form-container { max-width: 100%; }
+    .form-heading h1 { font-size: 1.35rem; }
+    .form-logo-row { display: none; }
+}
+
+/* ══════════════════════════════════════════════════
+   DESKTOP ONLY
+══════════════════════════════════════════════════ */
+@media (min-width: 769px) {
+    .form-logo-row { display: none; }
+
+    /* Reset clip-path dan pakai SVG overlay untuk kurva desktop */
+    .auth-right {
+        clip-path: none;
+        padding: 48px 48px 48px 80px;
+    }
+
+    /* SVG curve tampil di desktop */
+    .curve-svg { display: block; }
+}
