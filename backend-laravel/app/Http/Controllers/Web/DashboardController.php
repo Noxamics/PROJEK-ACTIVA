@@ -55,6 +55,40 @@ class DashboardController extends Controller
             }
         }
 
-        return view('web.dashboard', compact('user', 'latestQ', 'latestMl', 'avgScore', 'changePercent'));
+        $totalKuesioner = Questionnaire::where('user_id', $userId)->count();
+
+        // Calculate Streak
+        $dates = Questionnaire::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get(['created_at'])
+            ->map(function ($q) {
+                return $q->created_at->timezone('Asia/Jakarta')->format('Y-m-d');
+            })
+            ->unique()
+            ->values()
+            ->toArray();
+
+        $streak = 0;
+        if (!empty($dates)) {
+            $today = \Carbon\Carbon::now('Asia/Jakarta')->format('Y-m-d');
+            $yesterday = \Carbon\Carbon::now('Asia/Jakarta')->subDay()->format('Y-m-d');
+            
+            if ($dates[0] === $today || $dates[0] === $yesterday) {
+                $streak = 1;
+                $currentDate = \Carbon\Carbon::parse($dates[0]);
+                
+                for ($i = 1; $i < count($dates); $i++) {
+                    $prevDate = $currentDate->copy()->subDay()->format('Y-m-d');
+                    if ($dates[$i] === $prevDate) {
+                        $streak++;
+                        $currentDate->subDay();
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        return view('web.dashboard', compact('user', 'latestQ', 'latestMl', 'avgScore', 'changePercent', 'totalKuesioner', 'streak'));
     }
 }
