@@ -18,7 +18,6 @@
         </a>
         <div class="ln-nav-links">
             <a href="#features" class="ln-nav-link">Fitur</a>
-            <a href="#announcements" class="ln-nav-link">Pengumuman</a>
             <a href="#stats" class="ln-nav-link">Statistik</a>
             <a href="{{ url('/user/login') }}" class="btn btn-primary btn-sm">Masuk</a>
         </div>
@@ -28,7 +27,6 @@
     </div>
     <div class="mobile-menu" id="lnMobile">
         <a href="#features" class="mobile-link">Fitur</a>
-        <a href="#announcements" class="mobile-link">Pengumuman</a>
         <a href="#stats" class="mobile-link">Statistik</a>
         <a href="{{ url('/user/login') }}" class="mobile-link" style="color:var(--teal);font-weight:700;">Masuk</a>
         <a href="{{ url('/user/register') }}" class="mobile-link" style="color:var(--teal);">Daftar</a>
@@ -112,42 +110,6 @@
     </div>
 </section>
 
-{{-- ═══ ANNOUNCEMENTS ═══ --}}
-<section class="ln-section ln-section-alt" id="announcements">
-    <div class="ln-container">
-        <div class="ln-section-header anim-fade">
-            <div class="ln-section-badge">Info Terbaru</div>
-            <h2 class="ln-section-title">Pengumuman</h2>
-            <p class="ln-section-sub">Informasi terbaru dan update dari tim ACTIVA.</p>
-        </div>
-        @if(count($announcements) > 0)
-        <div class="ln-ann-grid">
-            @foreach($announcements as $ann)
-            <div class="ln-ann-card anim-up">
-                <div class="ln-ann-top">
-                    <span class="ln-ann-badge ln-ann-badge--{{ $ann['type'] }}">
-                        {{ $ann['type'] === 'info' ? 'Informasi' : ($ann['type'] === 'warning' ? 'Peringatan' : 'Update') }}
-                    </span>
-                    <span class="ln-ann-date">{{ $ann['created_at_relative'] }}</span>
-                </div>
-                <h4 class="ln-ann-title">{{ $ann['title'] }}</h4>
-                <p class="ln-ann-content">{{ Str::limit($ann['content'], 150) }}</p>
-                <div class="ln-ann-footer">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    {{ $ann['created_at_formatted'] }}
-                </div>
-            </div>
-            @endforeach
-        </div>
-        @else
-        <div class="ln-ann-empty anim-up">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-disabled)" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <p>Belum ada pengumuman saat ini.</p>
-        </div>
-        @endif
-    </div>
-</section>
-
 {{-- ═══ STATS ═══ --}}
 <section class="ln-section" id="stats">
     <div class="ln-container">
@@ -203,7 +165,7 @@
                 <a href="{{ url('/user/login') }}">Masuk</a>
                 <a href="{{ url('/user/register') }}">Daftar</a>
                 <a href="#features">Fitur</a>
-                <a href="#announcements">Pengumuman</a>
+                <a href="#stats">Statistik</a>
             </div>
         </div>
         <div class="ln-footer-bottom">

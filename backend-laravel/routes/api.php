@@ -8,7 +8,6 @@ use App\Http\Controllers\SurveyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\LaporanController;
 use App\Http\Controllers\Api\ExportController;
-use App\Http\Controllers\Api\AnnouncementController;
 
 // ── PUBLIC ────────────────────────────────────────────────────────────────
 Route::prefix('auth')->group(function () {

@@ -5,6 +5,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../faker/grafik_faker.dart';
 import '../services/grafik_service.dart';
+import '../../auth/providers/auth_provider.dart';
 
 // ── State ─────────────────────────────────────────────────────────────────────
 
@@ -42,6 +43,8 @@ class GrafikState {
 class GrafikNotifier extends Notifier<GrafikState> {
   @override
   GrafikState build() {
+    ref.watch(isAuthenticatedProvider);
+    
     // Mulai mengambil data secara asynchronous saat inisialisasi
     Future.microtask(() => fetchGrafikData(GrafikPeriod.week));
 

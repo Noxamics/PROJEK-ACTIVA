@@ -4,7 +4,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../auth/screens/login_screen.dart';
-import '../providers/announcement_provider.dart';
 
 // ─────────────────────────────────────────────────────────────
 //  Activa – Premium Onboarding Screen (4 slides)
@@ -217,9 +216,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                 totalSlides: _slides.length,
                 onNext: _nextPage,
                 onSkip: _skip,
-                announcementWidget: i == 0
-                    ? _AnnouncementBanner(ref: ref)
-                    : null,
               ),
             ),
           ],
@@ -240,7 +236,6 @@ class _OnboardingPage extends StatelessWidget {
     required this.totalSlides,
     required this.onNext,
     required this.onSkip,
-    this.announcementWidget,
   });
 
   final _SlideData data;
@@ -249,7 +244,6 @@ class _OnboardingPage extends StatelessWidget {
   final int totalSlides;
   final VoidCallback onNext;
   final VoidCallback onSkip;
-  final Widget? announcementWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -260,13 +254,6 @@ class _OnboardingPage extends StatelessWidget {
         Column(
           children: [
             _TopBar(skipColor: data.skipColor, onSkip: onSkip),
-            if (announcementWidget != null) ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: announcementWidget!,
-              ),
-              const SizedBox(height: 8),
-            ],
             Expanded(
               child: _MascotZone(
                 asset: data.mascotAsset,
@@ -783,88 +770,6 @@ class _StartButtonState extends State<_StartButton>
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-//  Announcement banner (slide 1 only)
-// ─────────────────────────────────────────────────────────────
-class _AnnouncementBanner extends StatelessWidget {
-  const _AnnouncementBanner({required this.ref});
-  final WidgetRef ref;
-
-  @override
-  Widget build(BuildContext context) {
-    final async = ref.watch(announcementProvider);
-    return async.when(
-      data: (list) {
-        if (list.isEmpty) return const SizedBox.shrink();
-        return Container(
-          margin: const EdgeInsets.only(top: 12),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: _kTeal.withOpacity(0.3), width: 1),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.campaign_outlined, color: _kTeal, size: 16),
-                  const SizedBox(width: 6),
-                  Text(
-                    'PENGUMUMAN TERBARU',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                      color: _kTeal,
-                      letterSpacing: 0.9,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 42,
-                child: PageView.builder(
-                  itemCount: list.length,
-                  itemBuilder: (_, i) {
-                    final item = list[i];
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                        Text(
-                          item.content,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11,
-                            color: Colors.white60,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
-    );
-  }
-}
 
 // ═════════════════════════════════════════════════════════════
 //  BACKGROUNDS
