@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/analytics_model.dart';
 import '../services/dashboard_service.dart';
 import '../../histori/providers/histori_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 
 // ── Streak Model ─────────────────────────────────────────────────────────────
 
@@ -83,6 +84,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
 
 final dashboardProvider =
     StateNotifierProvider<DashboardNotifier, DashboardState>((ref) {
+      ref.watch(isAuthenticatedProvider);
       final service = ref.watch(dashboardServiceProvider);
       return DashboardNotifier(service);
     });

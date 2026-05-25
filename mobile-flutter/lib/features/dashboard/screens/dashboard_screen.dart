@@ -19,12 +19,10 @@ import '../../grafik/screens/grafik_screen.dart';
 import '../../profil/screens/profil_screen.dart';
 import '../../profil/widgets/floating_particles.dart';
 
-// Warna background konten (putih/light) — dipakai oleh wave clipper
 const Color _kIce = AppColors.bgLight;
 
 // ══════════════════════════════════════════════════════════════════════════════
-// WAVE CLIPPER — Unified, dipakai di semua layar
-// Melengkung ke atas di bagian bawah header
+// WAVE CLIPPER
 // ══════════════════════════════════════════════════════════════════════════════
 
 class _WaveClipper extends CustomClipper<Path> {
@@ -43,6 +41,70 @@ class _WaveClipper extends CustomClipper<Path> {
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// SHIMMER WIDGET — dipakai untuk skeleton loading
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _ShimmerBox extends StatefulWidget {
+  final double height;
+  final double? width;
+  final double borderRadius;
+
+  const _ShimmerBox({
+    required this.height,
+    this.width,
+    this.borderRadius = 16,
+  });
+
+  @override
+  State<_ShimmerBox> createState() => _ShimmerBoxState();
+}
+
+class _ShimmerBoxState extends State<_ShimmerBox>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _anim,
+      builder: (_, __) => Container(
+        height: widget.height,
+        width: widget.width,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(widget.borderRadius),
+          color: Color.lerp(
+            const Color(0xFFE8EDF2),
+            const Color(0xFFF4F7FA),
+            _anim.value,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DASHBOARD SCREEN
+// ══════════════════════════════════════════════════════════════════════════════
+
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
@@ -53,39 +115,51 @@ class DashboardScreen extends ConsumerStatefulWidget {
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   int _currentNavIndex = 0;
 
+  // [FIX] Flag agar laporan hanya di-fetch sekali, tidak setiap rebuild
+  bool _laporanFetchTriggered = false;
+
   @override
   Widget build(BuildContext context) {
     final dashState = ref.watch(dashboardProvider);
     final user = ref.watch(currentUserProvider);
-    final analytics = dashState.analytics;
 
     final historiState = ref.watch(historiProvider);
+
+    // [FIX] Cek isLoading dari historiProvider secara eksplisit
+    final isHistoriLoading = historiState.isLoading;
     final historiItems = historiState.items;
     final hasHistory = historiItems.isNotEmpty;
     final latestResult = hasHistory ? historiItems.first : null;
     final historiCount = historiItems.length;
 
     final laporanState = ref.watch(laporanProvider);
-
     final weeklyStats = ref.watch(weeklyStatsProvider);
     final hasWeeklyData = ref.watch(hasWeeklyDataProvider);
     final dependencyDistribution = ref.watch(dependencyDistributionProvider);
 
+    // [FIX] Pindahkan trigger laporan ke postFrameCallback dengan flag
+    // agar tidak dipanggil berulang setiap rebuild
     if (historiCount >= 14 &&
         laporanState.data == null &&
         !laporanState.isLoading &&
-        laporanState.error == null) {
+        laporanState.error == null &&
+        !_laporanFetchTriggered) {
+      _laporanFetchTriggered = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(laporanProvider.notifier).fetchLaporan();
+        if (mounted) ref.read(laporanProvider.notifier).fetchLaporan();
       });
     }
+
+    // [FIX] Gabungkan kondisi loading — dashboard loading ATAU histori loading
+    final bool isOverallLoading =
+        (dashState.isLoading && dashState.analytics == null) || isHistoriLoading;
 
     return Scaffold(
       backgroundColor: AppColors.bgDark,
       body: SafeArea(
         child: Column(
           children: [
-            // ── Hero Header dengan wave putih di bawah ──────────────────
+            // ── Hero Header ─────────────────────────────────────────────
             _HeroHeader(user: user, greeting: _getGreeting()),
 
             // ── Main Content ─────────────────────────────────────────────
@@ -94,130 +168,27 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 color: AppColors.bgLight,
                 child: RefreshIndicator(
                   color: AppColors.teal,
-                  onRefresh: () =>
-                      ref.read(dashboardProvider.notifier).refresh(),
+                  onRefresh: () async {
+                    _laporanFetchTriggered = false; // reset flag saat refresh
+                    await ref.read(dashboardProvider.notifier).refresh();
+                  },
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (dashState.isLoading && analytics == null)
-                          _buildLoadingShimmer()
-                        else ...[
-                          Stack(
-                            children: [
-                              ImageFiltered(
-                                imageFilter: !hasHistory
-                                    ? ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0)
-                                    : ImageFilter.blur(
-                                        sigmaX: 0.0,
-                                        sigmaY: 0.0,
-                                      ),
-                                child: DependencyScoreCard(
-                                  score: latestResult?.dependenceInt ?? 0,
-                                  insight:
-                                      latestResult?.summary ??
-                                      'Silakan isi kuesioner untuk melihat insight kamu.',
-                                ),
-                              ),
-                              if (!hasHistory)
-                                Positioned.fill(
-                                  child: Center(
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 8,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withValues(
-                                          alpha: 0.6,
-                                        ),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: const Text(
-                                        'Belum Ada Data',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-
-                          QuickStatsGrid(
-                            screenTime: weeklyStats.screenTime,
-                            sleepDuration: weeklyStats.sleepHours,
-                            hasWeeklyData: hasWeeklyData,
-                            dataCount: weeklyStats.dataCount,
-                          ),
-                          const SizedBox(height: 16),
-
-                          StreakCard(
-                            streakDays: ref.watch(streakProvider).count,
-                            lastFilledDaysAgo: ref.watch(streakProvider).lastFilledDaysAgo,
-                            subtitle: 'Kamu rutin memantau kesehatan digitalmu',
-                          ),
-                          const SizedBox(height: 16),
-
-                          _buildCTAButton(context),
-                          const SizedBox(height: 16),
-
-                          _buildWeeklyInsightCard(context),
-                          const SizedBox(height: 16),
-
-                          if (dependencyDistribution.total > 0)
-                            DependencyDonutChart(
-                              countLow: dependencyDistribution.low,
-                              countMedium: dependencyDistribution.medium,
-                              countHigh: dependencyDistribution.high,
-                              totalSurveys: dependencyDistribution.total,
-                            )
-                          else
-                            const SizedBox(),
-                          const SizedBox(height: 16),
-
-                          HabitTracker(
-                            habits: [
-                              HabitItem(
-                                id: '1',
-                                label: 'Tidur minimal 7 jam',
-                                completed:
-                                    latestResult != null &&
-                                    latestResult.sleepHours >= 7,
-                              ),
-                              HabitItem(
-                                id: '2',
-                                label: 'Screen time < 6 jam',
-                                completed:
-                                    latestResult != null &&
-                                    latestResult.screenTime > 0 &&
-                                    latestResult.screenTime < 6,
-                              ),
-                              HabitItem(
-                                id: '3',
-                                label: 'Tingkat Ketergantungan Rendah',
-                                completed:
-                                    latestResult != null &&
-                                    latestResult.digitalDependenceScore < 50,
-                              ),
-                              HabitItem(
-                                id: '4',
-                                label: 'Kualitas Tidur Terjaga',
-                                completed:
-                                    latestResult != null &&
-                                    latestResult.sleepHours >= 6 &&
-                                    latestResult.sleepHours <= 9,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                      ],
+                    child: AnimatedSwitcher(
+                      // [FIX] AnimatedSwitcher untuk transisi smooth
+                      // dari skeleton → konten asli
+                      duration: const Duration(milliseconds: 400),
+                      child: isOverallLoading
+                          ? _buildLoadingShimmer()
+                          : _buildContent(
+                              context: context,
+                              hasHistory: hasHistory,
+                              latestResult: latestResult,
+                              weeklyStats: weeklyStats,
+                              hasWeeklyData: hasWeeklyData,
+                              dependencyDistribution: dependencyDistribution,
+                            ),
                     ),
                   ),
                 ),
@@ -233,6 +204,123 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  // ── [NEW] Pisahkan konten ke method sendiri ───────────────────────────────
+  Widget _buildContent({
+    required BuildContext context,
+    required bool hasHistory,
+    required dynamic latestResult,
+    required dynamic weeklyStats,
+    required bool hasWeeklyData,
+    required dynamic dependencyDistribution,
+  }) {
+    return Column(
+      key: const ValueKey('dashboard_content'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Score Card dengan blur jika belum ada data
+        Stack(
+          children: [
+            ImageFiltered(
+              imageFilter: !hasHistory
+                  ? ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0)
+                  : ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
+              child: DependencyScoreCard(
+                score: latestResult?.dependenceInt ?? 0,
+                insight: latestResult?.summary ??
+                    'Silakan isi kuesioner untuk melihat insight kamu.',
+              ),
+            ),
+            if (!hasHistory)
+              Positioned.fill(
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      'Belum Ada Data',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        QuickStatsGrid(
+          screenTime: weeklyStats.screenTime,
+          sleepDuration: weeklyStats.sleepHours,
+          hasWeeklyData: hasWeeklyData,
+          dataCount: weeklyStats.dataCount,
+        ),
+        const SizedBox(height: 16),
+
+        StreakCard(
+          streakDays: ref.watch(streakProvider).count,
+          lastFilledDaysAgo: ref.watch(streakProvider).lastFilledDaysAgo,
+          subtitle: 'Kamu rutin memantau kesehatan digitalmu',
+        ),
+        const SizedBox(height: 16),
+
+        _buildCTAButton(context),
+        const SizedBox(height: 16),
+
+        _buildWeeklyInsightCard(context),
+        const SizedBox(height: 16),
+
+        if (dependencyDistribution.total > 0)
+          DependencyDonutChart(
+            countLow: dependencyDistribution.low,
+            countMedium: dependencyDistribution.medium,
+            countHigh: dependencyDistribution.high,
+            totalSurveys: dependencyDistribution.total,
+          ),
+        const SizedBox(height: 16),
+
+        HabitTracker(
+          habits: [
+            HabitItem(
+              id: '1',
+              label: 'Tidur minimal 7 jam',
+              completed:
+                  latestResult != null && latestResult.sleepHours >= 7,
+            ),
+            HabitItem(
+              id: '2',
+              label: 'Screen time < 6 jam',
+              completed: latestResult != null &&
+                  latestResult.screenTime > 0 &&
+                  latestResult.screenTime < 6,
+            ),
+            HabitItem(
+              id: '3',
+              label: 'Tingkat Ketergantungan Rendah',
+              completed: latestResult != null &&
+                  latestResult.digitalDependenceScore < 50,
+            ),
+            HabitItem(
+              id: '4',
+              label: 'Kualitas Tidur Terjaga',
+              completed: latestResult != null &&
+                  latestResult.sleepHours >= 6 &&
+                  latestResult.sleepHours <= 9,
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 
@@ -453,9 +541,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: (item['color'] as Color).withValues(
-                                    alpha: 0.1,
-                                  ),
+                                  color: (item['color'] as Color)
+                                      .withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Icon(
@@ -537,41 +624,37 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
+  // ── [FIX] Shimmer animasi yang lebih baik ─────────────────────────────────
   Widget _buildLoadingShimmer() {
     return Column(
+      key: const ValueKey('dashboard_shimmer'),
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _shimmerBox(height: 200),
+        const _ShimmerBox(height: 200),
         const SizedBox(height: 16),
         Row(
-          children: [
-            Expanded(child: _shimmerBox(height: 120)),
-            const SizedBox(width: 12),
-            Expanded(child: _shimmerBox(height: 120)),
+          children: const [
+            Expanded(child: _ShimmerBox(height: 120)),
+            SizedBox(width: 12),
+            Expanded(child: _ShimmerBox(height: 120)),
           ],
         ),
         const SizedBox(height: 16),
-        _shimmerBox(height: 80),
+        const _ShimmerBox(height: 80),
         const SizedBox(height: 16),
-        _shimmerBox(height: 56),
+        const _ShimmerBox(height: 56),
         const SizedBox(height: 16),
-        _shimmerBox(height: 100),
+        const _ShimmerBox(height: 100),
+        const SizedBox(height: 16),
+        const _ShimmerBox(height: 160),
+        const SizedBox(height: 16),
+        const _ShimmerBox(height: 140),
       ],
-    );
-  }
-
-  Widget _shimmerBox({required double height}) {
-    return Container(
-      height: height,
-      decoration: BoxDecoration(
-        color: AppColors.bgLight,
-        borderRadius: BorderRadius.circular(16),
-      ),
     );
   }
 
   void _onNavTap(BuildContext context, int index) {
     if (index == _currentNavIndex) return;
-
     setState(() => _currentNavIndex = index);
 
     switch (index) {
@@ -605,10 +688,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// _HeroHeader — Header gelap dengan wave putih melengkung di bagian bawah
-// Menggunakan _WaveClipper yang sama dengan semua layar lainnya
-// ═══════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
+// _HeroHeader
+// ══════════════════════════════════════════════════════════════════════════════
 
 class _HeroHeader extends StatelessWidget {
   const _HeroHeader({required this.user, required this.greeting});
@@ -621,16 +703,15 @@ class _HeroHeader extends StatelessWidget {
     final userName = user?.name ?? 'Erick Dwi Kusuma S';
     final initials = userName.isNotEmpty
         ? userName
-              .split(' ')
-              .map((e) => e.isNotEmpty ? e[0] : '')
-              .take(2)
-              .join()
-              .toUpperCase()
+            .split(' ')
+            .map((e) => e.isNotEmpty ? e[0] : '')
+            .take(2)
+            .join()
+            .toUpperCase()
         : 'U';
 
     return Stack(
       children: [
-        // ── Background gelap beserta konten header ─────────────────────
         Container(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 72),
           decoration: BoxDecoration(
@@ -645,7 +726,6 @@ class _HeroHeader extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // Avatar
               Container(
                 width: 48,
                 height: 48,
@@ -676,8 +756,6 @@ class _HeroHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-
-              // Greeting
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -718,12 +796,10 @@ class _HeroHeader extends StatelessWidget {
           ),
         ),
 
-        // ── Floating particles ──
         const Positioned.fill(
           child: FloatingParticles(count: 12, color: AppColors.teal),
         ),
 
-        // ── Wave putih melengkung ke atas — unified _WaveClipper ───────
         Positioned(
           left: 0,
           right: 0,

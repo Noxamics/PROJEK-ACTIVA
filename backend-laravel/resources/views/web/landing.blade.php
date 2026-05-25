@@ -864,6 +864,15 @@
             </svg>
         </button>
     </div>
+<<<<<<< HEAD
+    <div class="mobile-menu" id="lnMobile">
+        <a href="#features" class="mobile-link">Fitur</a>
+        <a href="#stats" class="mobile-link">Statistik</a>
+        <a href="{{ url('/user/login') }}" class="mobile-link" style="color:var(--teal);font-weight:700;">Masuk</a>
+        <a href="{{ url('/user/register') }}" class="mobile-link" style="color:var(--teal);">Daftar</a>
+    </div>
+=======
+>>>>>>> 264b6bbaa867ff8c197f808a7f42e6bd412c8ac8
 </nav>
 <div class="ln-mobile-menu" id="lnMobile">
     <a href="#how" class="ln-mobile-link" onclick="closeMobile()">Cara Kerja</a>
@@ -1016,6 +1025,10 @@
     </div>
 </section>
 
+<<<<<<< HEAD
+{{-- ═══ STATS ═══ --}}
+<section class="ln-section" id="stats">
+=======
 {{-- ═══ FEATURES — Dark ═══ --}}
 <section class="ln-section-dark" id="features">
     <div class="ln-container">
@@ -1063,6 +1076,7 @@
 
 {{-- ═══ STATS — Dark ═══ --}}
 <section class="ln-section-dark" id="stats">
+>>>>>>> 264b6bbaa867ff8c197f808a7f42e6bd412c8ac8
     <div class="ln-container">
         <div class="ln-section-header anim-fade">
             <div class="ln-badge-dark">Angka Bicara</div>
@@ -1192,6 +1206,23 @@
 
 {{-- ═══ FOOTER ═══ --}}
 <footer class="ln-footer">
+<<<<<<< HEAD
+    <div class="ln-container">
+        <div class="ln-footer-inner">
+            <div class="ln-footer-brand">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                    <div class="topnav-logo" style="width:28px;height:28px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M9 11l3 3L22 4"/></svg></div>
+                    <span style="font-weight:800;color:var(--text-dark);font-size:1.1rem;">ACTIVA</span>
+                </div>
+                <p style="color:var(--text-muted);font-size:.8125rem;">DigitalLife Analyzer — Platform analisis gaya hidup digital berbasis AI.</p>
+            </div>
+            <div class="ln-footer-links">
+                <a href="{{ url('/user/login') }}">Masuk</a>
+                <a href="{{ url('/user/register') }}">Daftar</a>
+                <a href="#features">Fitur</a>
+                <a href="#stats">Statistik</a>
+            </div>
+=======
     <div class="ln-footer-inner">
         <div>
             <a href="{{ url('/user/landing') }}" class="ln-brand" style="margin-bottom:4px;">
@@ -1199,6 +1230,7 @@
                 <span class="ln-brand-text">ACTIVA</span>
             </a>
             <p class="ln-footer-brand-desc">DigitalLife Analyzer — Platform analisis gaya hidup digital berbasis Machine Learning dan AI.</p>
+>>>>>>> 264b6bbaa867ff8c197f808a7f42e6bd412c8ac8
         </div>
         <div class="ln-footer-links">
             <a href="{{ url('/user/login') }}">Masuk</a>
