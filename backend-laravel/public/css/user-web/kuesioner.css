@@ -395,6 +395,15 @@
     gap: 12px;
 }
 
+/* Center the last card with normal width if there's an odd number of cards */
+@media (min-width: 769px) {
+    .k-opt-group > .k-opt-card:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: calc(50% - 6px);
+    }
+}
+
 .k-opt-card {
     display:flex; align-items:center; gap:14px;
     padding:16px 18px;

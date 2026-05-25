@@ -149,15 +149,18 @@
                         <span class="k-q-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
                         Berapa lama kamu menggunakan perangkat digital hari ini?
                     </label>
-                    <div class="k-opt-grid" data-name="device_hours_per_day">
+                    <div class="k-opt-group" data-name="device_hours_per_day">
                         @foreach(['1.5'=>'Sangat Sedikit|Kurang dari 2 jam total penggunaan perangkat.', '3.0'=>'Sedikit|Sekitar 2–4 jam penggunaan perangkat.', '5.5'=>'Sedang|Sekitar 4–7 jam penggunaan perangkat.', '8.5'=>'Lama|Sekitar 7–10 jam penggunaan perangkat.', '12.0'=>'Sangat Lama|Lebih dari 10 jam penggunaan perangkat.'] as $val=>$lbl)
                         @php [$l,$d]=explode('|',$lbl); @endphp
-                        <div class="k-opt-btn {{ old('device_hours_per_day') == $val ? 'selected' : '' }}" data-value="{{ $val }}" data-desc="{{ $d }}">
-                            {{ $l }}
+                        <div class="k-opt-card {{ old('device_hours_per_day') == $val ? 'selected' : '' }}" data-value="{{ $val }}">
+                            <div class="k-opt-radio"></div>
+                            <div class="k-opt-body">
+                                <div class="k-opt-main">{{ $l }}</div>
+                                <div class="k-opt-sub">{{ $d }}</div>
+                            </div>
                         </div>
                         @endforeach
                     </div>
-                    <div class="k-opt-desc" id="desc-device_hours_per_day">Pilih salah satu jawaban di atas.</div>
                     <input type="hidden" name="device_hours_per_day" id="input-device_hours_per_day" value="{{ old('device_hours_per_day') }}">
                 </div>
 
@@ -168,15 +171,18 @@
                         <span class="k-q-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg></span>
                         Seberapa sering kamu membuka HP hari ini?
                     </label>
-                    <div class="k-opt-grid" data-name="phone_unlocks">
+                    <div class="k-opt-group" data-name="phone_unlocks">
                         @foreach(['10'=>'Jarang|Kurang dari 20 kali membuka HP hari ini.', '35'=>'Kadang-kadang|Sekitar 20–50 kali membuka HP.', '75'=>'Cukup Sering|Sekitar 50–100 kali membuka HP.', '150'=>'Sering|Sekitar 100–200 kali membuka HP.', '250'=>'Sangat Sering|Lebih dari 200 kali membuka HP.'] as $val=>$lbl)
                         @php [$l,$d]=explode('|',$lbl); @endphp
-                        <div class="k-opt-btn {{ old('phone_unlocks') == $val ? 'selected' : '' }}" data-value="{{ $val }}" data-desc="{{ $d }}">
-                            {{ $l }}
+                        <div class="k-opt-card {{ old('phone_unlocks') == $val ? 'selected' : '' }}" data-value="{{ $val }}">
+                            <div class="k-opt-radio"></div>
+                            <div class="k-opt-body">
+                                <div class="k-opt-main">{{ $l }}</div>
+                                <div class="k-opt-sub">{{ $d }}</div>
+                            </div>
                         </div>
                         @endforeach
                     </div>
-                    <div class="k-opt-desc" id="desc-phone_unlocks">Pilih salah satu jawaban di atas.</div>
                     <input type="hidden" name="phone_unlocks" id="input-phone_unlocks" value="{{ old('phone_unlocks') }}">
                 </div>
 
@@ -187,15 +193,18 @@
                         <span class="k-q-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
                         Berapa banyak notifikasi yang kamu terima hari ini?
                     </label>
-                    <div class="k-opt-grid" data-name="notifications_per_day">
+                    <div class="k-opt-group" data-name="notifications_per_day">
                         @foreach(['30'=>'Hampir Tidak Ada|Kurang dari 50 notifikasi sepanjang hari.', '100'=>'Sedikit|Sekitar 50–200 notifikasi hari ini.', '300'=>'Lumayan|Sekitar 200–500 notifikasi hari ini.', '700'=>'Banyak|Sekitar 500–1000 notifikasi hari ini.', '1100'=>'Sangat Banyak|Lebih dari 1000 notifikasi hari ini.'] as $val=>$lbl)
                         @php [$l,$d]=explode('|',$lbl); @endphp
-                        <div class="k-opt-btn {{ old('notifications_per_day') == $val ? 'selected' : '' }}" data-value="{{ $val }}" data-desc="{{ $d }}">
-                            {{ $l }}
+                        <div class="k-opt-card {{ old('notifications_per_day') == $val ? 'selected' : '' }}" data-value="{{ $val }}">
+                            <div class="k-opt-radio"></div>
+                            <div class="k-opt-body">
+                                <div class="k-opt-main">{{ $l }}</div>
+                                <div class="k-opt-sub">{{ $d }}</div>
+                            </div>
                         </div>
                         @endforeach
                     </div>
-                    <div class="k-opt-desc" id="desc-notifications_per_day">Pilih salah satu jawaban di atas.</div>
                     <input type="hidden" name="notifications_per_day" id="input-notifications_per_day" value="{{ old('notifications_per_day') }}">
                 </div>
 
@@ -206,15 +215,18 @@
                         <span class="k-q-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/><rect x="9" y="11" width="6" height="4" rx="1"/></svg></span>
                         Berapa lama kamu menggunakan media sosial hari ini?
                     </label>
-                    <div class="k-opt-grid" data-name="social_media_mins">
+                    <div class="k-opt-group" data-name="social_media_mins">
                         @foreach(['0'=>'Tidak Pakai|Hampir tidak pernah membuka media sosial.', '30'=>'Kurang dari 1 Jam|Sekitar 30 menit di media sosial.', '120'=>'1–3 Jam|Sekitar 2 jam per hari di media sosial.', '240'=>'3–5 Jam|Sekitar 4 jam per hari di media sosial.', '400'=>'Lebih dari 5 Jam|Sangat banyak waktu dihabiskan di sosmed.'] as $val=>$lbl)
                         @php [$l,$d]=explode('|',$lbl); @endphp
-                        <div class="k-opt-btn {{ old('social_media_mins') == $val ? 'selected' : '' }}" data-value="{{ $val }}" data-desc="{{ $d }}">
-                            {{ $l }}
+                        <div class="k-opt-card {{ old('social_media_mins') == $val ? 'selected' : '' }}" data-value="{{ $val }}">
+                            <div class="k-opt-radio"></div>
+                            <div class="k-opt-body">
+                                <div class="k-opt-main">{{ $l }}</div>
+                                <div class="k-opt-sub">{{ $d }}</div>
+                            </div>
                         </div>
                         @endforeach
                     </div>
-                    <div class="k-opt-desc" id="desc-social_media_mins">Pilih salah satu jawaban di atas.</div>
                     <input type="hidden" name="social_media_mins" id="input-social_media_mins" value="{{ old('social_media_mins') }}">
                 </div>
                 
@@ -225,15 +237,18 @@
                         <span class="k-q-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
                         Seberapa produktif kamu belajar atau bekerja hari ini?
                     </label>
-                    <div class="k-opt-grid" data-name="study_minutes">
+                    <div class="k-opt-group" data-name="study_minutes">
                         @foreach(['10'=>'Hampir Tidak Ada|Kurang dari 30 menit waktu fokus hari ini.', '60'=>'Sedikit|Sekitar 30 menit hingga 1 jam waktu fokus.', '150'=>'Cukup|Sekitar 1–3 jam waktu belajar atau kerja fokus.', '300'=>'Produktif|Sekitar 3–5 jam waktu belajar atau kerja fokus.', '400'=>'Sangat Produktif|Lebih dari 5 jam waktu fokus penuh hari ini.'] as $val=>$lbl)
                         @php [$l,$d]=explode('|',$lbl); @endphp
-                        <div class="k-opt-btn {{ old('study_minutes') == $val ? 'selected' : '' }}" data-value="{{ $val }}" data-desc="{{ $d }}">
-                            {{ $l }}
+                        <div class="k-opt-card {{ old('study_minutes') == $val ? 'selected' : '' }}" data-value="{{ $val }}">
+                            <div class="k-opt-radio"></div>
+                            <div class="k-opt-body">
+                                <div class="k-opt-main">{{ $l }}</div>
+                                <div class="k-opt-sub">{{ $d }}</div>
+                            </div>
                         </div>
                         @endforeach
                     </div>
-                    <div class="k-opt-desc" id="desc-study_minutes">Pilih salah satu jawaban di atas.</div>
                     <input type="hidden" name="study_minutes" id="input-study_minutes" value="{{ old('study_minutes') }}">
                 </div>
             </div>
@@ -299,15 +314,18 @@
                         <span class="k-q-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
                         Bagaimana kualitas tidurmu secara umum?
                     </label>
-                    <div class="k-opt-grid" data-name="sleep_quality">
+                    <div class="k-opt-group" data-name="sleep_quality">
                         @foreach(['1.0'=>'Sangat Buruk|Sering terbangun dan tidak merasa segar pagi ini.', '2.0'=>'Buruk|Kadang terbangun, kurang segar saat bangun.', '3.0'=>'Cukup|Tidur cukup namun belum terasa optimal.', '4.0'=>'Baik|Tidur nyenyak dan merasa segar saat bangun.', '5.0'=>'Sangat Baik|Tidur sangat nyenyak dan berkualitas tinggi.'] as $val=>$lbl)
                         @php [$l,$d]=explode('|',$lbl); @endphp
-                        <div class="k-opt-btn {{ old('sleep_quality') == $val ? 'selected' : '' }}" data-value="{{ $val }}" data-desc="{{ $d }}">
-                            {{ $l }}
+                        <div class="k-opt-card {{ old('sleep_quality') == $val ? 'selected' : '' }}" data-value="{{ $val }}">
+                            <div class="k-opt-radio"></div>
+                            <div class="k-opt-body">
+                                <div class="k-opt-main">{{ $l }}</div>
+                                <div class="k-opt-sub">{{ $d }}</div>
+                            </div>
                         </div>
                         @endforeach
                     </div>
-                    <div class="k-opt-desc" id="desc-sleep_quality">Pilih salah satu jawaban di atas.</div>
                     <input type="hidden" name="sleep_quality" id="input-sleep_quality" value="{{ old('sleep_quality') }}">
                 </div>
             </div>
@@ -329,15 +347,18 @@
                         <span class="k-q-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
                         Seberapa sering kamu merasa cemas atau gelisah hari ini?
                     </label>
-                    <div class="k-opt-grid" data-name="anxiety_score">
+                    <div class="k-opt-group" data-name="anxiety_score">
                         @foreach(['1.0'=>'Sangat Jarang|Hampir tidak pernah merasa cemas.', '7.0'=>'Jarang|Sesekali muncul rasa cemas.', '14.0'=>'Sedang|Kadang-kadang merasa cemas.', '21.0'=>'Sering|Cukup sering merasa cemas atau gelisah.', '27.0'=>'Sangat Sering|Hampir setiap saat merasa cemas.'] as $val=>$lbl)
                         @php [$l,$d]=explode('|',$lbl); @endphp
-                        <div class="k-opt-btn {{ old('anxiety_score') == $val ? 'selected' : '' }}" data-value="{{ $val }}" data-desc="{{ $d }}">
-                            {{ $l }}
+                        <div class="k-opt-card {{ old('anxiety_score') == $val ? 'selected' : '' }}" data-value="{{ $val }}">
+                            <div class="k-opt-radio"></div>
+                            <div class="k-opt-body">
+                                <div class="k-opt-main">{{ $l }}</div>
+                                <div class="k-opt-sub">{{ $d }}</div>
+                            </div>
                         </div>
                         @endforeach
                     </div>
-                    <div class="k-opt-desc" id="desc-anxiety_score">Pilih salah satu jawaban di atas.</div>
                     <input type="hidden" name="anxiety_score" id="input-anxiety_score" value="{{ old('anxiety_score') }}">
                 </div>
 
@@ -348,15 +369,18 @@
                         <span class="k-q-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></span>
                         Seberapa sering kamu merasa sedih atau tidak bersemangat hari ini?
                     </label>
-                    <div class="k-opt-grid" data-name="depression_score">
+                    <div class="k-opt-group" data-name="depression_score">
                         @foreach(['1.0'=>'Sangat Jarang|Hampir tidak pernah merasa sedih.', '7.0'=>'Jarang|Sesekali merasa kurang bersemangat.', '14.0'=>'Sedang|Kadang-kadang merasa sedih atau lesu.', '21.0'=>'Sering|Cukup sering merasa sedih atau tidak berenergi.', '27.0'=>'Sangat Sering|Hampir setiap saat merasa sedih atau putus asa.'] as $val=>$lbl)
                         @php [$l,$d]=explode('|',$lbl); @endphp
-                        <div class="k-opt-btn {{ old('depression_score') == $val ? 'selected' : '' }}" data-value="{{ $val }}" data-desc="{{ $d }}">
-                            {{ $l }}
+                        <div class="k-opt-card {{ old('depression_score') == $val ? 'selected' : '' }}" data-value="{{ $val }}">
+                            <div class="k-opt-radio"></div>
+                            <div class="k-opt-body">
+                                <div class="k-opt-main">{{ $l }}</div>
+                                <div class="k-opt-sub">{{ $d }}</div>
+                            </div>
                         </div>
                         @endforeach
                     </div>
-                    <div class="k-opt-desc" id="desc-depression_score">Pilih salah satu jawaban di atas.</div>
                     <input type="hidden" name="depression_score" id="input-depression_score" value="{{ old('depression_score') }}">
                 </div>
 
@@ -367,15 +391,18 @@
                         <span class="k-q-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
                         Seberapa tinggi tingkat stresmu minggu ini?
                     </label>
-                    <div class="k-opt-grid" data-name="stress_level">
+                    <div class="k-opt-group" data-name="stress_level">
                         @foreach(['1.0'=>'Sangat Rendah|Merasa tenang dan hampir tidak ada tekanan.', '3.0'=>'Rendah|Sedikit tekanan namun masih terkendali dengan baik.', '5.0'=>'Sedang|Ada tekanan yang terasa namun masih bisa diatasi.', '7.0'=>'Tinggi|Merasa cukup tertekan dan sulit untuk rileks.', '10.0'=>'Sangat Tinggi|Tekanan sangat berat dan mengganggu aktivitas sehari-hari.'] as $val=>$lbl)
                         @php [$l,$d]=explode('|',$lbl); @endphp
-                        <div class="k-opt-btn {{ old('stress_level') == $val ? 'selected' : '' }}" data-value="{{ $val }}" data-desc="{{ $d }}">
-                            {{ $l }}
+                        <div class="k-opt-card {{ old('stress_level') == $val ? 'selected' : '' }}" data-value="{{ $val }}">
+                            <div class="k-opt-radio"></div>
+                            <div class="k-opt-body">
+                                <div class="k-opt-main">{{ $l }}</div>
+                                <div class="k-opt-sub">{{ $d }}</div>
+                            </div>
                         </div>
                         @endforeach
                     </div>
-                    <div class="k-opt-desc" id="desc-stress_level">Pilih salah satu jawaban di atas.</div>
                     <input type="hidden" name="stress_level" id="input-stress_level" value="{{ old('stress_level') }}">
                 </div>
 
@@ -386,15 +413,18 @@
                         <span class="k-q-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></span>
                         Seberapa bahagia perasaanmu?
                     </label>
-                    <div class="k-opt-grid" data-name="happiness_score">
+                    <div class="k-opt-group" data-name="happiness_score">
                         @foreach(['1.0'=>'Sangat Sedih|Merasa sangat tidak bahagia atau hampa hari ini.', '3.0'=>'Sedih|Suasana hati kurang baik dan kurang bersemangat.', '5.0'=>'Biasa|Perasaan netral, tidak sedih namun tidak gembira.', '7.0'=>'Bahagia|Merasa cukup bahagia dan bersemangat hari ini.', '10.0'=>'Sangat Bahagia|Merasa sangat gembira dan penuh energi positif.'] as $val=>$lbl)
                         @php [$l,$d]=explode('|',$lbl); @endphp
-                        <div class="k-opt-btn {{ old('happiness_score') == $val ? 'selected' : '' }}" data-value="{{ $val }}" data-desc="{{ $d }}">
-                            {{ $l }}
+                        <div class="k-opt-card {{ old('happiness_score') == $val ? 'selected' : '' }}" data-value="{{ $val }}">
+                            <div class="k-opt-radio"></div>
+                            <div class="k-opt-body">
+                                <div class="k-opt-main">{{ $l }}</div>
+                                <div class="k-opt-sub">{{ $d }}</div>
+                            </div>
                         </div>
                         @endforeach
                     </div>
-                    <div class="k-opt-desc" id="desc-happiness_score">Pilih salah satu jawaban di atas.</div>
                     <input type="hidden" name="happiness_score" id="input-happiness_score" value="{{ old('happiness_score') }}">
                 </div>
             </div>
@@ -505,45 +535,17 @@
         });
     }
 
-    /* ── k-opt-btn click handler (new grid style) ── */
-    document.querySelectorAll('.k-opt-btn').forEach(function(btn){
-        btn.addEventListener('click',function(){
-            var grid = btn.closest('.k-opt-grid');
-            var name = grid.dataset.name;
+    /* ── k-opt-card click handler (Modern Grid Style) ── */
+    document.querySelectorAll('.k-opt-card').forEach(function(card){
+        card.addEventListener('click',function(){
+            var group = card.closest('.k-opt-group');
+            var name = group.dataset.name;
             /* deselect siblings */
-            grid.querySelectorAll('.k-opt-btn').forEach(function(x){ x.classList.remove('selected'); });
-            btn.classList.add('selected');
+            group.querySelectorAll('.k-opt-card').forEach(function(x){ x.classList.remove('selected'); });
+            card.classList.add('selected');
             /* set hidden input value */
             var input = document.getElementById('input-' + name);
-            if(input) input.value = btn.dataset.value;
-            /* show description below */
-            var descEl = document.getElementById('desc-' + name);
-            if(descEl && btn.dataset.desc) {
-                descEl.textContent = btn.dataset.desc;
-                descEl.classList.add('active');
-            }
-        });
-    });
-
-    /* ── Restore description for pre-selected (old) values ── */
-    document.querySelectorAll('.k-opt-btn.selected').forEach(function(btn){
-        var grid = btn.closest('.k-opt-grid');
-        var name = grid.dataset.name;
-        var descEl = document.getElementById('desc-' + name);
-        if(descEl && btn.dataset.desc) {
-            descEl.textContent = btn.dataset.desc;
-            descEl.classList.add('active');
-        }
-    });
-
-    /* ── Legacy k-opt-card handler (kept for backwards compat) ── */
-    document.querySelectorAll('.k-opt-card').forEach(function(c){
-        c.addEventListener('click',function(){
-            var group=c.closest('.k-opt-group');
-            group.querySelectorAll('.k-opt-card').forEach(function(x){x.classList.remove('selected');});
-            c.classList.add('selected');
-            var input=document.querySelector('input[name="'+group.dataset.name+'"]');
-            if(input) input.value=c.dataset.value;
+            if(input) input.value = card.dataset.value;
         });
     });
 
