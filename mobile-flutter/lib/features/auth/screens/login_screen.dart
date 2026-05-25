@@ -27,8 +27,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  bool _rememberMe = true;
-
+  
   bool _emailValid = false;
   bool _passValid = false;
   bool _submitted = false;
@@ -531,50 +530,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 ),
                 const SizedBox(height: 14),
 
-                // Remember me + forgot password row
+                // Forgot password row
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    GestureDetector(
-                      onTap: () => setState(() => _rememberMe = !_rememberMe),
-                      child: Row(
-                        children: [
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            width: 18,
-                            height: 18,
-                            decoration: BoxDecoration(
-                              color: _rememberMe
-                                  ? const Color(0xFF0D9488)
-                                  : Colors.transparent,
-                              border: Border.all(
-                                color: const Color(0xFF0D9488),
-                                width: 1.5,
-                              ),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            child: _rememberMe
-                                ? const Icon(
-                                    Icons.check,
-                                    size: 12,
-                                    color: Colors.white,
-                                  )
-                                : null,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Ingat saya',
-                            style: TextStyle(
-                              color: const Color(
-                                0xFF1E3A5F,
-                              ).withValues(alpha: 0.75),
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                     GestureDetector(
                       onTap: () => Navigator.push(
                         context,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/laporan_model.dart';
 import '../../../core/network/api_client.dart'; // sesuaikan path
 import '../../../core/network/api_endpoints.dart'; // sesuaikan path
+import '../../auth/providers/auth_provider.dart';
 
 // ── State ──────────────────────────────────────────────────────────────────
 
@@ -65,6 +66,7 @@ class LaporanNotifier extends StateNotifier<LaporanState> {
 final laporanProvider = StateNotifierProvider<LaporanNotifier, LaporanState>((
   ref,
 ) {
+  ref.watch(isAuthenticatedProvider);
   final api = ref.watch(apiClientProvider); // pakai provider yang sudah ada
   return LaporanNotifier(api);
 });

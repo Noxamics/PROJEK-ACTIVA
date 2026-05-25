@@ -222,7 +222,7 @@ class _SplashScreenState extends State<SplashScreen>
                           width: 75,
                           height: 75,
                           child: SvgPicture.asset(
-                            'logo/NewLogoEmblem2_fixed.svg',
+                            'assets/logo/NewLogoEmblem2_fixed.svg',
                             width: 90,
                             height: 90,
                           ),

@@ -1937,7 +1937,7 @@ class _SubmittingOverlayState extends State<_SubmittingOverlay>
                             width: 75,
                             height: 75,
                             child: SvgPicture.asset(
-                              'logo/NewLogoEmblem2_fixed.svg',
+                              'assets/logo/NewLogoEmblem2_fixed.svg',
                               width: 90,
                               height: 90,
                             ),

@@ -23,6 +23,7 @@ import '../../auth/screens/login_screen.dart';
 import '../../grafik/screens/grafik_screen.dart';
 import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
 import '../../kuisioner/screens/kuesioner_screen.dart';
+import '../../histori/providers/histori_provider.dart';
 import '../providers/notification_provider.dart';
 import '../widgets/futuristic_avatar.dart';
 import '../widgets/ai_wellness_card.dart';
@@ -312,7 +313,9 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // AI Wellness Card
-                AiWellnessCard(),
+                AiWellnessCard(
+                  items: ref.watch(historiProvider).items,
+                ),
                 const SizedBox(height: 28),
 
                 // Section label
