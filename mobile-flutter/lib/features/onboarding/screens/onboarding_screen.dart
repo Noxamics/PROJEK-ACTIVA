@@ -89,7 +89,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
       headline: 'Kenali pola\ndigitalmu',
       subtitle:
           'Kebiasaan kecil setiap hari bisa\nmemengaruhi fokus dan tidurmu.',
-      mascotAsset: 'assets/images/maskot1.png',
+      mascotAsset: 'assets/images/Maskot1.png',
       backgroundBuilder: (_) => const _S1Background(),
       contentBg: _kNavyDark,
       headlineColor: _kStarWhite,
@@ -108,7 +108,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
       headline: 'Tidak semua\nscreen time itu buruk',
       subtitle:
           'Activa membantu memahami\nkebiasaan digitalmu tanpa menghakimi.',
-      mascotAsset: 'assets/images/maskot2.png',
+      mascotAsset: 'assets/images/Maskot2.png',
       backgroundBuilder: (_) => const _S2Background(),
       contentBg: _kNavyDark,
       headlineColor: _kStarWhite,
@@ -126,7 +126,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
       tagBg: const Color(0x200D9488),
       headline: 'Kadang kita\nhanya perlu jeda',
       subtitle: 'Screen time, tidur, dan media sosial\nbisa lebih seimbang.',
-      mascotAsset: 'assets/images/maskot3.png',
+      mascotAsset: 'assets/images/Maskot3.png',
       backgroundBuilder: (_) => const _S3Background(),
       contentBg: const Color(0xFF0A1628),
       headlineColor: _kStarWhite,
@@ -145,7 +145,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
       headline: 'Mulai perjalanan\ndigital wellness kamu',
       subtitle:
           'Pantau perkembangan dan pahami\npola digitalmu bersama Activa.',
-      mascotAsset: 'assets/images/maskot4.png',
+      mascotAsset: 'assets/images/Maskot4.png',
       backgroundBuilder: (_) => const _S4Background(),
       contentBg: const Color(0xFF0A1628),
       headlineColor: _kStarWhite,
