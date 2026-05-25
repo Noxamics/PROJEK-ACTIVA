@@ -15,7 +15,7 @@ class KuesionerController extends Controller
         return view('web.kuesioner');
     }
 
-    public function store(Request $request)
+    public function store(Request $request, MlService $mlService)
     {
         $request->validate([
             'device_type' => 'nullable|string|in:Smartphone,Laptop,Both',
@@ -54,7 +54,6 @@ class KuesionerController extends Controller
 
         // Trigger ML prediction
         try {
-            $mlService = new MlService();
             $mlService->predict($questionnaire);
             $questionnaire->refresh();
         } catch (\Exception $e) {

@@ -57,12 +57,6 @@
             </div>
         </div>
         <span class="badge badge-{{ $scoreBadge }}" style="font-size:.875rem;padding:8px 20px;margin-top:16px;">Tingkat {{ $scoreCat }}</span>
-        @if($confidence)
-        <div style="max-width:300px;margin:20px auto 0;">
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:.8125rem;color:var(--text-muted);font-weight:600;">Confidence</span><span style="font-size:.8125rem;color:var(--teal);font-weight:700;">{{ round($confidence) }}%</span></div>
-            <div class="progress-bar"><div class="progress-fill" style="width:{{ min($confidence, 100) }}%"></div></div>
-        </div>
-        @endif
     </div>
 
     {{-- AI Analysis --}}
