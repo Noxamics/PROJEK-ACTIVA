@@ -1,0 +1,564 @@
+/* =====================================================
+   ACTIVA — Forgot Password Page CSS
+   Tema: Dark Navy + Teal (sama dengan halaman login)
+   Path: public/css/user-web/forgot.css
+   ===================================================== */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --navy:          #0d2137;
+    --navy-mid:      #0f2d47;
+    --teal:          #14B8A6;
+    --teal-dark:     #0F766E;
+    --surface:       #ffffff;
+    --text-primary:  #0d2137;
+    --text-sec:      #4b6278;
+    --text-hint:     #8fa8bb;
+    --border-input:  #d0e8de;
+    --input-bg:      #f2faf6;
+    --dark-text-sec: rgba(255,255,255,.60);
+    --radius-sm:  8px;
+    --radius-md:  12px;
+    --radius-lg:  18px;
+    --radius-xl:  24px;
+    --shadow-teal: 0 4px 18px rgba(26,188,140,.28);
+    --red:        #ef4444;
+    --green:      #22c55e;
+}
+
+/* ══════════════════════════════════════════════════
+   BASE
+══════════════════════════════════════════════════ */
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: stretch;
+    background: var(--navy);
+    overflow-x: hidden;
+}
+
+/* ══════════════════════════════════════════════════
+   KIRI — dark branding panel
+══════════════════════════════════════════════════ */
+.auth-left {
+    flex: 0 0 42%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 44px;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    background: linear-gradient(160deg, #0d2137 0%, #0f3249 50%, #0a3d2e 100%);
+}
+
+.auth-left::before {
+    content: '';
+    position: absolute;
+    top: -120px;
+    left: -120px;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(26,188,140,.18) 0%, transparent 68%);
+    pointer-events: none;
+    animation: pulseGlow 5s ease-in-out infinite;
+}
+
+.auth-left::after {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    right: -80px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(26,188,140,.14) 0%, transparent 68%);
+    pointer-events: none;
+    animation: pulseGlow 5s ease-in-out infinite 2s;
+}
+
+.deco-circle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+}
+.deco-circle-1 {
+    width: 90px; height: 90px;
+    right: -30px; top: 45%;
+    background: rgba(26,188,140,.18);
+    border: 2px solid rgba(26,188,140,.25);
+    animation: pulseGlow 4s ease-in-out infinite 1s;
+}
+.deco-circle-2 {
+    width: 50px; height: 50px;
+    left: 20px; bottom: 80px;
+    background: rgba(26,188,140,.12);
+    border: 2px solid rgba(26,188,140,.20);
+    animation: pulseGlow 4s ease-in-out infinite 0.5s;
+}
+.deco-circle-3 {
+    width: 30px; height: 30px;
+    right: 40px; bottom: 120px;
+    background: rgba(255,255,255,.06);
+    border: 1.5px solid rgba(255,255,255,.12);
+    animation: pulseGlow 6s ease-in-out infinite 3s;
+}
+
+@keyframes pulseGlow {
+    0%, 100% { transform: scale(1);    opacity: .8; }
+    50%       { transform: scale(1.07); opacity: 1; }
+}
+
+/* ══════════════════════════════════════════════════
+   KANAN — form putih, tepi kiri melengkung (desktop)
+══════════════════════════════════════════════════ */
+.auth-right-wrap {
+    flex: 0 0 58%;
+    position: relative;
+    display: flex;
+    align-items: stretch;
+}
+
+.auth-right {
+    flex: 1;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 48px 48px 80px;
+    position: relative;
+    clip-path: none;
+}
+
+.curve-svg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 90px;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+    display: block;
+}
+
+/* ══════════════════════════════════════════════════
+   FORM CONTAINER
+══════════════════════════════════════════════════ */
+.auth-form-container {
+    width: 100%;
+    max-width: 400px;
+    animation: fadeUp .45s cubic-bezier(.22,.68,0,1.1) both;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════════════
+   BRANDING — konten sisi kiri
+══════════════════════════════════════════════════ */
+.auth-brand {
+    position: relative;
+    z-index: 1;
+    text-align: left;
+    max-width: 360px;
+    width: 100%;
+}
+
+/* Logo */
+.logo-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 36px;
+}
+.logo-emblem {
+    width: 36px; height: 36px;
+    object-fit: contain; flex-shrink: 0;
+}
+.logo-emblem-fallback {
+    width: 36px; height: 36px;
+    background: var(--teal);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.logo-name {
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -.01em;
+    line-height: 1;
+}
+.logo-sub {
+    font-size: .6rem;
+    font-weight: 600;
+    color: rgba(255,255,255,.50);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-top: 2px;
+}
+
+/* Heading gelap */
+.brand-heading { margin-bottom: 20px; }
+.brand-heading h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -.02em;
+    line-height: 1.2;
+    margin-bottom: 12px;
+}
+.brand-heading p {
+    font-size: .875rem;
+    color: var(--dark-text-sec);
+    line-height: 1.65;
+}
+
+/* Maskot */
+.mascot-wrap {
+    position: absolute;
+    top: 0px;
+    right: -10px;
+    pointer-events: none;
+    z-index: 3;
+}
+.mascot-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(26,188,140,.22) 0%, transparent 70%);
+    filter: blur(14px);
+    animation: pulseGlow 4s ease-in-out infinite;
+}
+.mascot-wrap img {
+    width: 120px; height: 120px;
+    object-fit: contain;
+    position: relative; z-index: 2;
+    filter:
+        drop-shadow(0 0 10px rgba(26,188,140,.45))
+        drop-shadow(0 0 26px rgba(26,188,140,.20));
+    animation: float 3.5s ease-in-out infinite;
+}
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-10px); }
+}
+
+/* Tags */
+.tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 32px;
+}
+.tag {
+    background: rgba(255,255,255,.10);
+    color: rgba(255,255,255,.85);
+    font-size: .72rem;
+    font-weight: 700;
+    padding: 6px 13px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,.14);
+    letter-spacing: .02em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.tag i { color: var(--teal); font-size: .7rem; }
+
+/* ══════════════════════════════════════════════════
+   FORM KANAN — logo mobile
+══════════════════════════════════════════════════ */
+.form-logo-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+.form-logo-emblem { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
+.form-logo-name   { font-size: 1rem; font-weight: 800; color: var(--text-primary); line-height: 1; }
+.form-logo-sub    { font-size: .58rem; font-weight: 600; color: var(--teal-dark); text-transform: uppercase; letter-spacing: .08em; margin-top: 2px; }
+
+/* ══════════════════════════════════════════════════
+   BACK BUTTON
+══════════════════════════════════════════════════ */
+.fp-back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px; height: 40px;
+    background: var(--input-bg);
+    border: 1.5px solid var(--border-input);
+    border-radius: var(--radius-md);
+    color: var(--text-sec);
+    text-decoration: none;
+    transition: all .2s;
+    margin-bottom: 28px;
+}
+.fp-back-btn:hover {
+    background: rgba(20,184,166,.08);
+    border-color: rgba(20,184,166,.4);
+    color: var(--teal);
+}
+
+/* ══════════════════════════════════════════════════
+   ICON WRAP
+══════════════════════════════════════════════════ */
+.fp-icon-wrap {
+    width: 64px; height: 64px;
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(20,184,166,.10);
+    border: 1.5px solid rgba(20,184,166,.25);
+    color: var(--teal);
+    margin-bottom: 20px;
+}
+
+/* ══════════════════════════════════════════════════
+   HEADING FORM
+══════════════════════════════════════════════════ */
+.form-heading { margin-bottom: 28px; }
+.form-heading h1 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -.02em;
+    margin-bottom: 6px;
+}
+.form-heading p {
+    font-size: .875rem;
+    color: var(--text-sec);
+    line-height: 1.6;
+}
+
+/* ══════════════════════════════════════════════════
+   ALERTS
+══════════════════════════════════════════════════ */
+.fp-alert {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    font-size: .8125rem; font-weight: 600;
+    margin-bottom: 20px;
+}
+.fp-alert svg { flex-shrink: 0; }
+.fp-alert-error {
+    background: rgba(239,68,68,.07);
+    border: 1px solid rgba(239,68,68,.20);
+    color: #b91c1c;
+}
+.fp-alert-success {
+    background: rgba(26,188,140,.08);
+    border: 1px solid rgba(26,188,140,.25);
+    color: var(--teal-dark);
+}
+
+/* ══════════════════════════════════════════════════
+   FORM FIELDS
+══════════════════════════════════════════════════ */
+.form-body  { display: flex; flex-direction: column; gap: 18px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: .8125rem; font-weight: 600; color: var(--text-sec); }
+
+.input-wrap { position: relative; display: flex; align-items: center; }
+.input-icon {
+    position: absolute;
+    left: 13px;
+    color: var(--text-hint);
+    pointer-events: none;
+    width: 17px; height: 17px;
+}
+.form-input {
+    width: 100%;
+    height: 46px;
+    padding: 0 44px 0 40px;
+    background: var(--input-bg);
+    border: 1.5px solid var(--border-input);
+    border-radius: var(--radius-md);
+    font-size: .9rem;
+    font-family: inherit;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color .2s, background .2s, box-shadow .2s;
+}
+.form-input::placeholder { color: var(--text-hint); }
+.form-input:focus {
+    border-color: var(--teal);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(26,188,140,.12);
+}
+
+/* Valid checkmark */
+.fp-valid-icon {
+    position: absolute;
+    right: 13px;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+}
+
+/* ══════════════════════════════════════════════════
+   INFO BOX
+══════════════════════════════════════════════════ */
+.fp-info-box {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 12px 14px;
+    background: rgba(20,184,166,.07);
+    border: 1px solid rgba(20,184,166,.18);
+    border-radius: var(--radius-md);
+    color: var(--teal-dark);
+    font-size: .8125rem; line-height: 1.55;
+}
+.fp-info-box svg { flex-shrink: 0; margin-top: 1px; }
+.fp-info-box strong { font-weight: 700; }
+
+/* ══════════════════════════════════════════════════
+   SUBMIT BUTTON
+══════════════════════════════════════════════════ */
+.btn-primary {
+    width: 100%;
+    height: 48px;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: .9375rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    letter-spacing: .01em;
+    box-shadow: var(--shadow-teal);
+    transition: transform .15s, box-shadow .15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 28px;
+    text-decoration: none;
+}
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(26,188,140,.42);
+}
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled {
+    opacity: .7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ══════════════════════════════════════════════════
+   FOOTER FORM
+══════════════════════════════════════════════════ */
+.form-footer {
+    text-align: center;
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.form-footer p { font-size: .875rem; color: var(--text-sec); }
+.form-footer a { color: var(--teal-dark); font-weight: 700; text-decoration: none; transition: color .2s; }
+.form-footer a:hover { color: var(--teal); }
+
+/* ══════════════════════════════════════════════════
+   SPIN ANIMATION (untuk loading button)
+══════════════════════════════════════════════════ */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+.spin {
+    animation: spin .8s linear infinite;
+    transform-origin: center;
+    display: inline-block;
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE — MOBILE
+══════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+        background: #f4f9f7;
+        min-height: 100vh;
+    }
+
+    .auth-left {
+        flex: 0 0 auto;
+        width: 100%;
+        padding: 32px 24px 100px;
+        justify-content: flex-start;
+        align-items: flex-start;
+        overflow: visible;
+    }
+
+    .auth-left::before {
+        width: 240px; height: 240px;
+        top: -80px; left: -80px;
+    }
+    .auth-left::after {
+        width: 180px; height: 180px;
+        bottom: 0px; right: -60px;
+        display: block;
+    }
+    .deco-circle-1 {
+        right: 16px; top: auto; bottom: 50px;
+        width: 70px; height: 70px;
+    }
+    .deco-circle-2 { display: none; }
+    .deco-circle-3 { display: none; }
+
+    .mascot-wrap {
+        top: 20px;
+        right: 16px;
+    }
+    .mascot-wrap img { width: 90px; height: 90px; }
+
+    .brand-heading h2 { font-size: 1.55rem; }
+    .brand-heading p  { font-size: .825rem; }
+    .tags { margin-top: 18px; }
+
+    .auth-right-wrap {
+        flex: 1 1 auto;
+        width: 100%;
+        margin-top: -60px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .curve-svg { display: none; }
+
+    .auth-right {
+        border-radius: 50px 50px 0 0;
+        padding: 36px 24px 48px;
+        clip-path: none;
+        box-shadow: 0 -6px 30px rgba(13,33,55,.18);
+        background: var(--surface);
+        min-height: 100%;
+    }
+
+    .auth-form-container { max-width: 100%; }
+    .form-heading h1 { font-size: 1.35rem; }
+    .form-logo-row { display: flex; }
+}
+
+/* ══════════════════════════════════════════════════
+   DESKTOP ONLY
+══════════════════════════════════════════════════ */
+@media (min-width: 769px) {
+    .form-logo-row { display: none; }
+
+    .auth-right {
+        clip-path: none;
+        padding: 48px 48px 48px 80px;
+    }
+
+    .curve-svg { display: block; }
+}
