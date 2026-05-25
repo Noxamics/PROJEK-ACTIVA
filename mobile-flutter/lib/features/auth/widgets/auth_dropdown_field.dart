@@ -30,7 +30,7 @@ class AuthDropdownField extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: value,
+          initialValue: value,
           onChanged: onChanged,
           style: const TextStyle(color: AppColors.textDark, fontSize: 15),
           icon: const Icon(

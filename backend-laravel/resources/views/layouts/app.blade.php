@@ -18,6 +18,7 @@ Layout utama Activa Admin Panel
     rel="stylesheet">
   <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
   <link rel="stylesheet" href="{{ asset('css/rules.css') }}">
+  {{-- <link rel="stylesheet" href="{{ asset('css/user-web/kuesioner.css') }}"> --}}
   @stack('head-scripts')
   <style>
     :root {
