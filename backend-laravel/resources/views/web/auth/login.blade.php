@@ -111,7 +111,7 @@
                                 <polyline points="22 4 12 14.01 9 11.01"/>
                             </svg>
                         </div>
-                        <div style="font-size:.9375rem;font-weight:800;color:var(--text-primary);margin-bottom:5px;">Password Berhasil Direset! 🎉</div>
+                        <div style="font-size:.9375rem;font-weight:800;color:var(--text-primary);margin-bottom:5px;">Password Berhasil Direset</div>
                         <div style="font-size:.8rem;color:var(--text-sec);">Silakan login dengan password baru kamu.</div>
                     </div>
                 @elseif(session('success'))
