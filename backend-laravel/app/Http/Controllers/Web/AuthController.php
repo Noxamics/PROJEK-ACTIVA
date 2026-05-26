@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Laravel\Socialite\Facades\Socialite;
 use Carbon\Carbon;
 
 class AuthController extends Controller
@@ -45,59 +46,42 @@ class AuthController extends Controller
     }
 
     /**
-     * Step A — Frontend mengirim Google id_token → backend verifikasi → simpan di session.
+     * Redirect user to Google OAuth
      */
-    public function verifyGoogleToken(Request $request)
+    public function redirectToGoogle()
     {
-        $request->validate(['id_token' => 'required|string']);
+        session()->forget(['reg_google_verified', 'reg_google_email', 'reg_google_name', 'reg_google_picture']);
+        return Socialite::driver('google')->redirect();
+    }
 
+    /**
+     * Handle callback from Google OAuth
+     */
+    public function handleGoogleCallback()
+    {
         try {
-            $response = \Illuminate\Support\Facades\Http::get('https://oauth2.googleapis.com/tokeninfo', [
-                'id_token' => $request->id_token,
-            ]);
-
-            if (!$response->ok()) {
-                return response()->json(['success' => false, 'message' => 'Token tidak valid.'], 422);
-            }
-
-            $payload = $response->json();
-
-            $allowedAud = env('GOOGLE_CLIENT_ID', '');
-            if ($allowedAud && !in_array($payload['aud'] ?? '', [$allowedAud])) {
-                return response()->json(['success' => false, 'message' => 'Token tidak valid untuk aplikasi ini.'], 422);
-            }
-
-            if (($payload['email_verified'] ?? 'false') !== 'true') {
-                return response()->json(['success' => false, 'message' => 'Email Google belum diverifikasi.'], 422);
-            }
-
-            $email = $payload['email'];
-            $name  = $payload['name'] ?? '';
+            $googleUser = Socialite::driver('google')->user();
+            
+            $email = $googleUser->getEmail();
+            $name  = $googleUser->getName() ?? '';
+            $picture = $googleUser->getAvatar();
 
             if (User::where('email', $email)->exists()) {
-                return response()->json([
-                    'success'        => false,
-                    'message'        => 'Email ini sudah terdaftar. Silakan login.',
-                    'already_exists' => true,
-                ], 409);
+                return redirect('/user/login')->withErrors(['email' => 'Email ini sudah terdaftar. Silakan login.']);
             }
 
             session([
                 'reg_google_verified' => true,
                 'reg_google_email'    => $email,
                 'reg_google_name'     => $name,
-                'reg_google_picture'  => $payload['picture'] ?? null,
+                'reg_google_picture'  => $picture,
             ]);
 
-            return response()->json([
-                'success' => true,
-                'email'   => $email,
-                'name'    => $name,
-                'picture' => $payload['picture'] ?? null,
-            ]);
+            return redirect('/user/register');
         } catch (\Exception $e) {
-            Log::error('Google token verify failed: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Gagal memverifikasi. Coba lagi.'], 500);
+            file_put_contents(storage_path('logs/socialite_debug.txt'), $e->getMessage() . "\n" . $e->getTraceAsString());
+            Log::error('Google Socialite callback failed: ' . $e->getMessage());
+            return redirect('/user/register')->withErrors(['google' => 'Gagal memverifikasi akun Google. Coba lagi.']);
         }
     }
 
