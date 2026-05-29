@@ -2,7 +2,104 @@
 @section('title', 'Profil')
 
 @section('styles')
+@section('body-class', 'page-histori')
+<link href="{{ asset('css/user-web/histori.css') }}" rel="stylesheet">
 <link href="{{ asset('css/user-web/profile.css') }}" rel="stylesheet">
+<style>
+    /* Override profile.css specifically for dark theme and glassmorphism */
+    body.page-profil, body.page-histori {
+        background: transparent !important; 
+    }
+    .profil-hero {
+        background: rgba(255,255,255,0.04) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+    .profil-card {
+        background: rgba(255,255,255,0.06) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+    .profil-item {
+        border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+        transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), background 0.25s, box-shadow 0.25s, border-color 0.25s !important;
+    }
+    .profil-item:last-child {
+        border-bottom: none !important;
+    }
+    .profil-item:hover {
+        background: rgba(255,255,255,0.08) !important;
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0,229,200,0.15), 0 4px 12px rgba(0,0,0,0.3) !important;
+        border-radius: 12px;
+        border: 1px solid rgba(0,229,200,0.4) !important;
+    }
+    .profil-item-label { color: #fff !important; }
+    .profil-item-label.danger { color: #ef4444 !important; }
+    .profil-item-desc { color: rgba(255,255,255,0.6) !important; }
+    .profil-item-chevron { stroke: rgba(255,255,255,0.4) !important; }
+    
+    /* Title in right panel */
+    .profil-section-title { color: rgba(255,255,255,0.55) !important; }
+    
+    /* Modal dark theme */
+    .profil-modal-box {
+        background: rgba(15,23,42,0.95) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        backdrop-filter: blur(16px);
+        color: #fff;
+    }
+    .profil-modal-header { border-bottom-color: rgba(255,255,255,0.08) !important; }
+    .profil-modal-header h3 { color: #fff !important; }
+    .profil-form-label { color: rgba(255,255,255,0.7) !important; }
+    .profil-form-input {
+        background: rgba(255,255,255,0.05) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        color: #fff !important;
+    }
+    .profil-form-input:focus { border-color: #0D9488 !important; }
+    .profil-modal-close {
+        background: rgba(255,255,255,0.08) !important;
+        color: rgba(255,255,255,0.6) !important;
+    }
+    .btn-profil-ghost {
+        background: rgba(255,255,255,0.08) !important;
+        border-color: rgba(255,255,255,0.1) !important;
+        color: #fff !important;
+    }
+
+    /* Custom Dropdown (Dark Theme) */
+    .cdd-wrap { position: relative; }
+    .cdd {
+        display: flex; align-items: center; justify-content: space-between;
+        width: 100%; padding: 13px 16px;
+        background: rgba(255,255,255,0.05) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 12px; color: #fff;
+        font-size: .9375rem; cursor: pointer; transition: all .2s;
+    }
+    .cdd:hover, .cdd.open { border-color: #0D9488 !important; }
+    .cdd.open .cdd-arrow { transform: rotate(180deg); }
+    .cdd-arrow { transition: transform 0.2s; stroke: rgba(255,255,255,0.4); }
+    .cdd-menu {
+        position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+        background: rgba(15,23,42,0.98); border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px; padding: 6px; z-index: 100;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+        opacity: 0; visibility: hidden; transform: translateY(-10px);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        max-height: 200px; overflow-y: auto;
+    }
+    .cdd-menu.open { opacity: 1; visibility: visible; transform: translateY(0); }
+    .cdd-item {
+        padding: 10px 14px; border-radius: 8px; color: rgba(255,255,255,0.8);
+        font-size: .9375rem; cursor: pointer; transition: all .15s;
+    }
+    .cdd-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .cdd-item.selected { background: rgba(13,148,136,0.15); color: #14B8A6; font-weight: 600; }
+</style>
 @endsection
 
 @section('content')
@@ -14,13 +111,15 @@
     ];
 @endphp
 
-<script>document.body.classList.add('page-profil');</script>
-
-{{-- Page-level glow blobs --}}
-<div class="profil-page-glow" aria-hidden="true">
-    <span class="g1"></span>
-    <span class="g2"></span>
-</div>
+{{-- ── Dark background + decorative circles ── --}}
+<div class="hist-bg"       aria-hidden="true"></div>
+<div class="hist-orb-mid"  aria-hidden="true"></div>
+<div class="hist-circle-1" aria-hidden="true"></div>
+<div class="hist-circle-2" aria-hidden="true"></div>
+<div class="hist-circle-3" aria-hidden="true"></div>
+<div class="hist-circle-4" aria-hidden="true"></div>
+<div class="hist-circle-5" aria-hidden="true"></div>
+<div class="hist-circle-6" aria-hidden="true"></div>
 
 <div class="profil-wrapper">
 <div class="profil-layout">
@@ -191,24 +290,68 @@
                 <label class="profil-form-label">Nama Lengkap</label>
                 <input name="name" class="profil-form-input" value="{{ $user->name }}" placeholder="Nama lengkap" required>
             </div>
+            
             <div class="profil-form-group">
                 <label class="profil-form-label">Gender</label>
-                <select name="gender" class="profil-form-input profil-form-select" required>
-                    <option value="Laki-laki" {{ $user->gender=='Laki-laki'?'selected':'' }}>Laki-laki</option>
-                    <option value="Perempuan" {{ $user->gender=='Perempuan'?'selected':'' }}>Perempuan</option>
-                </select>
+                <input type="hidden" name="gender" id="val-gender" value="{{ $user->gender }}" required>
+                <div class="cdd-wrap">
+                    <div class="cdd" id="dd-gender" onclick="toggleDD('gender')">
+                        <span id="lbl-gender">{{ $user->gender ?: 'Pilih jenis kelamin' }}</span>
+                        <svg class="cdd-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="cdd-menu" id="menu-gender">
+                        <div class="cdd-item {{ $user->gender=='Laki-laki' ? 'selected' : '' }}" onclick="pickDD('gender','Laki-laki','Laki-laki')">Laki-laki</div>
+                        <div class="cdd-item {{ $user->gender=='Perempuan' ? 'selected' : '' }}" onclick="pickDD('gender','Perempuan','Perempuan')">Perempuan</div>
+                    </div>
+                </div>
             </div>
+            
             <div class="profil-form-group">
-                <label class="profil-form-label">Region / Kota</label>
-                <input name="region" class="profil-form-input" value="{{ $user->region }}" placeholder="Contoh: Surabaya" required>
+                <label class="profil-form-label">Region / Wilayah</label>
+                <input type="hidden" name="region" id="val-region" value="{{ $user->region }}" required>
+                <div class="cdd-wrap">
+                    <div class="cdd" id="dd-region" onclick="toggleDD('region')">
+                        <span id="lbl-region">{{ $user->region ?: 'Pilih wilayah' }}</span>
+                        <svg class="cdd-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="cdd-menu" id="menu-region">
+                        @foreach(['Afrika', 'Asia', 'Eropa', 'Timur Tengah', 'Amerika Utara', 'Amerika Selatan'] as $r)
+                        <div class="cdd-item {{ $user->region == $r ? 'selected' : '' }}" onclick="pickDD('region','{{ $r }}','{{ $r }}')">{{ $r }}</div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
+            
             <div class="profil-form-group">
                 <label class="profil-form-label">Pendidikan Terakhir</label>
-                <input name="education_level" class="profil-form-input" value="{{ $user->education_level }}" placeholder="Contoh: Sarjana" required>
+                <input type="hidden" name="education_level" id="val-education_level" value="{{ $user->education_level }}" required>
+                <div class="cdd-wrap">
+                    <div class="cdd" id="dd-education_level" onclick="toggleDD('education_level')">
+                        <span id="lbl-education_level">{{ $user->education_level ?: 'Pilih pendidikan' }}</span>
+                        <svg class="cdd-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="cdd-menu" id="menu-education_level">
+                        @foreach(['SMA/SMK/Sederajat', 'Sarjana', 'Magister', 'Doktor'] as $e)
+                        <div class="cdd-item {{ $user->education_level == $e ? 'selected' : '' }}" onclick="pickDD('education_level','{{ $e }}','{{ $e }}')">{{ $e }}</div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
+            
             <div class="profil-form-group">
                 <label class="profil-form-label">Peran Sehari-hari</label>
-                <input name="daily_role" class="profil-form-input" value="{{ $user->daily_role }}" placeholder="Contoh: Mahasiswa" required>
+                <input type="hidden" name="daily_role" id="val-daily_role" value="{{ $user->daily_role }}" required>
+                <div class="cdd-wrap">
+                    <div class="cdd" id="dd-daily_role" onclick="toggleDD('daily_role')">
+                        <span id="lbl-daily_role">{{ $user->daily_role ?: 'Pilih peran' }}</span>
+                        <svg class="cdd-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="cdd-menu" id="menu-daily_role">
+                        @foreach(['Pelajar/Mahasiswa', 'Karyawan Penuh Waktu', 'Karyawan Paruh Waktu', 'Pengurus Rumah Tangga', 'Tidak Bekerja'] as $r)
+                        <div class="cdd-item {{ $user->daily_role == $r ? 'selected' : '' }}" onclick="pickDD('daily_role','{{ $r }}','{{ $r }}')">{{ $r }}</div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
         </div>
         <div class="profil-modal-footer">
@@ -260,5 +403,44 @@
 @endsection
 
 @section('scripts')
-<script>document.body.classList.add('page-profil');</script>
+<script>
+    document.body.classList.add('page-histori');
+
+    function toggleDD(name) {
+        const menu = document.getElementById('menu-' + name);
+        const btn  = document.getElementById('dd-' + name);
+        const isOpen = menu.classList.contains('open');
+        closeAllDD();
+        if (!isOpen) { 
+            menu.classList.add('open'); 
+            btn.classList.add('open'); 
+        }
+    }
+    
+    function pickDD(name, value, label) {
+        document.getElementById('val-' + name).value = value;
+        const lbl = document.getElementById('lbl-' + name);
+        lbl.textContent = label;
+        
+        document.querySelectorAll('#menu-' + name + ' .cdd-item').forEach(el => {
+            if(el.textContent.trim() === label) {
+                el.classList.add('selected');
+            } else {
+                el.classList.remove('selected');
+            }
+        });
+        closeAllDD();
+    }
+    
+    function closeAllDD() {
+        document.querySelectorAll('.cdd-menu').forEach(m => m.classList.remove('open'));
+        document.querySelectorAll('.cdd').forEach(b => b.classList.remove('open'));
+    }
+    
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.profil-form-group') && !e.target.closest('.cdd-wrap')) {
+            closeAllDD();
+        }
+    });
+</script>
 @endsection

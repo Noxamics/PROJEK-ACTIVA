@@ -287,6 +287,32 @@ body::after {
 .streak-fire-dim-svg .fire-layer-3 {
     animation: none !important;
 }
+
+/* ══ Hover Animations (Float & Glow) matching Histori & Profil ══ */
+.score-card-wrap {
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), box-shadow 0.25s, border-color 0.25s !important;
+}
+.score-card-wrap:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0,229,200,0.4) !important;
+    box-shadow: 0 12px 40px rgba(0,229,200,0.15), 0 4px 12px rgba(0,0,0,0.3) !important;
+}
+
+.card {
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), box-shadow 0.25s, border-color 0.25s !important;
+}
+.card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0,229,200,0.4) !important;
+    box-shadow: 0 12px 40px rgba(0,229,200,0.15), 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+.habit-row, .tip-row {
+    transition: transform 0.2s, background 0.2s;
+}
+.habit-row:hover, .tip-row:hover {
+    transform: translateX(4px);
+}
 </style>
 @endsection
 
@@ -816,7 +842,7 @@ body::after {
             </div>
             <div style="display:flex;flex-direction:column;gap:8px;">
                 @foreach($habits as $habit)
-                <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:var(--radius-lg);border:1px solid {{ $habit['done'] ? 'rgba(13,148,136,.2)' : 'var(--border-light)' }};background:{{ $habit['done'] ? 'rgba(13,148,136,.03)' : 'transparent' }};">
+                <div class="habit-item" style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:var(--radius-lg);border:1px solid {{ $habit['done'] ? 'rgba(13,148,136,.2)' : 'var(--border-light)' }};background:{{ $habit['done'] ? 'rgba(13,148,136,.03)' : 'transparent' }};">
                     <div style="width:22px;height:22px;border-radius:50%;background:{{ $habit['done'] ? 'var(--teal)' : 'var(--bg-light)' }};border:2px solid {{ $habit['done'] ? 'var(--teal)' : 'var(--border-light)' }};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                         @if($habit['done'])
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
@@ -856,7 +882,7 @@ body::after {
             </div>
             <div style="display:flex;flex-direction:column;gap:10px;">
                 @foreach($tips as $tip)
-                <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bg-light);border-radius:var(--radius-lg);">
+                <div class="tip-row" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bg-light);border-radius:var(--radius-lg);">
                     <div style="width:32px;height:32px;border-radius:var(--radius-sm);background:{{ $tip['bg'] }};display:flex;align-items:center;justify-content:center;flex-shrink:0;color:{{ $tip['color'] }};">
                         {!! $tip['icon'] !!}
                     </div>
