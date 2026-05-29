@@ -117,16 +117,32 @@ class AnalyticsController extends Controller
      */
     public function history(Request $request): JsonResponse
     {
-        \Illuminate\Support\Facades\Log::info('Analytics history called', ['user_id' => auth()->id(), 'days' => $request->get('days')]);
+        \Illuminate\Support\Facades\Log::info('Analytics history called', [
+            'user_id' => auth()->id(),
+            'days' => $request->get('days'),
+            'month' => $request->get('month'),
+            'year' => $request->get('year'),
+        ]);
         
         try {
-            $days = min((int) $request->get('days', 30), 365); // max 365 hari
+            $query = MlResult::with('questionnaire')
+                ->where('user_id', auth()->id());
 
-            $results = MlResult::with('questionnaire')
-                ->where('user_id', auth()->id())
-                ->where('created_at', '>=', now()->subDays($days))
-                ->orderBy('created_at', 'asc')
-                ->get();
+            // Jika month & year disediakan, filter berdasarkan bulan spesifik
+            $month = $request->get('month');
+            $year = $request->get('year');
+
+            if ($month && $year) {
+                $startOfMonth = Carbon::create((int) $year, (int) $month, 1)->startOfMonth();
+                $endOfMonth = $startOfMonth->copy()->endOfMonth();
+
+                $query->whereBetween('created_at', [$startOfMonth, $endOfMonth]);
+            } else {
+                $days = min((int) $request->get('days', 30), 365);
+                $query->where('created_at', '>=', now()->subDays($days));
+            }
+
+            $results = $query->orderBy('created_at', 'asc')->get();
 
             \Illuminate\Support\Facades\Log::info('Analytics history records found', ['count' => $results->count()]);
 
@@ -144,7 +160,8 @@ class AnalyticsController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'days' => $days,
+                    'month' => $month ? (int) $month : null,
+                    'year' => $year ? (int) $year : null,
                     'records' => $mapped,
                 ],
             ]);

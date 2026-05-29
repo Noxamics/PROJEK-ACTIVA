@@ -103,10 +103,10 @@ class GrafikFaker {
 
   /// Hasilkan [GrafikData] dummy sesuai periode.
   /// Ganti method ini dengan service call saat backend sudah siap.
-  static GrafikData generate({required GrafikPeriod period}) {
+  static GrafikData generate({required GrafikPeriod period, int? month, int? year}) {
     return switch (period) {
       GrafikPeriod.week => _generateWeek(),
-      GrafikPeriod.month => _generateMonth(),
+      GrafikPeriod.month => _generateMonth(month: month, year: year),
       GrafikPeriod.year => _generateYear(),
     };
   }
@@ -150,27 +150,42 @@ class GrafikFaker {
     );
   }
 
-  static GrafikData _generateMonth() {
-    // 4 minggu
-    const labels = ['M1', 'M2', 'M3', 'M4'];
+  static GrafikData _generateMonth({int? month, int? year}) {
+    final targetMonth = month ?? DateTime.now().month;
+    final targetYear = year ?? DateTime.now().year;
+    final lastDay = DateTime(targetYear, targetMonth + 1, 0);
+    final totalDays = lastDay.day;
+    final firstDay = DateTime(targetYear, targetMonth, 1);
 
-    final dependence = _smoothSeries(start: 42, end: 55, count: 4, noiseMax: 5);
+    // Determine number of weeks (same logic as service)
+    final numWeeks = ((totalDays + firstDay.weekday - 1) / 7).ceil().clamp(4, 5);
+
+    final labels = List.generate(numWeeks, (i) => 'M${i + 1}');
+
+    // Use month as seed variation for varied but consistent data per month
+    final seedOffset = targetMonth + targetYear * 12;
+    final rng = Random(42 + seedOffset);
+
+    final baseStart = 38.0 + (rng.nextDouble() * 10);
+    final baseEnd = 52.0 + (rng.nextDouble() * 12);
+
+    final dependence = _smoothSeries(start: baseStart, end: baseEnd, count: numWeeks, noiseMax: 5);
     final deviceHours = _smoothSeries(
-      start: 6.0,
-      end: 7.5,
-      count: 4,
+      start: 5.5 + rng.nextDouble(),
+      end: 7.0 + rng.nextDouble(),
+      count: numWeeks,
       noiseMax: 0.8,
     );
     final socialMedia = _smoothSeries(
-      start: 150,
-      end: 230,
-      count: 4,
+      start: 140 + rng.nextDouble() * 30,
+      end: 210 + rng.nextDouble() * 40,
+      count: numWeeks,
       noiseMax: 30,
     );
-    final sleep = _smoothSeries(start: 7.0, end: 6.2, count: 4, noiseMax: 0.5);
+    final sleep = _smoothSeries(start: 7.2 - rng.nextDouble() * 0.5, end: 6.0 + rng.nextDouble() * 0.5, count: numWeeks, noiseMax: 0.5);
 
     final entries = List.generate(
-      4,
+      numWeeks,
       (i) => GrafikEntry(
         label: labels[i],
         dependenceScore: dependence[i],
