@@ -16,6 +16,7 @@ import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
 import '../../histori/screens/histori_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../profil/widgets/floating_particles.dart';
+import '../../grafik/providers/grafik_provider.dart';
 
 // true  = hitung lokal (backend belum siap)
 // false = kirim ke Laravel → data masuk MongoDB
@@ -231,6 +232,10 @@ class _KuesionerScreenState extends ConsumerState<KuesionerScreen> {
         ref.read(resultProvider.notifier).setResult(result);
       }
       ref.read(questionnaireProvider.notifier).reset(keepResult: true);
+      
+      // Memicu refresh data grafik agar hasil terbaru langsung muncul tanpa perlu ditarik (pull-to-refresh)
+      ref.invalidate(grafikProvider);
+
       setState(() => _showSelection = true);
       Navigator.push(
         context,

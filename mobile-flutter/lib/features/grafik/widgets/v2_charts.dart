@@ -38,31 +38,66 @@ class _SimpleLineChartState extends State<SimpleLineChart> {
             // Chart Area
             Expanded(
               flex: 3,
-              child: SizedBox(
-                height: 140,
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return GestureDetector(
-                      onPanUpdate: (details) => _handleTouch(
-                        details.localPosition,
-                        constraints.maxWidth,
-                      ),
-                      onTapDown: (details) => _handleTouch(
-                        details.localPosition,
-                        constraints.maxWidth,
-                      ),
-                      child: CustomPaint(
-                        size: Size.infinite,
-                        painter: _LineChartPainter(
-                          values: widget.values,
-                          color: widget.color,
-                          maxValue: widget.maxValue,
-                          selectedIndex: _selectedIndex,
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 140,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return GestureDetector(
+                          onPanUpdate: (details) => _handleTouch(
+                            details.localPosition,
+                            constraints.maxWidth,
+                          ),
+                          onTapDown: (details) => _handleTouch(
+                            details.localPosition,
+                            constraints.maxWidth,
+                          ),
+                          child: CustomPaint(
+                            size: Size.infinite,
+                            painter: _LineChartPainter(
+                              values: widget.values,
+                              color: widget.color,
+                              maxValue: widget.maxValue,
+                              selectedIndex: _selectedIndex,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // X-Axis Labels (aligned perfectly with dots)
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      if (widget.labels.isEmpty) return const SizedBox(height: 16);
+                      final stepX = widget.labels.length > 1
+                          ? constraints.maxWidth / (widget.labels.length - 1)
+                          : 0.0;
+                      return SizedBox(
+                        height: 16,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: List.generate(widget.labels.length, (i) {
+                            return Positioned(
+                              left: (i * stepX) - 30, // 30 is half of 60 to center the text
+                              width: 60,
+                              child: Text(
+                                widget.labels[i],
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: AppColors.textMuted.withValues(alpha: 0.6),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            );
+                          }),
                         ),
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
 
@@ -117,26 +152,6 @@ class _SimpleLineChartState extends State<SimpleLineChart> {
             else
               const Expanded(flex: 1, child: SizedBox()),
           ],
-        ),
-        const SizedBox(height: 16),
-        // X-Axis Labels
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: widget.labels
-                .map(
-                  (l) => Text(
-                    l,
-                    style: TextStyle(
-                      color: AppColors.textMuted.withValues(alpha: 0.6),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
         ),
       ],
     );

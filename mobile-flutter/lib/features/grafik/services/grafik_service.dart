@@ -14,31 +14,40 @@ class GrafikService {
 
   GrafikService(this._client);
 
-  /// Fetch history records from database and aggregate based on selected period
-  Future<GrafikData> getGrafikData(GrafikPeriod period) async {
-    final int days = switch (period) {
-      GrafikPeriod.week => 7,
-      GrafikPeriod.month => 30,
-      GrafikPeriod.year => 365,
-    };
-
+  /// Fetch history records from database and aggregate based on selected period.
+  /// When period is [GrafikPeriod.month], [month] and [year] specify the calendar month.
+  Future<GrafikData> getGrafikData(GrafikPeriod period, {int? month, int? year}) async {
     try {
+      final Map<String, dynamic> queryParams;
+
+      if (period == GrafikPeriod.month && month != null && year != null) {
+        // Fetch data for a specific calendar month
+        queryParams = {'month': month, 'year': year};
+      } else {
+        final int days = switch (period) {
+          GrafikPeriod.week => 7,
+          GrafikPeriod.month => 30,
+          GrafikPeriod.year => 365,
+        };
+        queryParams = {'days': days};
+      }
+
       final response = await _client.get(
         ApiEndpoints.analyticsHistory,
-        queryParams: {'days': days},
+        queryParams: queryParams,
       );
 
       final responseData = response.data as Map<String, dynamic>;
       final data = responseData['data'] as Map<String, dynamic>;
       final records = data['records'] as List<dynamic>;
 
-      return _parseAndAggregate(records, period);
+      return _parseAndAggregate(records, period, month: month, year: year);
     } on DioException catch (e) {
       throw _handleError(e);
     }
   }
 
-  GrafikData _parseAndAggregate(List<dynamic> records, GrafikPeriod period) {
+  GrafikData _parseAndAggregate(List<dynamic> records, GrafikPeriod period, {int? month, int? year}) {
     if (records.isEmpty) {
       return const GrafikData(
         entries: [],
@@ -123,42 +132,33 @@ class GrafikService {
         ));
       }
     } else if (period == GrafikPeriod.month) {
-      // Group last 30 days into 4 relative weeks: M1, M2, M3, M4 based on relative days
-      final now = DateTime.now();
-      final todayMidnight = DateTime(now.year, now.month, now.day);
+      // Group records into calendar weeks within the selected month
+      final targetMonth = month ?? DateTime.now().month;
+      final targetYear = year ?? DateTime.now().year;
+      final firstDay = DateTime(targetYear, targetMonth, 1);
+      final lastDay = DateTime(targetYear, targetMonth + 1, 0); // last day of month
+      final totalDays = lastDay.day;
 
-      final List<Map<String, dynamic>> w1 = [];
-      final List<Map<String, dynamic>> w2 = [];
-      final List<Map<String, dynamic>> w3 = [];
-      final List<Map<String, dynamic>> w4 = [];
+      // Determine number of weeks (ceil of totalDays / 7, max 5)
+      final numWeeks = ((totalDays + firstDay.weekday - 1) / 7).ceil().clamp(4, 5);
+
+      // Create week buckets
+      final List<List<Map<String, dynamic>>> weekBuckets = List.generate(numWeeks, (_) => []);
 
       for (var rec in records) {
         final dateStr = rec['date'] as String;
         final date = DateTime.tryParse(dateStr);
         if (date == null) continue;
 
-        final diff = todayMidnight.difference(DateTime(date.year, date.month, date.day)).inDays;
-        if (diff <= 7) {
-          w4.add(Map<String, dynamic>.from(rec as Map));
-        } else if (diff <= 14) {
-          w3.add(Map<String, dynamic>.from(rec as Map));
-        } else if (diff <= 21) {
-          w2.add(Map<String, dynamic>.from(rec as Map));
-        } else {
-          w1.add(Map<String, dynamic>.from(rec as Map));
-        }
+        // Calculate which week this date falls in (0-indexed)
+        final dayOfMonth = date.day;
+        final weekIndex = ((dayOfMonth - 1) / 7).floor().clamp(0, numWeeks - 1);
+        weekBuckets[weekIndex].add(Map<String, dynamic>.from(rec as Map));
       }
 
-      final weeks = [
-        {'label': 'M1', 'records': w1},
-        {'label': 'M2', 'records': w2},
-        {'label': 'M3', 'records': w3},
-        {'label': 'M4', 'records': w4},
-      ];
-
-      for (var wk in weeks) {
-        final label = wk['label'] as String;
-        final wkRecords = wk['records'] as List<Map<String, dynamic>>;
+      for (int i = 0; i < numWeeks; i++) {
+        final label = 'M${i + 1}';
+        final wkRecords = weekBuckets[i];
 
         if (wkRecords.isEmpty) {
           entries.add(GrafikEntry(
