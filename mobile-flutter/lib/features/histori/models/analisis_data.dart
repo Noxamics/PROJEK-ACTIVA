@@ -11,6 +11,7 @@ class AnalisisData {
   final double confidence;
   final String? note;
   final Color? noteColor;
+  final MlResultModel originalResult;
 
   const AnalisisData({
     required this.number,
@@ -21,6 +22,7 @@ class AnalisisData {
     required this.confidence,
     this.note,
     this.noteColor,
+    required this.originalResult,
   });
 
   // ── Getters untuk histori_screen.dart ─────────────────────────
@@ -53,6 +55,7 @@ extension AnalisisDataConverter on AnalisisData {
       noteColor: ml.category.toLowerCase() == 'tinggi'
           ? AppColors.red
           : AppColors.teal,
+      originalResult: ml,
     );
   }
 }

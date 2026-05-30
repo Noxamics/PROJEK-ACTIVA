@@ -149,13 +149,13 @@ class MlResultModel {
           );
 
     // Ekstrak penyebab
-    final rawPenyebab = aiAnalysis?['penyebab'] ?? json['penyebab'];
+    final rawPenyebab = aiAnalysis?['penyebab'] ?? mlResult?['penyebab'] ?? json['penyebab'];
     final penyebab = rawPenyebab is List
         ? rawPenyebab.map((e) => e.toString()).toList()
         : <String>[];
 
     // Ekstrak rekomendasi
-    final rawRek = aiAnalysis?['rekomendasi'] ?? json['rekomendasi'];
+    final rawRek = aiAnalysis?['rekomendasi'] ?? mlResult?['rekomendasi'] ?? json['rekomendasi'];
     final rekomendasi = rawRek is List
         ? rawRek
               .map(
@@ -166,11 +166,11 @@ class MlResultModel {
               .toList()
         : <RecommendationItem>[];
 
-    final pembukaan = (aiAnalysis?['pembukaan'] ?? json['pembukaan'] ?? '')
+    final pembukaan = (aiAnalysis?['pembukaan'] ?? mlResult?['pembukaan'] ?? json['pembukaan'] ?? '')
         .toString();
-    final summary = (aiAnalysis?['summary'] ?? json['summary'] ?? '')
+    final summary = (aiAnalysis?['summary'] ?? mlResult?['summary'] ?? json['summary'] ?? '')
         .toString();
-    final aiModel = (aiAnalysis?['model'] ?? json['aiModel'] ?? 'unknown')
+    final aiModel = (aiAnalysis?['model'] ?? mlResult?['model'] ?? json['aiModel'] ?? 'unknown')
         .toString();
     final highRiskFlag = _toInt(
       mlResult?['high_risk_flag'] ?? json['high_risk_flag'],

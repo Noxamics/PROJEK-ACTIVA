@@ -23,10 +23,8 @@ import '../../auth/screens/login_screen.dart';
 import '../../grafik/screens/grafik_screen.dart';
 import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
 import '../../kuisioner/screens/kuesioner_screen.dart';
-import '../../histori/providers/histori_provider.dart';
 import '../providers/notification_provider.dart';
 import '../widgets/futuristic_avatar.dart';
-import '../widgets/ai_wellness_card.dart';
 import '../widgets/glassmorphism_chip.dart';
 import '../widgets/premium_setting_item.dart';
 import '../widgets/premium_setting_toggle.dart';
@@ -42,6 +40,22 @@ class _PC {
   static const blue = Color(0xFF4B9FFF);
   static const rose = Color(0xFFFF6B8A);
   static const glassBorder = Color(0x25FFFFFF);
+}
+
+class _WaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final p = Path();
+    p.moveTo(0, size.height * 0.5);
+    p.quadraticBezierTo(size.width * 0.5, 0, size.width, size.height * 0.5);
+    p.lineTo(size.width, size.height);
+    p.lineTo(0, size.height);
+    p.close();
+    return p;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
 
 // ── Main Screen ────────────────────────────────────────────────────────────────
@@ -286,69 +300,63 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen>
   // ── Bottom "rising" glass sheet ──────────────────────────────────────────────
 
   Widget _buildBottomSheet(user) {
-    final notifEnabled = ref.watch(notificationProvider);
+  final notifEnabled = ref.watch(notificationProvider);
 
-    return Container(
-      margin: const EdgeInsets.only(top: 8),
-      decoration: const BoxDecoration(
-        color: Color(0xFFF4F7FB),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
-      ),
-      child: Column(
-        children: [
-          // pill handle
-          Container(
-            margin: const EdgeInsets.only(top: 14, bottom: 10),
-            width: 36,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // AI Wellness Card
-                AiWellnessCard(
-                  items: ref.watch(historiProvider).items,
-                ),
-                const SizedBox(height: 28),
-
-                // Section label
-                _sectionLabel('PENGATURAN AKUN'),
-                const SizedBox(height: 14),
-
-                // Settings card
-                _buildSettingsCard(notifEnabled),
-                const SizedBox(height: 28),
-
-                // Logout
-                _LogoutButton(onTap: _showKeluarDialog),
-                const SizedBox(height: 20),
-
-                Center(
-                  child: Text(
-                    'Activa — Digital Wellness v1.0.0',
-                    style: TextStyle(
-                      color: Colors.black.withValues(alpha: 0.25),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.4,
+  return Stack(
+    children: [
+      // Container putih utama dengan padding atas untuk beri ruang wave
+      Container(
+        margin: const EdgeInsets.only(top: 30),
+        color: const Color(0xFFF4F7FB),
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _sectionLabel('PENGATURAN AKUN'),
+                  const SizedBox(height: 14),
+                  _buildSettingsCard(notifEnabled),
+                  const SizedBox(height: 28),
+                  _LogoutButton(onTap: _showKeluarDialog),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: Text(
+                      'Activa — Digital Wellness v1.0.0',
+                      style: TextStyle(
+                        color: Colors.black.withValues(alpha: 0.25),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.4,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 90), // bottom nav clearance
-              ],
+                  const SizedBox(height: 90),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    );
-  }
+
+      // Wave di atas container putih
+      Positioned(
+        top: 0,
+        left: 0,
+        right: 0,
+        child: ClipPath(
+          clipper: _WaveClipper(),
+          child: Container(
+            height: 60,
+            color: const Color(0xFFF4F7FB),
+          ),
+        ),
+      ),
+    ],
+  );
+}
 
   Widget _sectionLabel(String text) {
     return Text(
