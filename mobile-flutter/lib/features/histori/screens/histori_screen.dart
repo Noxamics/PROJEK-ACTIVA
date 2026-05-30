@@ -7,6 +7,7 @@ import '../models/analisis_data.dart';
 import '../../grafik/screens/grafik_screen.dart';
 import '../../profil/screens/profil_screen.dart';
 import '../../laporan_perkembangan/screens/laporan_perkembangan_screen.dart';
+import '../../hasil_prediksi/screens/hasil_prediksi_screen.dart';
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -733,7 +734,16 @@ class _TimelineItemState extends State<_TimelineItem>
                     onTapDown: (_) => setState(() => _pressed = true),
                     onTapUp: (_) => setState(() => _pressed = false),
                     onTapCancel: () => setState(() => _pressed = false),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => HasilPrediksiScreen(
+                            result: widget.data.originalResult,
+                          ),
+                        ),
+                      );
+                    },
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 150),
                       transform: Matrix4.identity()
