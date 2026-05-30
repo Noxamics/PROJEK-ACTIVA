@@ -81,6 +81,11 @@ class _GrafikScreenState extends ConsumerState<GrafikScreen> {
                   child: Column(
                     children: [
                       _buildPeriodSelector(selectedPeriodIndex),
+                      // ── Month picker (hanya muncul saat period = Bulanan) ──
+                      if (grafikState.period == GrafikPeriod.month) ...[
+                        const SizedBox(height: 16),
+                        _buildMonthPicker(grafikState),
+                      ],
                       const SizedBox(height: 32),
                       _buildContent(grafikState),
                       const SizedBox(height: 32),
@@ -260,6 +265,18 @@ class _GrafikScreenState extends ConsumerState<GrafikScreen> {
             maxValue: 12,
           ),
         ),
+        const SizedBox(height: 20),
+
+        // 5. Distribusi Kategori
+        _card(
+          title: 'Distribusi Kategori',
+          subtitle: 'Frekuensi tingkat dependensi pada periode ini',
+          child: DonutChartWidget(
+            low: data.kategori.low,
+            medium: data.kategori.medium,
+            high: data.kategori.high,
+          ),
+        ),
       ],
     );
   }
@@ -430,6 +447,276 @@ class _GrafikScreenState extends ConsumerState<GrafikScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  // ── Nama bulan dalam Bahasa Indonesia ────────────────────────────────────
+  static const _monthNames = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+  ];
+
+  Widget _buildMonthPicker(GrafikState grafikState) {
+    final notifier = ref.read(grafikProvider.notifier);
+    final monthLabel = '${_monthNames[grafikState.selectedMonth - 1]} ${grafikState.selectedYear}';
+    final canNext = notifier.canGoNextMonth;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.bgWhite,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Tombol bulan sebelumnya
+          _monthNavButton(
+            icon: Icons.chevron_left_rounded,
+            onTap: () => notifier.previousMonth(),
+            enabled: true,
+          ),
+
+          // Label bulan & tahun
+          Expanded(
+            child: GestureDetector(
+              onTap: () => _showMonthYearPicker(context, grafikState),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                transitionBuilder: (child, animation) => FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 0.15),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  ),
+                ),
+                child: Text(
+                  monthLabel,
+                  key: ValueKey(monthLabel),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: AppColors.textDark,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Tombol bulan berikutnya
+          _monthNavButton(
+            icon: Icons.chevron_right_rounded,
+            onTap: canNext ? () => notifier.nextMonth() : null,
+            enabled: canNext,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _monthNavButton({
+    required IconData icon,
+    required VoidCallback? onTap,
+    required bool enabled,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: enabled
+                ? AppColors.bgDark.withValues(alpha: 0.08)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            icon,
+            size: 22,
+            color: enabled ? AppColors.textDark : AppColors.textDisabled,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Dialog untuk memilih bulan dan tahun secara langsung
+  void _showMonthYearPicker(BuildContext context, GrafikState grafikState) {
+    int pickedMonth = grafikState.selectedMonth;
+    int pickedYear = grafikState.selectedYear;
+    final now = DateTime.now();
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setModalState) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: AppColors.bgWhite,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              ),
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Handle bar
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.textDisabled,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Title
+                  const Text(
+                    'Pilih Bulan',
+                    style: TextStyle(
+                      color: AppColors.textDark,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Year selector
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          setModalState(() => pickedYear--);
+                        },
+                        icon: const Icon(Icons.chevron_left_rounded, color: AppColors.textDark),
+                      ),
+                      Text(
+                        '$pickedYear',
+                        style: const TextStyle(
+                          color: AppColors.textDark,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: pickedYear < now.year
+                            ? () {
+                                setModalState(() => pickedYear++);
+                              }
+                            : null,
+                        icon: Icon(
+                          Icons.chevron_right_rounded,
+                          color: pickedYear < now.year ? AppColors.textDark : AppColors.textDisabled,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Month grid (3 kolom × 4 baris)
+                  GridView.count(
+                    crossAxisCount: 3,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    childAspectRatio: 2.2,
+                    children: List.generate(12, (i) {
+                      final m = i + 1;
+                      final isFuture = pickedYear == now.year && m > now.month ||
+                          pickedYear > now.year;
+
+                      return GestureDetector(
+                        onTap: isFuture
+                            ? null
+                            : () {
+                                setModalState(() => pickedMonth = m);
+                              },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          decoration: BoxDecoration(
+                            color: m == pickedMonth
+                                ? AppColors.bgDark
+                                : isFuture
+                                    ? AppColors.bgLight
+                                    : AppColors.bgWhite,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: m == pickedMonth
+                                  ? AppColors.bgDark
+                                  : AppColors.lightBorder,
+                              width: m == pickedMonth ? 1.5 : 1,
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            _monthNames[i].substring(0, 3),
+                            style: TextStyle(
+                              color: m == pickedMonth
+                                  ? Colors.white
+                                  : isFuture
+                                      ? AppColors.textDisabled
+                                      : AppColors.textDark,
+                              fontSize: 13,
+                              fontWeight: m == pickedMonth ? FontWeight.w700 : FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Tombol konfirmasi
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        ref.read(grafikProvider.notifier).setMonth(pickedMonth, pickedYear);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.bgDark,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'Terapkan',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

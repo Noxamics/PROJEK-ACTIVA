@@ -228,6 +228,91 @@ body::after {
     border-radius: 99px;
     transition: width .8s cubic-bezier(.16,1,.3,1);
 }
+
+/* ══ Realistic SVG Fire Animation ══ */
+@keyframes fireBgGlow {
+    0%, 100% { box-shadow: 0 0 15px rgba(255, 120, 0, 0.2), inset 0 0 15px rgba(255, 255, 255, 0.2); background: rgba(255, 140, 0, 0.15); }
+    50% { box-shadow: 0 0 35px rgba(255, 100, 0, 0.6), inset 0 0 25px rgba(255, 255, 255, 0.4); background: rgba(255, 110, 0, 0.3); border-color: rgba(255, 160, 0, 0.7); }
+}
+
+.streak-fire-container-lit {
+    width: 64px; height: 64px; border-radius: 50%; 
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255, 140, 0, 0.4);
+    animation: fireBgGlow 2.5s infinite ease-in-out;
+}
+
+.streak-fire-container-dim {
+    width: 64px; height: 64px; border-radius: 50%; 
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.08);
+}
+
+.modern-fire-svg {
+    width: 44px;
+    height: 44px;
+    overflow: visible;
+}
+.modern-fire-svg .fire-layer-1 {
+    transform-origin: 50% 95%;
+    animation: fireSway1 2s infinite ease-in-out alternate;
+}
+.modern-fire-svg .fire-layer-2 {
+    transform-origin: 50% 95%;
+    animation: fireSway2 1.6s infinite ease-in-out alternate;
+}
+.modern-fire-svg .fire-layer-3 {
+    transform-origin: 50% 95%;
+    animation: fireSway3 1.2s infinite ease-in-out alternate;
+}
+
+@keyframes fireSway1 {
+    0%   { transform: scaleY(1) scaleX(1) rotate(-2deg); }
+    100% { transform: scaleY(1.03) scaleX(0.97) rotate(2deg); }
+}
+@keyframes fireSway2 {
+    0%   { transform: scaleY(1) scaleX(1) rotate(3deg); }
+    100% { transform: scaleY(1.06) scaleX(0.94) rotate(-3deg); }
+}
+@keyframes fireSway3 {
+    0%   { transform: scaleY(1) scaleX(1) rotate(-4deg); }
+    100% { transform: scaleY(1.1) scaleX(0.9) rotate(4deg); }
+}
+
+.streak-fire-dim-svg {
+    filter: grayscale(100%) opacity(0.3);
+}
+.streak-fire-dim-svg .fire-layer-1,
+.streak-fire-dim-svg .fire-layer-2,
+.streak-fire-dim-svg .fire-layer-3 {
+    animation: none !important;
+}
+
+/* ══ Hover Animations (Float & Glow) matching Histori & Profil ══ */
+.score-card-wrap {
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), box-shadow 0.25s, border-color 0.25s !important;
+}
+.score-card-wrap:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0,229,200,0.4) !important;
+    box-shadow: 0 12px 40px rgba(0,229,200,0.15), 0 4px 12px rgba(0,0,0,0.3) !important;
+}
+
+.card {
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), box-shadow 0.25s, border-color 0.25s !important;
+}
+.card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0,229,200,0.4) !important;
+    box-shadow: 0 12px 40px rgba(0,229,200,0.15), 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+.habit-row, .tip-row {
+    transition: transform 0.2s, background 0.2s;
+}
+.habit-row:hover, .tip-row:hover {
+    transform: translateX(4px);
+}
 </style>
 @endsection
 
@@ -256,8 +341,10 @@ body::after {
     // Dummy data
     $screenTimeHours = 9.3;
     $sleepHours      = 6.5;
-    $streakDays      = 1;
-    $totalKuesioner  = 14;
+    // $totalKuesioner dari controller
+    if (!isset($totalKuesioner)) {
+        $totalKuesioner = 0;
+    }
 
     $catRendah = 29; $catRendahCount = 2;
     $catSedang = 57; $catSedangCount = 4;
@@ -271,14 +358,74 @@ body::after {
     $sOff = -$rD;
     $tOff = -$rD - $sD;
 
+    // Dynamic Habits based on latest questionnaire
     $habits = [
-        ['label' => 'Tidur melebihi 7–8 jam',  'done' => true],
-        ['label' => 'Screen time < 6 jam',       'done' => true],
-        ['label' => 'Istirahat media sosial',     'done' => false],
-        ['label' => 'Aktivitas fisik',            'done' => true],
+        ['label' => 'Tidur minimal 7 jam',             'done' => $latestQ ? ($latestQ->sleep_hours >= 7) : false],
+        ['label' => 'Screen time < 6 jam',             'done' => $latestQ ? ($latestQ->device_hours_per_day < 6) : false],
+        ['label' => 'Tingkat ketergantungan rendah',   'done' => $score !== null ? ($score < 33.47) : false],
+        ['label' => 'Kualitas tidur terjaga',          'done' => $latestQ ? ($latestQ->sleep_quality >= 4.0) : false],
     ];
     $habitsDone  = collect($habits)->where('done', true)->count();
     $habitsTotal = count($habits);
+
+    // Dynamic Tips based on latest questionnaire
+    $tips = [];
+    if ($latestQ) {
+        if ($latestQ->sleep_hours < 7) {
+            $tips[] = [
+                'text' => 'Tidur yang cukup sangat penting. Cobalah tidur 30 menit lebih awal malam ini.',
+                'color' => 'var(--blue)', 'bg' => 'rgba(59,130,246,.1)',
+                'icon' => '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'
+            ];
+        }
+        if ($latestQ->device_hours_per_day >= 6) {
+            $tips[] = [
+                'text' => 'Screen time Anda cukup tinggi. Terapkan aturan 20-20-20 untuk istirahatkan mata.',
+                'color' => 'var(--amber)', 'bg' => 'rgba(245,158,11,.1)',
+                'icon' => '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+            ];
+        }
+        if ($latestQ->social_media_mins >= 60) {
+            $tips[] = [
+                'text' => 'Batasi media sosial. Matikan notifikasi non-esensial selama 2 jam saat bekerja.',
+                'color' => 'var(--amber)', 'bg' => 'rgba(245,158,11,.1)',
+                'icon' => '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>'
+            ];
+        }
+        if ($latestQ->physical_activity_days < 3) {
+            $tips[] = [
+                'text' => 'Luangkan 15 menit jalan kaki tanpa melihat smartphone hari ini.',
+                'color' => 'var(--green)', 'bg' => 'rgba(34,197,94,.1)',
+                'icon' => '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>'
+            ];
+        }
+    }
+    
+    // Fallback if no issues found or no questionnaire
+    if (empty($tips)) {
+        if (!$latestQ) {
+            $tips[] = [
+                'text' => 'Isi kuesioner pertama Anda untuk mendapatkan tips harian yang dipersonalisasi.',
+                'color' => 'var(--teal)', 'bg' => 'rgba(13,148,136,.1)',
+                'icon' => '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+            ];
+        } else {
+            $tips[] = [
+                'text' => 'Bagus! Pertahankan kebiasaan sehat dan disiplin digital Anda saat ini.',
+                'color' => 'var(--green)', 'bg' => 'rgba(34,197,94,.1)',
+                'icon' => '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>'
+            ];
+            $tips[] = [
+                'text' => 'Sesekali jauhkan ponsel saat sedang berkumpul santai bersama keluarga.',
+                'color' => 'var(--purple)', 'bg' => 'rgba(139,92,246,.1)',
+                'icon' => '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+            ];
+        }
+    }
+    
+    // Pick up to 3 tips
+    shuffle($tips);
+    $tips = array_slice($tips, 0, 3);
 @endphp
 
 {{-- ─── Page Header ─── --}}
@@ -327,9 +474,6 @@ body::after {
                             <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>
                             {{ $scoreCat }}
                         </span>
-                        @if($confidence)
-                            <span style="font-size:.8rem;color:rgba(255,255,255,.4);margin-left:10px;">Akurasi {{ round($confidence) }}%</span>
-                        @endif
                     </div>
 
                     {{-- Horizontal bar --}}
@@ -461,18 +605,66 @@ body::after {
     <div style="background:linear-gradient(135deg,var(--teal-dark),var(--teal),#0ea5e9);border-radius:var(--radius-xl);padding:20px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;position:relative;overflow:hidden;">
         <span style="position:absolute;right:-20px;top:-20px;width:110px;height:110px;background:rgba(255,255,255,.07);border-radius:50%;pointer-events:none;"></span>
         <span style="position:absolute;right:80px;bottom:-30px;width:80px;height:80px;background:rgba(255,255,255,.04);border-radius:50%;pointer-events:none;"></span>
-        <div style="display:flex;align-items:center;gap:16px;">
+        <div style="display:flex;align-items:center;gap:16px;position:relative;z-index:1;">
             <div style="width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.95)" stroke-width="2.2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
             </div>
             <div>
-                <div style="font-size:1.0625rem;font-weight:800;color:#fff;margin-bottom:2px;">{{ $streakDays }} Hari Streak</div>
-                <div style="font-size:.8125rem;color:rgba(255,255,255,.75);">Kebiasaan sehatmu mulai terbentuk. Pertahankan!</div>
+                <div style="font-size:1.0625rem;font-weight:800;color:#fff;margin-bottom:2px;">{{ $streak }} Hari Streak</div>
+                <div style="font-size:.8125rem;color:rgba(255,255,255,.75);">
+                    @if($streak >= 3)
+                        Kebiasaan sehatmu mulai terbentuk. Pertahankan!
+                    @elseif($streak > 0)
+                        Terus berlanjut! Selesaikan {{ 3 - $streak }} hari lagi agar api menyala.
+                    @else
+                        Mulai kebiasaan sehatmu hari ini. Jangan sampai bolong!
+                    @endif
+                </div>
             </div>
         </div>
-        <div style="background:rgba(255,255,255,.18);border-radius:var(--radius-full);padding:8px 20px;font-size:.875rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px;white-space:nowrap;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            Aktif Hari Ini
+        <div style="display:flex;align-items:center;gap:8px;position:relative;z-index:1;">
+            @if($streak >= 3)
+                {{-- Nyala (Lit) - Butuh minimal 3 hari --}}
+                <div class="streak-fire-container-lit">
+                    <svg viewBox="0 0 100 100" class="modern-fire-svg">
+                        <defs>
+                            <linearGradient id="fireOuter" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#ef4444"/>
+                                <stop offset="100%" stop-color="#b91c1c"/>
+                            </linearGradient>
+                            <linearGradient id="fireMid" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#f97316"/>
+                                <stop offset="100%" stop-color="#ea580c"/>
+                            </linearGradient>
+                            <linearGradient id="fireInner" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#fde047"/>
+                                <stop offset="100%" stop-color="#f59e0b"/>
+                            </linearGradient>
+                            <filter id="fireGlow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="3" result="blur" />
+                                <feMerge>
+                                    <feMergeNode in="blur" />
+                                    <feMergeNode in="SourceGraphic" />
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <g filter="url(#fireGlow)">
+                            <path class="fire-layer-1" fill="url(#fireOuter)" d="M 50,5 Q 35,35 30,50 Q 25,40 20,40 C 0,70 15,95 50,95 C 85,95 100,70 80,40 Q 75,40 70,50 Q 65,35 50,5 Z" />
+                            <path class="fire-layer-2" fill="url(#fireMid)" d="M 50,30 Q 40,50 35,65 Q 30,55 27,55 C 15,75 25,95 50,95 C 75,95 85,75 73,55 Q 70,55 65,65 Q 60,50 50,30 Z" />
+                            <path class="fire-layer-3" fill="url(#fireInner)" d="M 50,55 Q 40,65 38,75 C 35,90 45,95 50,95 C 55,95 65,90 62,75 Q 60,65 50,55 Z" />
+                        </g>
+                    </svg>
+                </div>
+            @else
+                {{-- Padam (Dim) --}}
+                <div class="streak-fire-container-dim">
+                    <svg viewBox="0 0 100 100" class="modern-fire-svg streak-fire-dim-svg">
+                        <path class="fire-layer-1" fill="#ef4444" d="M 50,5 Q 35,35 30,50 Q 25,40 20,40 C 0,70 15,95 50,95 C 85,95 100,70 80,40 Q 75,40 70,50 Q 65,35 50,5 Z" />
+                        <path class="fire-layer-2" fill="#f97316" d="M 50,30 Q 40,50 35,65 Q 30,55 27,55 C 15,75 25,95 50,95 C 75,95 85,75 73,55 Q 70,55 65,65 Q 60,50 50,30 Z" />
+                        <path class="fire-layer-3" fill="#fde047" d="M 50,55 Q 40,65 38,75 C 35,90 45,95 50,95 C 55,95 65,90 62,75 Q 60,65 50,55 Z" />
+                    </svg>
+                </div>
+            @endif
         </div>
     </div>
 </div>
@@ -482,7 +674,16 @@ body::after {
 
     {{-- Weekly Insight --}}
     <div class="anim-up d4">
-        <div class="card card-p" style="height:100%;">
+        <div class="card card-p" style="height:100%;position:relative;border-radius:var(--radius-2xl, 24px);">
+            @if($totalKuesioner < 14)
+                <div style="position:absolute;inset:0;z-index:10;background:rgba(255,255,255,0.65);backdrop-filter:blur(4px);border-radius:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;">
+                    <div style="width:48px;height:48px;border-radius:50%;background:rgba(15,23,42,0.05);display:flex;align-items:center;justify-content:center;margin-bottom:12px;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted, #64748B)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </div>
+                    <div style="font-size:1.0625rem;font-weight:800;color:var(--text-dark, #0F172A);margin-bottom:6px;">Insight Terkunci</div>
+                    <div style="font-size:0.8125rem;color:var(--text-muted, #64748B);line-height:1.5;">Isi <strong>{{ 14 - $totalKuesioner }}</strong> kuesioner lagi<br>untuk membuka Insight Mingguan.</div>
+                </div>
+            @endif
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
                 <div style="width:40px;height:40px;border-radius:var(--radius-md);background:rgba(59,130,246,.08);display:flex;align-items:center;justify-content:center;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -641,7 +842,7 @@ body::after {
             </div>
             <div style="display:flex;flex-direction:column;gap:8px;">
                 @foreach($habits as $habit)
-                <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:var(--radius-lg);border:1px solid {{ $habit['done'] ? 'rgba(13,148,136,.2)' : 'var(--border-light)' }};background:{{ $habit['done'] ? 'rgba(13,148,136,.03)' : 'transparent' }};">
+                <div class="habit-item" style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:var(--radius-lg);border:1px solid {{ $habit['done'] ? 'rgba(13,148,136,.2)' : 'var(--border-light)' }};background:{{ $habit['done'] ? 'rgba(13,148,136,.03)' : 'transparent' }};">
                     <div style="width:22px;height:22px;border-radius:50%;background:{{ $habit['done'] ? 'var(--teal)' : 'var(--bg-light)' }};border:2px solid {{ $habit['done'] ? 'var(--teal)' : 'var(--border-light)' }};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                         @if($habit['done'])
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
@@ -680,18 +881,14 @@ body::after {
                 <h3 style="color:var(--text-dark);">Tips Hari Ini</h3>
             </div>
             <div style="display:flex;flex-direction:column;gap:10px;">
-                <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bg-light);border-radius:var(--radius-lg);">
-                    <div style="width:32px;height:32px;border-radius:var(--radius-sm);background:rgba(245,158,11,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2.2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
-                    <span style="font-size:.875rem;font-weight:600;color:var(--text-dark);">Matikan notifikasi non-esensial selama 2 jam</span>
+                @foreach($tips as $tip)
+                <div class="tip-row" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bg-light);border-radius:var(--radius-lg);">
+                    <div style="width:32px;height:32px;border-radius:var(--radius-sm);background:{{ $tip['bg'] }};display:flex;align-items:center;justify-content:center;flex-shrink:0;color:{{ $tip['color'] }};">
+                        {!! $tip['icon'] !!}
+                    </div>
+                    <span style="font-size:.875rem;font-weight:600;color:var(--text-dark);">{{ $tip['text'] }}</span>
                 </div>
-                <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bg-light);border-radius:var(--radius-lg);">
-                    <div style="width:32px;height:32px;border-radius:var(--radius-sm);background:rgba(34,197,94,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
-                    <span style="font-size:.875rem;font-weight:600;color:var(--text-dark);">Luangkan 15 menit jalan kaki tanpa smartphone</span>
-                </div>
-                <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bg-light);border-radius:var(--radius-lg);">
-                    <div style="width:32px;height:32px;border-radius:var(--radius-sm);background:rgba(59,130,246,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
-                    <span style="font-size:.875rem;font-weight:600;color:var(--text-dark);">Hindari layar 30 menit sebelum tidur</span>
-                </div>
+                @endforeach
             </div>
         </div>
     </div>

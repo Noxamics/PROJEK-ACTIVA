@@ -106,14 +106,8 @@
 
                         <div class="gv-err" id="gv-err"></div>
 
-                        {{-- Loading state --}}
-                        <div class="gv-loading" id="gv-loading">
-                            <div class="mini-spin"></div>
-                            <span>Memuat tombol Google...</span>
-                        </div>
-
-                        {{-- Tombol Google CUSTOM (cantik) --}}
-                        <button type="button" id="gv-btn-custom" onclick="triggerGoogleSignIn()">
+                        {{-- Tombol Google CUSTOM (cantik) menggunakan Laravel Socialite --}}
+                        <a href="{{ route('user.register.google-redirect') }}" id="gv-btn-custom" style="text-decoration: none;">
                             <div class="google-icon-wrap">
                                 {{-- Google "G" SVG logo --}}
                                 <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
@@ -124,11 +118,8 @@
                                     <path fill="none" d="M0 0h48v48H0z"/>
                                 </svg>
                             </div>
-                            <span class="google-btn-text">Login dengan Google</span>
-                        </button>
-
-                        {{-- Google SDK button (tersembunyi, hanya dipakai sebagai trigger) --}}
-                        <div id="gv-btn"></div>
+                            <span class="google-btn-text">Daftar dengan Google</span>
+                        </a>
                     </div>
 
                     <div id="gv-after" style="display:none;">
@@ -317,94 +308,15 @@
         </div>
     </div>
 
-    <script src="https://accounts.google.com/gsi/client" async></script>
     <script>
-    const CLIENT_ID = '{{ env("GOOGLE_CLIENT_ID") }}';
     const CSRF      = document.querySelector('meta[name="csrf-token"]').content;
     let   gOK       = {{ session('reg_google_verified') ? 'true' : 'false' }};
-    let   googleInitialized = false;
 
     document.addEventListener('DOMContentLoaded', () => {
         @if(session('reg_google_verified') && session('reg_google_email'))
-            showVerified('{{ session("reg_google_email") }}', '{{ session("reg_google_name","") }}', null);
+            showVerified('{{ session("reg_google_email") }}', '{{ session("reg_google_name","") }}', '{{ session("reg_google_picture","") }}');
         @endif
     });
-
-    function initGoogle() {
-        if (!CLIENT_ID || typeof google === 'undefined') { showFail(); return; }
-        try {
-            google.accounts.id.initialize({
-                client_id: CLIENT_ID,
-                callback : onGCB,
-                auto_select: false,
-                use_fedcm_for_prompt: true,
-            });
-            // Render tombol SDK tersembunyi (sebagai trigger)
-            google.accounts.id.renderButton(
-                document.getElementById('gv-btn'),
-                { theme:'outline', size:'large', text:'signin_with', shape:'rectangular', width:440 }
-            );
-            setTimeout(() => {
-                const c = document.getElementById('gv-btn');
-                if (!c.children.length) { showFail(); return; }
-                // Sembunyikan loading, tampilkan tombol custom
-                document.getElementById('gv-loading').style.display = 'none';
-                document.getElementById('gv-btn-custom').style.display = 'flex';
-                googleInitialized = true;
-            }, 2000);
-        } catch(e) { showFail(); }
-    }
-
-    // Klik tombol custom → trigger klik tombol SDK Google
-    function triggerGoogleSignIn() {
-        if (!googleInitialized) return;
-        // Coba klik iframe Google di dalam #gv-btn
-        const iframe = document.querySelector('#gv-btn iframe');
-        if (iframe) {
-            iframe.click();
-        } else {
-            // fallback: prompt
-            google.accounts.id.prompt();
-        }
-    }
-
-    function showFail() {
-        document.getElementById('gv-loading').style.display = 'none';
-        // Tampilkan tombol custom saja (tetap bisa diklik)
-        document.getElementById('gv-btn-custom').style.display = 'flex';
-    }
-
-    window.addEventListener('load', () => {
-        const t = setTimeout(showFail, 4000);
-        if (typeof google !== 'undefined') { clearTimeout(t); initGoogle(); }
-        else {
-            const s = document.querySelector('script[src*="accounts.google"]');
-            if (s) s.addEventListener('load', () => { clearTimeout(t); initGoogle(); });
-            else showFail();
-        }
-    });
-
-    function onGCB(res) {
-        if (!res.credential) { showErr('Verifikasi dibatalkan.'); return; }
-        const btn = document.getElementById('gv-btn-custom');
-        btn.style.opacity = '.5'; btn.style.pointerEvents = 'none';
-        document.getElementById('gv-err').style.display = 'none';
-        fetch('{{ url("/user/register/google-verify") }}', {
-            method: 'POST',
-            headers: {'Content-Type':'application/json','X-CSRF-TOKEN': CSRF},
-            body: JSON.stringify({id_token: res.credential}),
-        })
-        .then(r => r.json())
-        .then(d => {
-            btn.style.opacity = '1'; btn.style.pointerEvents = 'auto';
-            if (d.success) { showVerified(d.email, d.name, d.picture); }
-            else {
-                showErr(d.message || 'Gagal memverifikasi.');
-                if (d.already_exists) setTimeout(() => location = '{{ url("/user/login") }}', 2000);
-            }
-        })
-        .catch(() => { btn.style.opacity='1'; btn.style.pointerEvents='auto'; showErr('Koneksi gagal. Coba lagi.'); });
-    }
 
     function showVerified(email, name, pic) {
         document.getElementById('gv-before').style.display = 'none';

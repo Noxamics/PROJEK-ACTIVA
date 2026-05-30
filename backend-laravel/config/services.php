@@ -52,4 +52,10 @@ return [
         'url' => env('ML_SERVICE_URL', 'http://localhost:5000'),
         'timeout' => env('ML_SERVICE_TIMEOUT', 30),
     ],
+
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => '/user/register/google-callback',
+    ],
 ];
