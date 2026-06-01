@@ -476,7 +476,7 @@
         background:linear-gradient(135deg,var(--step-c,rgba(13,148,136,.04)) 0%,transparent 60%);
         pointer-events:none;
     }
-    .ln-step-card:hover { transform:translateY(-5px);box-shadow:0 16px 40px rgba(13,148,136,.13); }
+    .ln-step-card:hover { transform:translateY(-4px); border-color: rgba(0,229,200,0.4); box-shadow: 0 12px 40px rgba(0,229,200,0.15), 0 4px 12px rgba(0,0,0,0.1); }
     .ln-step-num {
         width:60px;height:60px;
         border-radius:50%;
@@ -539,8 +539,8 @@
     }
     .ln-feat-card:hover {
         transform:translateY(-4px);
-        border-color:rgba(94,234,212,.28);
-        box-shadow:0 20px 50px rgba(0,0,0,.3);
+        border-color:rgba(0,229,200,0.4);
+        box-shadow:0 12px 40px rgba(0,229,200,0.15), 0 4px 12px rgba(0,0,0,0.3);
     }
     .ln-feat-num {
         position:absolute;top:22px;right:22px;
@@ -625,8 +625,8 @@
     }
     .ln-stat-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 18px 46px rgba(0,0,0,.28);
-        border-color: rgba(94,234,212,.22);
+        border-color: rgba(0,229,200,0.4);
+        box-shadow: 0 12px 40px rgba(0,229,200,0.15), 0 4px 12px rgba(0,0,0,0.3);
     }
 
     /* Icon wrapper — left side */
@@ -885,7 +885,7 @@
         <div class="ln-hero-left">
             <div class="ln-hero-badge anim-fade">
                 <span class="dot"></span>
-                Platform Analisis Digital #1
+                Platform Analisis Digital 
             </div>
             <h1 class="ln-hero-title anim-fade d1">
                 Kenali Gaya Hidup<br>
@@ -904,17 +904,28 @@
                 </a>
             </div>
             <div class="ln-hero-stats anim-up d3">
+                @if($userCount > 100)
+                    <div class="ln-hs">
+                        <span class="ln-hs-num">{{ number_format($userCount) }}+</span>
+                        <span class="ln-hs-lbl">Pengguna Aktif</span>
+                    </div>
+                    <div class="ln-hs">
+                        <span class="ln-hs-num">{{ number_format($surveyCount) }}+</span>
+                        <span class="ln-hs-lbl">Analisis Selesai</span>
+                    </div>
+                @else
+                    <div class="ln-hs">
+                        <span class="ln-hs-num">12</span>
+                        <span class="ln-hs-lbl">Pertanyaan Kuesioner</span>
+                    </div>
+                    <div class="ln-hs">
+                        <span class="ln-hs-num">&lt; 1 Menit</span>
+                        <span class="ln-hs-lbl">Waktu Analisis</span>
+                    </div>
+                @endif
                 <div class="ln-hs">
-                    <span class="ln-hs-num">{{ number_format($userCount) }}+</span>
-                    <span class="ln-hs-lbl">Pengguna</span>
-                </div>
-                <div class="ln-hs">
-                    <span class="ln-hs-num">{{ number_format($surveyCount) }}+</span>
-                    <span class="ln-hs-lbl">Analisis</span>
-                </div>
-                <div class="ln-hs">
-                    <span class="ln-hs-num">98%</span>
-                    <span class="ln-hs-lbl">Akurasi ML</span>
+                    <span class="ln-hs-num">R² 0.87</span>
+                    <span class="ln-hs-lbl">Akurasi Model</span>
                 </div>
             </div>
         </div>
@@ -1005,12 +1016,12 @@
             <div class="ln-step-card anim-up d1" style="--step-c:rgba(124,131,253,.05);">
                 <div class="ln-step-num" style="--step-bg:linear-gradient(135deg,var(--purple),#6b5ce7);--step-shadow:rgba(124,131,253,.3);">2</div>
                 <h3>Analisis ML</h3>
-                <p>Model Random Forest kami memproses jawaban dan menghasilkan skor ketergantungan digital dengan akurasi tinggi.</p>
+                <p>Model Multiple Linear Regression kami memproses jawaban dan menghasilkan skor ketergantungan digital dengan akurasi tinggi.</p>
             </div>
             <div class="ln-step-card anim-up d2" style="--step-c:rgba(250,204,21,.04);">
                 <div class="ln-step-num" style="--step-bg:linear-gradient(135deg,#f59e0b,var(--yellow));--step-shadow:rgba(250,204,21,.3);">3</div>
                 <h3>Rekomendasi AI</h3>
-                <p>Dapatkan saran personal yang actionable dari AI chatbot untuk memperbaiki kebiasaan digitalmu.</p>
+                <p>Dapatkan insight dan langkah-langkah praktis yang dirumuskan oleh AI generatif berdasarkan hasil analisis skormu.</p>
             </div>
         </div>
     </div>
@@ -1039,7 +1050,7 @@
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
                 </div>
                 <h3>Prediksi Machine Learning</h3>
-                <p>Model Random Forest menganalisis data dan memberikan skor ketergantungan digital dengan confidence tinggi — akurasi 98%.</p>
+                <p>Model Multiple Linear Regression menganalisis data dan memberikan skor ketergantungan digital.</p>
             </div>
             <div class="ln-feat-card anim-up d2" style="--fc:rgba(250,204,21,.05);">
                 <span class="ln-feat-num">03</span>
@@ -1054,8 +1065,8 @@
                 <div class="ln-feat-icon" style="background:rgba(94,234,212,.1);">
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--teal-light)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 </div>
-                <h3>Rekomendasi AI</h3>
-                <p>Saran personal dari AI chatbot — mulai dari atur waktu layar, digital detox pagi, hingga mindful scrolling.</p>
+                <h3>Insight & Rekomendasi AI</h3>
+                <p>Laporan komprehensif dengan saran personalisasi dari AI — mencakup manajemen waktu layar hingga rutinitas digital detox.</p>
             </div>
         </div>
     </div>
@@ -1085,12 +1096,21 @@
                     </svg>
                 </div>
                 <div class="ln-stat-body">
-                    <div class="ln-stat-num" style="color:var(--teal-light);">{{ number_format($userCount) }}</div>
-                    <div class="ln-stat-lbl">Pengguna Aktif</div>
-                    <span class="ln-stat-tag" style="background:rgba(13,148,136,.15);color:var(--teal-light);">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-                        Terus bertumbuh
-                    </span>
+                    @if($userCount > 100)
+                        <div class="ln-stat-num" style="color:var(--teal-light);">{{ number_format($userCount) }}+</div>
+                        <div class="ln-stat-lbl">Pengguna Aktif</div>
+                        <span class="ln-stat-tag" style="background:rgba(13,148,136,.15);color:var(--teal-light);">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                            Terus bertumbuh
+                        </span>
+                    @else
+                        <div class="ln-stat-num" style="color:var(--teal-light);">12</div>
+                        <div class="ln-stat-lbl">Aspek Analisis</div>
+                        <span class="ln-stat-tag" style="background:rgba(13,148,136,.15);color:var(--teal-light);">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                            Kuesioner Terstruktur
+                        </span>
+                    @endif
                 </div>
             </div>
 
@@ -1108,12 +1128,21 @@
                     </svg>
                 </div>
                 <div class="ln-stat-body">
-                    <div class="ln-stat-num" style="color:var(--purple);">{{ number_format($surveyCount) }}</div>
-                    <div class="ln-stat-lbl">Kuesioner Selesai</div>
-                    <span class="ln-stat-tag" style="background:rgba(124,131,253,.15);color:var(--purple);">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                        Dianalisis ML
-                    </span>
+                    @if($surveyCount > 100)
+                        <div class="ln-stat-num" style="color:var(--purple);">{{ number_format($surveyCount) }}+</div>
+                        <div class="ln-stat-lbl">Kuesioner Selesai</div>
+                        <span class="ln-stat-tag" style="background:rgba(124,131,253,.15);color:var(--purple);">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            Dianalisis ML
+                        </span>
+                    @else
+                        <div class="ln-stat-num" style="color:var(--purple);">&lt; 1 Menit</div>
+                        <div class="ln-stat-lbl">Kecepatan Prediksi</div>
+                        <span class="ln-stat-tag" style="background:rgba(124,131,253,.15);color:var(--purple);">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            Real-time Processing
+                        </span>
+                    @endif
                 </div>
             </div>
 
@@ -1132,11 +1161,11 @@
                     </svg>
                 </div>
                 <div class="ln-stat-body">
-                    <div class="ln-stat-num" style="color:var(--yellow);">98%</div>
-                    <div class="ln-stat-lbl">Akurasi Prediksi</div>
+                    <div class="ln-stat-num" style="color:var(--yellow);">R² 0.87</div>
+                    <div class="ln-stat-lbl">Skor Evaluasi ML</div>
                     <span class="ln-stat-tag" style="background:rgba(250,204,21,.12);color:var(--yellow);">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                        Random Forest
+                        Multiple Linear Regression
                     </span>
                 </div>
             </div>

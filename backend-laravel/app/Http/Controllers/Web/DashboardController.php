@@ -89,6 +89,32 @@ class DashboardController extends Controller
             }
         }
 
-        return view('web.dashboard', compact('user', 'latestQ', 'latestMl', 'avgScore', 'changePercent', 'totalKuesioner', 'streak'));
+        // Hitung Kategori Dependensi secara dinamis dari database
+        $mlResults = MlResult::where('user_id', $userId)->get();
+        $totalMl = $mlResults->count();
+
+        $catRendahCount = 0;
+        $catSedangCount = 0;
+        $catTinggiCount = 0;
+
+        foreach ($mlResults as $ml) {
+            $score = $ml->ml_result['digital_dependence_score'] ?? 0;
+            if ($score < 33.47) {
+                $catRendahCount++;
+            } elseif ($score <= 61.34) {
+                $catSedangCount++;
+            } else {
+                $catTinggiCount++;
+            }
+        }
+
+        $catRendah = $totalMl > 0 ? round(($catRendahCount / $totalMl) * 100) : 0;
+        $catSedang = $totalMl > 0 ? round(($catSedangCount / $totalMl) * 100) : 0;
+        $catTinggi = $totalMl > 0 ? round(($catTinggiCount / $totalMl) * 100) : 0;
+
+        return view('web.dashboard', compact(
+            'user', 'latestQ', 'latestMl', 'avgScore', 'changePercent', 'totalKuesioner', 'streak',
+            'catRendah', 'catRendahCount', 'catSedang', 'catSedangCount', 'catTinggi', 'catTinggiCount'
+        ));
     }
 }

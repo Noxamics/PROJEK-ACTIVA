@@ -2,16 +2,22 @@
 @section('title', 'Kuesioner')
 
 @section('styles')
+@section('body-class', 'page-histori')
+<link href="{{ asset('css/user-web/histori.css') }}" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/user-web/kuesioner.css') }}">
 @endsection
 
 @section('content')
 
-<div class="kues-bg">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-</div>
+{{-- ── Dark background + decorative circles ── --}}
+<div class="hist-bg"       aria-hidden="true"></div>
+<div class="hist-orb-mid"  aria-hidden="true"></div>
+<div class="hist-circle-1" aria-hidden="true"></div>
+<div class="hist-circle-2" aria-hidden="true"></div>
+<div class="hist-circle-3" aria-hidden="true"></div>
+<div class="hist-circle-4" aria-hidden="true"></div>
+<div class="hist-circle-5" aria-hidden="true"></div>
+<div class="hist-circle-6" aria-hidden="true"></div>
 
 {{-- Mobile Top Bar --}}
 <div class="mobile-topbar">
@@ -464,13 +470,13 @@
         document.getElementById(valId).textContent = el.value;
         var min=parseFloat(el.min), max=parseFloat(el.max), val=parseFloat(el.value);
         var pct=((val-min)/(max-min))*100;
-        el.style.background='linear-gradient(to right,#0D9488 0%,#0D9488 '+pct+'%,#e2e8f0 '+pct+'%)';
+        el.style.background='linear-gradient(to right,#00E5C8 0%,#00E5C8 '+pct+'%,rgba(255,255,255,0.10) '+pct+'%)';
     };
 
     document.querySelectorAll('.k-range-slider').forEach(function(el){
         var min=parseFloat(el.min),max=parseFloat(el.max),val=parseFloat(el.value);
         var pct=((val-min)/(max-min))*100;
-        el.style.background='linear-gradient(to right,#0D9488 0%,#0D9488 '+pct+'%,#e2e8f0 '+pct+'%)';
+        el.style.background='linear-gradient(to right,#00E5C8 0%,#00E5C8 '+pct+'%,rgba(255,255,255,0.10) '+pct+'%)';
     });
 
     window.kWizStep = function(d) {
@@ -478,13 +484,27 @@
             var currentStepEl = document.getElementById('step' + step);
             var hiddenInputs = currentStepEl.querySelectorAll('input[type="hidden"]');
             var allFilled = true;
+            var firstMissed = null;
+
+            // Clear previous errors
+            currentStepEl.querySelectorAll('.k-q-block').forEach(function(el) {
+                el.classList.remove('has-error');
+            });
+
             for (var i = 0; i < hiddenInputs.length; i++) {
                 if (hiddenInputs[i].name && !hiddenInputs[i].value) {
                     allFilled = false;
-                    break;
+                    var block = hiddenInputs[i].closest('.k-q-block');
+                    if (block) {
+                        block.classList.add('has-error');
+                        if (!firstMissed) firstMissed = block;
+                    }
                 }
             }
             if (!allFilled) {
+                if (firstMissed) {
+                    firstMissed.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
                 alert('Silakan pilih salah satu jawaban untuk setiap pertanyaan sebelum melanjutkan.');
                 return;
             }
@@ -522,14 +542,28 @@
             if (!currentStepEl) return;
             var hiddenInputs = currentStepEl.querySelectorAll('input[type="hidden"]');
             var allFilled = true;
+            var firstMissed = null;
+
+            // Clear previous errors
+            currentStepEl.querySelectorAll('.k-q-block').forEach(function(el) {
+                el.classList.remove('has-error');
+            });
+
             for (var i = 0; i < hiddenInputs.length; i++) {
                 if (hiddenInputs[i].name && !hiddenInputs[i].value) {
                     allFilled = false;
-                    break;
+                    var block = hiddenInputs[i].closest('.k-q-block');
+                    if (block) {
+                        block.classList.add('has-error');
+                        if (!firstMissed) firstMissed = block;
+                    }
                 }
             }
             if (!allFilled) {
                 e.preventDefault();
+                if (firstMissed) {
+                    firstMissed.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
                 alert('Silakan pilih salah satu jawaban untuk setiap pertanyaan sebelum mengirim.');
             }
         });

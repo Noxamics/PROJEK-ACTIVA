@@ -134,14 +134,14 @@
             </div>
         </main>
 
-    {{-- ═══ Footer ═══ --}}
-    <footer class="site-footer">
-        <div class="footer-inner">
+    <!-- Footer -->
+    <footer class="site-footer" style="background: rgb(230, 233, 238); backdrop-filter: blur(50px); -webkit-backdrop-filter: blur(50px); padding:12px 20px;">
+        <div class="footer-inner" style="display:flex;align-items:center;justify-content:space-between;">
             <div style="display:flex;align-items:center;gap:10px;">
                 <img src="{{ asset('images/NewLogoEmblem.svg') }}" alt="Activa" style="width:26px;height:26px;object-fit:contain;">
                 <span style="font-weight:700;color:var(--text-dark);">ACTIVA</span>
             </div>
-            <p style="color:var(--text-muted);font-size:.8125rem;">© {{ date('Y') }} ACTIVA DigitalLife Analyzer. All rights reserved.</p>
+            <p style="color:var(--text-muted);font-size:.8125rem;margin:0;">© {{ date('Y') }} ACTIVA DigitalLife Analyzer. All rights reserved.</p>
         </div>
     </footer>
 

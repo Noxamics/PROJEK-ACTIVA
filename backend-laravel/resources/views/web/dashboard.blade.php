@@ -2,53 +2,66 @@
 @section('title', 'Dashboard')
 
 @section('styles')
+@section('body-class', 'page-histori')
+<link href="{{ asset('css/user-web/histori.css') }}" rel="stylesheet">
 <style>
-    
-/* ── Background base ── */
+/* Override text colors for dark theme */
+:root {
+    --text-dark: #ffffff;
+    --text-muted: rgba(255,255,255,0.6);
+    --bg-light: rgba(255,255,255,0.05);
+    --border-light: rgba(255,255,255,0.1);
+    --border-card: rgba(255,255,255,0.1);
+    --bg-card: rgba(255,255,255,0.06);
+}
+
+body.page-histori {
+    background: transparent !important;
+}
+
+/* ── Footer pinning: ensure page-container fills remaining space ── */
+.page-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 100px - 52px); /* topnav+curve(100px) + footer(52px) */
+}
+
+
+/* Base text styling */
 body {
-    background: #f1f4f8 !important;
+    color: var(--text-dark);
 }
- 
-/* ── Dot-grid texture + ambient glow blobs (via pseudo-element) ── */
-body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: -10;
-    pointer-events: none;
- 
-    /* Dot grid */
-    background-color: #e8eef7;
-    background-image:
-        radial-gradient(circle, rgba(11,40,60,0.065) 1px, transparent 1px);
-    background-size: 26px 26px;
+.page-header h1 { color: #fff; }
+.page-header p { color: var(--text-muted); }
+
+/* Glassmorphism Cards */
+.card {
+    background: rgba(255,255,255,0.06) !important;
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: var(--radius-xl);
 }
- 
-body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: -9;
-    pointer-events: none;
- 
-    /* Ambient glow blobs — teal kiri, navy kanan, dll. */
-    background:
-        radial-gradient(ellipse 540px 440px at -6% -2%,  rgba(13,148,136,.15)  0%, transparent 68%),
-        radial-gradient(ellipse 420px 360px at 104%  4%,  rgba(11, 20, 80,.12)  0%, transparent 68%),
-        radial-gradient(ellipse 380px 380px at  10% 60%,  rgba(20,184,166,.09)  0%, transparent 65%),
-        radial-gradient(ellipse 500px 400px at 100% 100%, rgba(15, 38,100,.12)  0%, transparent 70%),
-        radial-gradient(ellipse 620px 280px at  52% 44%,  rgba(13,148,136,.05)  0%, transparent 68%);
+
+/* Hover Animations only for Interactive Menus */
+.menu-card {
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
- 
-/* ── SVG decorative layer ── */
-#dash-bg-svg {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -8;
-    pointer-events: none;
-    overflow: hidden;
+.menu-card:hover {
+    background: rgba(255,255,255,0.08) !important;
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4), 0 0 20px rgba(0, 229, 200, 0.15) !important;
+    border-color: rgba(0, 229, 200, 0.3) !important;
+}
+
+/* Grid Layout Fixes */
+.dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+@media (max-width: 992px) {
+    .dash-grid { grid-template-columns: 1fr !important; }
 }
 
 /* ══ Score Card — Flutter style ══ */
@@ -298,13 +311,22 @@ body::after {
     box-shadow: 0 12px 40px rgba(0,229,200,0.15), 0 4px 12px rgba(0,0,0,0.3) !important;
 }
 
+/* ── Cards ── */
 .card {
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: var(--radius-2xl);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2) !important;
+    overflow: hidden;
+    color: #fff;
     transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), box-shadow 0.25s, border-color 0.25s !important;
 }
 .card:hover {
     transform: translateY(-4px);
     border-color: rgba(0,229,200,0.4) !important;
-    box-shadow: 0 12px 40px rgba(0,229,200,0.15), 0 4px 12px rgba(0,0,0,0.1) !important;
+    box-shadow: 0 12px 40px rgba(0,229,200,0.15), 0 4px 12px rgba(0,0,0,0.3) !important;
 }
 
 .habit-row, .tip-row {
@@ -317,6 +339,17 @@ body::after {
 @endsection
 
 @section('content')
+
+{{-- ── Dark background + decorative circles ── --}}
+<div class="hist-bg"       aria-hidden="true"></div>
+<div class="hist-orb-mid"  aria-hidden="true"></div>
+<div class="hist-circle-1" aria-hidden="true"></div>
+<div class="hist-circle-2" aria-hidden="true"></div>
+<div class="hist-circle-3" aria-hidden="true"></div>
+<div class="hist-circle-4" aria-hidden="true"></div>
+<div class="hist-circle-5" aria-hidden="true"></div>
+<div class="hist-circle-6" aria-hidden="true"></div>
+
 @php
     $hour = (int)date('H');
     $greeting = $hour < 11 ? 'Selamat Pagi' : ($hour < 15 ? 'Selamat Siang' : ($hour < 18 ? 'Selamat Sore' : 'Selamat Malam'));
@@ -346,9 +379,12 @@ body::after {
         $totalKuesioner = 0;
     }
 
-    $catRendah = 29; $catRendahCount = 2;
-    $catSedang = 57; $catSedangCount = 4;
-    $catTinggi = 14; $catTinggiCount = 1;
+    $catRendah      = $catRendah ?? 0;
+    $catRendahCount = $catRendahCount ?? 0;
+    $catSedang      = $catSedang ?? 0;
+    $catSedangCount = $catSedangCount ?? 0;
+    $catTinggi      = $catTinggi ?? 0;
+    $catTinggiCount = $catTinggiCount ?? 0;
 
     // Donut
     $r2   = 46; $circ2 = 2 * 3.14159 * $r2;
@@ -676,12 +712,12 @@ body::after {
     <div class="anim-up d4">
         <div class="card card-p" style="height:100%;position:relative;border-radius:var(--radius-2xl, 24px);">
             @if($totalKuesioner < 14)
-                <div style="position:absolute;inset:0;z-index:10;background:rgba(255,255,255,0.65);backdrop-filter:blur(4px);border-radius:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;">
-                    <div style="width:48px;height:48px;border-radius:50%;background:rgba(15,23,42,0.05);display:flex;align-items:center;justify-content:center;margin-bottom:12px;">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted, #64748B)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <div style="position:absolute;inset:0;z-index:10;background:rgba(0,0,0,0.4);backdrop-filter:blur(10px);border-radius:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;border:1px solid rgba(255,255,255,0.05);">
+                    <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;margin-bottom:12px;border:1px solid rgba(255,255,255,0.1);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                     </div>
-                    <div style="font-size:1.0625rem;font-weight:800;color:var(--text-dark, #0F172A);margin-bottom:6px;">Insight Terkunci</div>
-                    <div style="font-size:0.8125rem;color:var(--text-muted, #64748B);line-height:1.5;">Isi <strong>{{ 14 - $totalKuesioner }}</strong> kuesioner lagi<br>untuk membuka Insight Mingguan.</div>
+                    <div style="font-size:1.0625rem;font-weight:800;color:#ffffff;margin-bottom:6px;">Insight Terkunci</div>
+                    <div style="font-size:0.8125rem;color:rgba(255,255,255,0.7);line-height:1.5;">Isi <strong>{{ 14 - $totalKuesioner }}</strong> kuesioner lagi<br>untuk membuka Insight Mingguan.</div>
                 </div>
             @endif
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
@@ -753,7 +789,7 @@ body::after {
                             </linearGradient>
                         </defs>
                         {{-- Track --}}
-                        <circle cx="65" cy="65" r="{{ $r2 }}" fill="none" stroke="#E2E8F0" stroke-width="14"/>
+                        <circle cx="65" cy="65" r="{{ $r2 }}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="14"/>
                         {{-- Rendah --}}
                         <circle cx="65" cy="65" r="{{ $r2 }}" fill="none" stroke="url(#grad-rendah)" stroke-width="14"
                             stroke-linecap="round"
@@ -772,9 +808,6 @@ body::after {
                             stroke-dasharray="{{ $tD }} {{ $circ2 - $tD }}"
                             stroke-dashoffset="{{ $tOff }}"
                             filter="url(#donut-shadow)"/>
-                        {{-- Center white circle for depth --}}
-                        <circle cx="65" cy="65" r="32" fill="white" opacity=".6"/>
-                        <circle cx="65" cy="65" r="30" fill="white"/>
                     </svg>
                     <div class="donut-inner-text">
                         <div class="donut-inner-num">{{ $totalKuesioner }}</div>
@@ -858,7 +891,7 @@ body::after {
 
 {{-- ════ CTA Kuesioner ════ --}}
 <div class="anim-up d4" style="margin-bottom:24px;">
-    <a href="{{ url('/user/kuesioner') }}" class="card card-p" style="display:flex;align-items:center;gap:16px;border-color:rgba(13,148,136,.2);background:linear-gradient(135deg,rgba(13,148,136,.04),rgba(14,165,233,.04));transition:all .25s;">
+    <a href="{{ url('/user/kuesioner') }}" class="card card-p menu-card" style="display:flex;align-items:center;gap:16px;border-color:rgba(13,148,136,.2);background:linear-gradient(135deg,rgba(13,148,136,.04),rgba(14,165,233,.04));transition:all .25s;">
         <div style="width:48px;height:48px;border-radius:var(--radius-lg);background:rgba(13,148,136,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         </div>
@@ -871,9 +904,9 @@ body::after {
 </div>
 
 {{-- ════ Tips + Quick Actions ════ --}}
-<div class="dash-grid" style="margin-bottom:0;">
-    <div class="anim-up d5">
-        <div class="card card-p" style="height:100%;">
+<div class="dash-grid" style="margin-bottom:0; align-items: stretch;">
+    <div class="anim-up d5" style="display: flex; flex-direction: column;">
+        <div class="card card-p" style="height:100%; flex: 1; display: flex; flex-direction: column;">
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
                 <div style="width:40px;height:40px;border-radius:var(--radius-md);background:rgba(139,92,246,.08);display:flex;align-items:center;justify-content:center;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
@@ -893,21 +926,21 @@ body::after {
         </div>
     </div>
 
-    <div class="anim-up d6">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;height:100%;">
-            <a href="{{ url('/user/histori') }}" class="card card-p" style="display:flex;align-items:center;gap:12px;">
+    <div class="anim-up d6" style="display: flex; flex-direction: column;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;height:100%; flex: 1;">
+            <a href="{{ url('/user/histori') }}" class="card card-p menu-card" style="display:flex;align-items:center;gap:12px;padding:20px;">
                 <div style="width:44px;height:44px;border-radius:var(--radius-md);background:rgba(13,148,136,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
                 <div><div style="font-weight:700;color:var(--text-dark);">Histori</div><div style="font-size:.75rem;color:var(--text-muted);">Lihat riwayat</div></div>
             </a>
-            <a href="{{ url('/user/grafik') }}" class="card card-p" style="display:flex;align-items:center;gap:12px;">
+            <a href="{{ url('/user/grafik') }}" class="card card-p menu-card" style="display:flex;align-items:center;gap:12px;padding:20px;">
                 <div style="width:44px;height:44px;border-radius:var(--radius-md);background:rgba(139,92,246,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
                 <div><div style="font-weight:700;color:var(--text-dark);">Grafik</div><div style="font-size:.75rem;color:var(--text-muted);">Visualisasi data</div></div>
             </a>
-            <a href="{{ url('/user/laporan') }}" class="card card-p" style="display:flex;align-items:center;gap:12px;">
+            <a href="{{ url('/user/laporan') }}" class="card card-p menu-card" style="display:flex;align-items:center;gap:12px;padding:20px;">
                 <div style="width:44px;height:44px;border-radius:var(--radius-md);background:rgba(59,130,246,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
                 <div><div style="font-weight:700;color:var(--text-dark);">Laporan</div><div style="font-size:.75rem;color:var(--text-muted);">Perkembangan</div></div>
             </a>
-            <a href="{{ url('/user/profil') }}" class="card card-p" style="display:flex;align-items:center;gap:12px;">
+            <a href="{{ url('/user/profil') }}" class="card card-p menu-card" style="display:flex;align-items:center;gap:12px;padding:20px;">
                 <div style="width:44px;height:44px;border-radius:var(--radius-md);background:rgba(245,158,11,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
                 <div><div style="font-weight:700;color:var(--text-dark);">Profil</div><div style="font-size:.75rem;color:var(--text-muted);">Pengaturan akun</div></div>
             </a>
@@ -926,6 +959,12 @@ body::after {
     svg.setAttribute('id', 'dash-bg-svg');
     svg.setAttribute('xmlns', ns);
     svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+    svg.style.position = 'fixed';
+    svg.style.inset = '0';
+    svg.style.width = '100vw';
+    svg.style.height = '100vh';
+    svg.style.zIndex = '-2';
+    svg.style.pointerEvents = 'none';
  
     svg.innerHTML = `
     <defs>
